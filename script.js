@@ -200,3 +200,21 @@ const imgObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.gallery-item img').forEach(img => {
   imgObserver.observe(img);
 });
+
+// ===== LIGHTBOX =====
+function openLightbox(src) {
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  img.src = src;
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
