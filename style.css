@@ -1170,3 +1170,114 @@ img {
   width: 20px;
   height: 20px;
 }
+
+/* ===== INTRO OVERLAY ===== */
+#introOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: #050008;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#introOverlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.intro-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  text-align: center;
+  position: relative;
+}
+.intro-logo {
+  width: clamp(240px, 50vw, 500px);
+  height: auto;
+  animation: introPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 40px rgba(123,47,255,0.6));
+}
+@keyframes introPulse {
+  0%, 100% { filter: drop-shadow(0 0 30px rgba(123,47,255,0.4)); }
+  50% { filter: drop-shadow(0 0 60px rgba(102,0,255,0.9)); }
+}
+.intro-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  border: 1px solid rgba(123,47,255,0.2);
+  animation: pulseRing 2s ease-out infinite;
+  pointer-events: none;
+}
+.intro-pulse::before,
+.intro-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  border: 1px solid rgba(123,47,255,0.1);
+  animation: pulseRing 2s ease-out infinite 0.4s;
+}
+.intro-pulse::after {
+  inset: -80px;
+  animation-delay: 0.8s;
+}
+@keyframes pulseRing {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+#enterBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 48px;
+  background: transparent;
+  border: 2px solid rgba(123,47,255,0.8);
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+#enterBtn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+#enterBtn:hover {
+  border-color: transparent;
+  box-shadow: 0 0 40px rgba(102,0,255,0.5);
+  transform: translateY(-2px);
+}
+#enterBtn:hover::before {
+  opacity: 1;
+}
+.intro-sub {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ===== BODY LOCKED WHEN OVERLAY VISIBLE ===== */
+body.locked {
+  overflow: hidden;
+}

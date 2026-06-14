@@ -241,3 +241,42 @@ document.querySelectorAll('.gallery-item').forEach(item => {
   // Przy kliknięciu lightbox pokaże pełne zdjęcie
   item.setAttribute('onclick', `openLightbox('${src}')`);
 });
+
+// ===== INTRO OVERLAY + AUDIO =====
+function enterSite() {
+  const overlay = document.getElementById('introOverlay');
+  const audio = document.getElementById('bgAudio');
+
+  // Odblokuj scroll
+  document.body.classList.remove('locked');
+
+  // Fade out overlay
+  overlay.classList.add('hidden');
+
+  // Odtwórz muzykę
+  if (audio) {
+    audio.volume = 0;
+    audio.play().then(() => {
+      // Fade in audio
+      let vol = 0;
+      const fadeIn = setInterval(() => {
+        vol = Math.min(vol + 0.02, 0.6);
+        audio.volume = vol;
+        if (vol >= 0.6) clearInterval(fadeIn);
+      }, 80);
+    }).catch(e => console.log('Audio blocked:', e));
+  }
+}
+
+// Init overlay
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('locked');
+
+  // Też zamknij overlay klawiszem Enter/Space
+  document.addEventListener('keydown', e => {
+    const overlay = document.getElementById('introOverlay');
+    if (!overlay.classList.contains('hidden') && (e.key === 'Enter' || e.key === ' ')) {
+      enterSite();
+    }
+  });
+});

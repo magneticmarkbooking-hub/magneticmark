@@ -17,7 +17,7 @@
 
 <!-- Open Graph -->
 <meta property="og:title" content="MagneticMark – DJ & Producer">
-<meta property="og:description" content="Polski DJ, producent muzyczny i instrumentalista. Big Room, Hardstyle, Peak Time Techno. 216K+ monthly listeners on Spotify.">
+<meta property="og:description" content="Polski DJ, producent muzyczny i instrumentalista. Big Room, Hardstyle, Peak Time Techno. 500K+ monthly listeners on Spotify.">
 <meta property="og:type" content="profile">
 <meta property="og:url" content="https://magneticmark.com">
 <meta property="og:image" content="images/hero.jpg">
@@ -28,7 +28,7 @@
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="MagneticMark – DJ & Producer">
-<meta name="twitter:description" content="Polish DJ & trumpet player. Big Room, Hardstyle, Techno. 216K+ monthly listeners on Spotify.">
+<meta name="twitter:description" content="Polish DJ & trumpet player. Big Room, Hardstyle, Techno. 500K+ monthly listeners on Spotify.">
 <meta name="twitter:image" content="images/hero.jpg">
 
 <!-- Schema.org -->
@@ -94,6 +94,25 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 </head>
 <body>
 
+<!-- AUDIO -->
+<audio id="bgAudio" loop preload="auto">
+  <source src="sounds/intro.mp3" type="audio/mpeg">
+</audio>
+
+<!-- INTRO OVERLAY -->
+<div id="introOverlay">
+  <div class="intro-inner">
+    <img src="images/logo-white.png" alt="MagneticMark" class="intro-logo">
+    <div class="intro-pulse"></div>
+    <button id="enterBtn" onclick="enterSite()">
+      <span class="enter-text" data-pl="WEJDŹ" data-en="ENTER">WEJDŹ</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <p class="intro-sub" data-pl="Big Room · Hardstyle · Peak Time Techno" data-en="Big Room · Hardstyle · Peak Time Techno">Big Room · Hardstyle · Peak Time Techno</p>
+  </div>
+</div>
+
+
 <!-- NAVIGATION -->
 <nav id="navbar">
   <div class="nav-container">
@@ -130,7 +149,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     <p class="hero-sub" data-pl="Big Room · Hardstyle · Peak Time Techno" data-en="Big Room · Hardstyle · Peak Time Techno">Big Room · Hardstyle · Peak Time Techno</p>
     <div class="hero-stats">
       <div class="stat">
-        <span class="stat-num">216K+</span>
+        <span class="stat-num">500K+</span>
         <span class="stat-label" data-pl="Słuchaczy miesięcznie" data-en="Monthly listeners">Słuchaczy miesięcznie</span>
       </div>
       <div class="stat-divider"></div>
