@@ -101,61 +101,81 @@ document.querySelectorAll('.bio-grid, .section-title, .event-item, .track-card')
 let countersStarted = false;
 
 function animateCounter(el, target, suffix, duration) {
-  const startTime = performance.now();
+  // Ustaw 0 natychmiast przed startem animacji
+  el.textContent = '0' + suffix;
   const finalText = el.getAttribute('data-final') || (target + suffix);
 
-  function update(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const current = Math.floor(eased * target);
+  // Małe opóźnienie żeby "0" było widoczne przez chwilę
+  setTimeout(() => {
+    const startTime = performance.now();
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Wolniejszy easing - liniowy na początku
+      const eased = progress < 0.7
+        ? progress * 0.7
+        : 0.49 + (1 - Math.pow(1 - (progress - 0.7) / 0.3, 2)) * 0.51;
+      const current = Math.floor(eased * target);
 
-    let display;
-    if (target >= 1000000) {
-      display = Math.floor(current / 1000000) + 'M';
-    } else if (target >= 1000) {
-      display = Math.floor(current / 1000) + 'K';
-    } else {
-      display = current;
-    }
-    el.textContent = display + suffix;
+      let display;
+      if (target >= 1000000) {
+        display = Math.floor(current / 1000000) + 'M';
+      } else if (target >= 1000) {
+        display = Math.floor(current / 1000) + 'K';
+      } else {
+        display = current;
+      }
+      el.textContent = display + suffix;
 
-    if (progress < 1) {
-      requestAnimationFrame(update);
-    } else {
-      el.textContent = finalText;
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        el.textContent = finalText;
+      }
     }
-  }
-  requestAnimationFrame(update);
+    requestAnimationFrame(update);
+  }, 200);
 }
 
 function startCounters() {
   if (countersStarted) return;
   countersStarted = true;
+  // Natychmiast ustaw 0 na wszystkich licznikach
   document.querySelectorAll('.stat-num[data-target]').forEach(el => {
-    const target = parseInt(el.getAttribute('data-target'));
     const suffix = el.getAttribute('data-suffix') || '';
-    animateCounter(el, target, suffix, 2500);
+    el.textContent = '0' + suffix;
   });
+  // Potem zacznij animację z lekkim opóźnieniem
+  setTimeout(() => {
+    document.querySelectorAll('.stat-num[data-target]').forEach(el => {
+      const target = parseInt(el.getAttribute('data-target'));
+      const suffix = el.getAttribute('data-suffix') || '';
+      animateCounter(el, target, suffix, 3800);
+    });
+  }, 300);
 }
 
 // ===== TRĄBKA POPUP =====
 function animateTrumpet() {
   const trumpet = document.querySelector('.stat-num:not([data-target])');
   if (!trumpet) return;
-  trumpet.style.transition = 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)';
   trumpet.style.display = 'inline-block';
-  // Sekwencja: małe → duże → normalne
-  setTimeout(() => { trumpet.style.transform = 'scale(1.8) rotate(-15deg)'; }, 100);
-  setTimeout(() => { trumpet.style.transform = 'scale(0.9) rotate(5deg)'; }, 450);
-  setTimeout(() => { trumpet.style.transform = 'scale(1) rotate(0deg)'; }, 650);
+  trumpet.style.transition = 'transform 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+  // Wolniejsza sekwencja
+  setTimeout(() => { trumpet.style.transform = 'scale(0.5) rotate(-20deg)'; }, 0);
+  setTimeout(() => { trumpet.style.transform = 'scale(2) rotate(-10deg)'; }, 600);
+  setTimeout(() => { trumpet.style.transform = 'scale(0.95) rotate(5deg)'; }, 1200);
+  setTimeout(() => { trumpet.style.transform = 'scale(1) rotate(0deg)'; }, 1600);
 }
 
-// ===== GALLERY BLUR =====
+// ===== GALLERY BLUR + CACHE FIX =====
 function initGallery() {
   document.querySelectorAll('.gallery-item img').forEach(img => {
     if (img.dataset.galleryInit) return;
     img.dataset.galleryInit = '1';
+
+    // Zmień loading na eager - przeglądarka nie wyrzuci z pamięci
+    img.loading = 'eager';
     img.classList.add('img-loading');
 
     function onLoad() {
@@ -168,6 +188,15 @@ function initGallery() {
     } else {
       img.addEventListener('load', onLoad, { once: true });
       img.addEventListener('error', onLoad, { once: true });
+    }
+  });
+
+  // Prefetch wszystkich zdjęć galerii do pamięci cache
+  document.querySelectorAll('.gallery-item img').forEach(img => {
+    const src = img.getAttribute('src');
+    if (src) {
+      const preload = new Image();
+      preload.src = src;
     }
   });
 }
