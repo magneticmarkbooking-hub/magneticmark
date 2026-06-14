@@ -349,6 +349,38 @@ function enterSite() {
   }
 }
 
+
+// ===== LOAD PRESS =====
+async function loadPress() {
+  try {
+    const res = await fetch('press.json');
+    const articles = await res.json();
+    const grid = document.getElementById('pressGrid');
+    if (!grid) return;
+
+    grid.innerHTML = articles.map(a => {
+      const date = new Date(a.date).toLocaleDateString(
+        currentLang === 'pl' ? 'pl-PL' : 'en-US',
+        { year: 'numeric', month: 'long', day: 'numeric' }
+      );
+      const excerpt = currentLang === 'pl' ? a.excerpt_pl : a.excerpt_en;
+      return `
+        <article class="press-card">
+          <div class="press-tag">${a.tag}</div>
+          <div class="press-content">
+            <p class="press-date">${date}</p>
+            <h3 class="press-title">${a.title}</h3>
+            <p class="press-excerpt">${excerpt}</p>
+          </div>
+          <a href="${a.url}" target="_blank" rel="noopener" class="press-link" data-pl="Czytaj artykuł" data-en="Read article">
+            Czytaj artykuł
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </article>`;
+    }).join('');
+  } catch(e) { console.warn('press.json not found'); }
+}
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   setLang(currentLang);
@@ -357,6 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadEvents();
   initGallery();
   setupGalleryClicks();
+  loadPress();
 
   // Klawiatura na overlay
   document.addEventListener('keydown', e => {
