@@ -195,6 +195,16 @@ a { text-decoration: none; color: inherit; }
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+.hero-logo-wrap {
+  margin: 0 auto 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+.hero-logo-img {
+  width: clamp(280px, 60vw, 680px);
+  height: auto;
+  filter: drop-shadow(0 0 40px rgba(123,47,255,0.5));
+}
 .hero-sub {
   font-size: 16px;
   letter-spacing: 0.15em;
@@ -497,7 +507,9 @@ section {
 .platform-link svg { width: 18px; height: 18px; }
 .platform-link:hover { color: #fff; border-color: rgba(123,47,255,0.6); background: rgba(123,47,255,0.15); }
 .platform-link.spotify:hover { border-color: #1DB954; color: #1DB954; }
+.platform-link.youtube:hover { border-color: #FF0000; color: #FF0000; }
 .platform-link.soundcloud:hover { border-color: #FF5500; color: #FF5500; }
+.platform-link.beatport:hover { border-color: #01FF95; color: #01FF95; }
 
 /* ===== VIDEO ===== */
 .video-grid {
@@ -519,10 +531,30 @@ section {
   width: 100%; height: 100%;
 }
 .video-label {
-  margin-top: 1rem;
-  font-size: 14px;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 13px;
   color: var(--gray);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
+}
+.video-wrapper-sm {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.video-wrapper-sm iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+.sc-embed-wrap {
+  margin-top: 1rem;
+}
+.sc-embed-wrap iframe {
+  border-radius: 4px;
+  display: block;
 }
 .video-side {
   display: flex;
