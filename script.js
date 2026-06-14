@@ -218,3 +218,26 @@ function closeLightbox() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeLightbox();
 });
+
+// ===== BACK TO TOP =====
+const backToTop = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  backToTop?.classList.toggle('visible', window.scrollY > 400);
+}, { passive: true });
+
+// ===== GALLERY THUMBNAIL QUALITY =====
+// Ładuj miniaturę (small) a przy kliknięciu pełne zdjęcie
+document.querySelectorAll('.gallery-item').forEach(item => {
+  const img = item.querySelector('img');
+  if (!img) return;
+  const fullSrc = img.src || img.getAttribute('src');
+  // Dodaj wsrv.nl resize dla miniatur - 400px szerokości
+  const src = img.getAttribute('src');
+  if (src && src.startsWith('images/')) {
+    // lokalne pliki - nie można resizować bez backendu
+    // ale możemy ustawić sizes dla przeglądarki
+    img.setAttribute('sizes', '(max-width: 600px) 50vw, 25vw');
+  }
+  // Przy kliknięciu lightbox pokaże pełne zdjęcie
+  item.setAttribute('onclick', `openLightbox('${src}')`);
+});
