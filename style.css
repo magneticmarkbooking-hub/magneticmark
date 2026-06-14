@@ -1586,3 +1586,61 @@ body.menu-open {
     gap: 0;
   }
 }
+
+/* ===== AUDIO CTRL W NAV-RIGHT ===== */
+#audioCtrl {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  /* Desktop: inline w nav-right */
+}
+#audioCtrl.visible {
+  display: flex !important;
+}
+/* Desktop - brak fixed, siedzi w nav */
+@media (min-width: 769px) {
+  #audioCtrl {
+    position: static;
+    background: none;
+    border: none;
+    backdrop-filter: none;
+    padding: 0;
+    border-radius: 0;
+  }
+  #volumeSlider {
+    width: 70px;
+  }
+}
+/* Mobile - też w nav, bez tła */
+@media (max-width: 768px) {
+  #audioCtrl {
+    position: static !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+  }
+  #volumeSlider {
+    width: 55px;
+  }
+}
+
+/* ===== GALLERY BLUR VIA CSS CLASSES ===== */
+.gallery-item img.img-loading {
+  filter: blur(8px);
+  transform: scale(1.03);
+  transition: filter 0.5s ease, transform 0.5s ease;
+}
+.gallery-item img.img-loaded {
+  filter: none;
+  transform: none;
+  transition: filter 0.5s ease, transform 0.5s ease;
+}
+
+/* ===== MENU SCROLL FIX ===== */
+body.menu-open {
+  position: fixed;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}

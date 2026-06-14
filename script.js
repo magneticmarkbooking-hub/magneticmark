@@ -30,31 +30,41 @@ window.addEventListener('scroll', () => {
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 
+function closeMenu() {
+  navLinks.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', false);
+  hamburger.querySelectorAll('span').forEach(s => {
+    s.style.transform = '';
+    s.style.opacity = '';
+  });
+  // Przywróć scroll BEZ przeskakiwania na górę
+  const scrollY = parseInt(document.body.style.top || '0') * -1;
+  document.body.classList.remove('menu-open');
+  document.body.style.top = '';
+  if (scrollY) window.scrollTo(0, scrollY);
+}
+
 hamburger.addEventListener('click', () => {
-  const isOpen = navLinks.classList.toggle('open');
-  document.body.classList.toggle('menu-open', isOpen);
-  hamburger.setAttribute('aria-expanded', isOpen);
-  const spans = hamburger.querySelectorAll('span');
+  const isOpen = !navLinks.classList.contains('open');
   if (isOpen) {
+    // Zapisz pozycję scrolla przed blokowaniem
+    const scrollY = window.scrollY;
+    document.body.style.top = `-${scrollY}px`;
+    document.body.classList.add('menu-open');
+    navLinks.classList.add('open');
+    hamburger.setAttribute('aria-expanded', true);
+    const spans = hamburger.querySelectorAll('span');
     spans[0].style.transform = 'translateY(7px) rotate(45deg)';
     spans[1].style.opacity = '0';
     spans[2].style.transform = 'translateY(-7px) rotate(-45deg)';
   } else {
-    spans[0].style.transform = '';
-    spans[1].style.opacity = '';
-    spans[2].style.transform = '';
+    closeMenu();
   }
 });
 
 navLinks.querySelectorAll('a').forEach(a => {
   a.addEventListener('click', () => {
-    navLinks.classList.remove('open');
-    document.body.classList.remove('menu-open');
-    hamburger.setAttribute('aria-expanded', false);
-    hamburger.querySelectorAll('span').forEach(s => {
-      s.style.transform = '';
-      s.style.opacity = '';
-    });
+    closeMenu();
   });
 });
 
@@ -122,7 +132,7 @@ function animateCounter(el, target, suffix, duration) {
   requestAnimationFrame(update);
 }
 
-function startCounters() {
+window.startCounters = function startCounters() {
   if (countersStarted) return;
   countersStarted = true;
   document.querySelectorAll('.stat-num[data-target]').forEach(el => {
@@ -152,14 +162,12 @@ function initGallery() {
     if (img.dataset.galleryInit) return;
     img.dataset.galleryInit = '1';
 
-    img.style.filter = 'blur(10px)';
-    img.style.transform = 'scale(1.03)';
-    img.style.transition = 'filter 0.6s ease, transform 0.6s ease';
+    // Dodaj klasę loading - CSS zrobi blur
+    img.classList.add('img-loading');
 
     function onLoad() {
-      img.style.filter = '';
-      img.style.transform = '';
-      img.classList.add('loaded');
+      img.classList.remove('img-loading');
+      img.classList.add('img-loaded');
     }
 
     if (img.complete && img.naturalWidth > 0) {
@@ -324,7 +332,7 @@ function setVolume(val) {
 function showAudioCtrl() {
   const ctrl = document.getElementById('audioCtrl');
   if (!ctrl) return;
-  ctrl.style.display = 'flex';
+  ctrl.classList.add('visible');
 }
 
 // ===== INTRO OVERLAY + AUDIO =====
