@@ -1461,21 +1461,7 @@ body.menu-open {
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-/* ===== AUDIO CONTROLLER MOBILE - górny pasek ===== */
-@media (max-width: 768px) {
-  #audioCtrl {
-    bottom: auto;
-    top: calc(var(--nav-h) + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    right: auto;
-    padding: 6px 14px 6px 10px;
-    gap: 8px;
-  }
-  #volumeSlider {
-    width: 80px;
-  }
-}
+
 
 /* ===== GALLERY BLUR LOADING ===== */
 .gallery-item img {
@@ -1513,5 +1499,90 @@ body.menu-open {
   .lang-toggle {
     z-index: 1001;
     position: relative;
+  }
+}
+
+/* ===== AUDIO CONTROLLER – DESKTOP (przy back to top) ===== */
+#audioCtrl {
+  position: fixed;
+  bottom: 2rem;
+  left: 1.5rem;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(10,0,21,0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(123,47,255,0.3);
+  border-radius: 30px;
+  padding: 8px 16px 8px 12px;
+  transition: opacity 0.3s ease;
+}
+#audioCtrl:hover { opacity: 1 !important; }
+
+/* ===== AUDIO CONTROLLER – MOBILE (w headerze między logo a menu) ===== */
+@media (max-width: 768px) {
+  #audioCtrl {
+    position: static;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    padding: 0;
+    gap: 6px;
+    display: none; /* pokazuje się po enterSite() */
+  }
+  #audioCtrl.mobile-visible {
+    display: flex !important;
+  }
+  #volumeSlider {
+    width: 60px;
+  }
+  #muteBtn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ===== NAV AUDIO CTRL POZYCJA ===== */
+/* Desktop - audioCtrl jest fixed bottom left (style inline w HTML) */
+/* Na desktop ukryj go z navbara i pokaż jako fixed */
+@media (min-width: 769px) {
+  #audioCtrl {
+    position: fixed;
+    bottom: 2rem;
+    left: 1.5rem;
+    top: auto;
+    transform: none;
+  }
+}
+
+/* Mobile - audioCtrl w navbarze między logo a menu */
+@media (max-width: 768px) {
+  #audioCtrl {
+    position: static !important;
+    transform: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    padding: 0 !important;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+    margin: 0 8px;
+  }
+  #volumeSlider {
+    width: 70px;
+    height: 3px;
+  }
+  #muteBtn svg {
+    width: 16px;
+    height: 16px;
+  }
+  /* Nav container layout na mobile */
+  .nav-container {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0;
   }
 }
