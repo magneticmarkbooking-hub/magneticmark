@@ -408,6 +408,32 @@ async function loadPress() {
   } catch(e) { console.warn('press.json not found'); }
 }
 
+
+// ===== TRĄBKA BOUNCE W BIO =====
+let trumpetBioPlayed = false;
+const bioObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !trumpetBioPlayed) {
+      trumpetBioPlayed = true;
+      bioObserver.disconnect();
+      // Znajdź trąbkę w hero stats i zrób bounce
+      const trumpet = document.querySelector('.stat-num:not([data-target])');
+      if (trumpet) {
+        trumpet.style.display = 'inline-block';
+        trumpet.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1)';
+        setTimeout(() => { trumpet.style.transform = 'scale(0.3) rotate(-30deg)'; }, 0);
+        setTimeout(() => { trumpet.style.transform = 'scale(2.2) rotate(-10deg)'; }, 500);
+        setTimeout(() => { trumpet.style.transform = 'scale(0.9) rotate(8deg)'; }, 1100);
+        setTimeout(() => { trumpet.style.transform = 'scale(1.1) rotate(-3deg)'; }, 1500);
+        setTimeout(() => { trumpet.style.transform = 'scale(1) rotate(0deg)'; }, 1800);
+      }
+    }
+  });
+}, { threshold: 0.4 });
+
+const bioSection = document.querySelector('#bio');
+if (bioSection) bioObserver.observe(bioSection);
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   setLang(currentLang);
