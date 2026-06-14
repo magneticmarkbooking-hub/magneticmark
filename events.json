@@ -1,22 +1,36 @@
 [
   {
-    "date": "2026-07-26",
-    "name": "Sunset Vibes",
-    "location": "Mango Club, Opole",
+    "date": "2026-06-12",
+    "name": "ING Silesia Beats",
+    "location": "Chorzów",
     "stage": "",
     "link": ""
   },
   {
-    "date": "2026-08-02",
+    "date": "2025-09-12",
+    "name": "Dj's Night",
+    "location": "Lubieszów, Bierawa",
+    "stage": "",
+    "link": ""
+  },
+  {
+    "date": "2025-08-14",
+    "name": "Red One Festival",
+    "location": "Kotulin",
+    "stage": "",
+    "link": ""
+  },
+  {
+    "date": "2025-08-02",
     "name": "Projekt L 808",
     "location": "Leśnica",
     "stage": "",
     "link": ""
   },
   {
-    "date": "2026-08-14",
-    "name": "Red One Festival",
-    "location": "Kotulin",
+    "date": "2025-07-26",
+    "name": "Sunset Vibes",
+    "location": "Mango Club, Opole",
     "stage": "",
     "link": ""
   }

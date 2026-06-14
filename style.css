@@ -406,8 +406,8 @@ section {
 /* ===== MUSIC ===== */
 .tracks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.25rem;
   margin-bottom: 3rem;
 }
 .track-card {
@@ -872,7 +872,7 @@ img {
   .video-grid { grid-template-columns: 1fr; gap: 1.5rem; }
   .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
   .contact-image { display: none; }
-  .tracks-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .tracks-grid { grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
 }
 
 @media (max-width: 600px) {
@@ -914,3 +914,8 @@ img {
   height: 20px;
   flex-shrink: 0;
 }
+/* Beatport zielony, SoundCloud pomarańczowy */
+.platform-link.beatport { color: rgba(255,255,255,0.75); }
+.platform-link.beatport:hover { border-color: #01FF95; color: #01FF95; }
+.platform-link.soundcloud { color: rgba(255,255,255,0.75); }
+.platform-link.soundcloud:hover { border-color: #FF5500; color: #FF5500; }
