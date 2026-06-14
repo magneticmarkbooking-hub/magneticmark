@@ -70,7 +70,7 @@ a { text-decoration: none; color: inherit; }
   gap: 2rem;
 }
 .nav-logo { display: flex; align-items: center; }
-.logo-img { height: 44px; width: auto; filter: brightness(1.1); }
+.logo-img { height: 56px; width: auto; filter: brightness(1.1); }
 .nav-links {
   display: flex;
   list-style: none;
@@ -347,6 +347,9 @@ section {
 }
 .bio-image img {
   width: 100%;
+  height: 560px;
+  object-fit: cover;
+  object-position: top center;
   border-radius: 4px;
   filter: brightness(0.95);
 }
@@ -702,7 +705,8 @@ section {
 .gallery-item {
   overflow: hidden;
   aspect-ratio: 3/4;
-  border-radius: 2px;
+  border-radius: 4px;
+  background: rgba(123,47,255,0.1);
 }
 .gallery-item img {
   width: 100%;
@@ -919,3 +923,79 @@ img {
 .platform-link.beatport:hover { border-color: #01FF95; color: #01FF95; }
 .platform-link.soundcloud { color: rgba(255,255,255,0.75); }
 .platform-link.soundcloud:hover { border-color: #FF5500; color: #FF5500; }
+
+/* ===== GALLERY HOVER POPUP ===== */
+.gallery-item {
+  position: relative;
+}
+.gallery-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
+  pointer-events: none;
+}
+.gallery-item:hover::after {
+  border-color: var(--accent);
+}
+.gallery-item .gallery-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(102,0,255,0.85) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  border-radius: 4px;
+}
+.gallery-item:hover .gallery-overlay {
+  opacity: 1;
+}
+.gallery-overlay-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+}
+
+/* ===== PAST EVENTS ===== */
+.event-past {
+  opacity: 0.45;
+}
+.event-past .event-day,
+.event-past .event-info h3 {
+  color: var(--gray);
+}
+.event-past .event-month {
+  color: var(--gray);
+}
+
+/* ===== PLATFORM ICON SIZING ===== */
+.platform-link.soundcloud svg,
+.platform-link.beatport svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ===== LAZY LOADING PLACEHOLDER ===== */
+.gallery-item img {
+  background: rgba(123,47,255,0.08);
+  transition: opacity 0.4s ease, transform 0.5s ease, filter 0.3s ease;
+  opacity: 0;
+}
+.gallery-item img.loaded {
+  opacity: 1;
+}
+.gallery-item:hover img {
+  transform: scale(1.05);
+  filter: brightness(1) saturate(1.1);
+}

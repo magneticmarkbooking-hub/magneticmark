@@ -131,15 +131,14 @@ async function loadEvents() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const upcoming = events
-      .filter(e => new Date(e.date) >= today)
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sorted = events.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    if (upcoming.length === 0) {
+    if (sorted.length === 0) {
       list.style.display = 'none';
       if (empty) empty.style.display = 'block';
       return;
     }
+    const upcoming = sorted;
 
     const monthsPl = ['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
     const monthsEn = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
@@ -153,8 +152,9 @@ async function loadEvents() {
       const linkHtml = e.link
         ? `<a href="${e.link}" target="_blank" rel="noopener" class="event-link" data-pl="Dołącz" data-en="Join">Dołącz</a>`
         : '';
+      const isPast = new Date(e.date) < today;
       return `
-        <div class="event-item fade-in">
+        <div class="event-item fade-in${isPast ? ' event-past' : ''}">
           <div class="event-date">
             <div class="event-day">${String(day).padStart(2,'0')}</div>
             <div class="event-month" data-pl="${mPl}" data-en="${mEn}">${currentLang==='pl'?mPl:mEn}</div>
@@ -182,4 +182,21 @@ document.addEventListener('DOMContentLoaded', () => {
   setLang(currentLang);
   loadTracks();
   loadEvents();
+});
+
+// ===== LAZY LOAD IMAGES =====
+const imgObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const img = e.target;
+      img.addEventListener('load', () => img.classList.add('loaded'));
+      img.addEventListener('error', () => img.classList.add('loaded'));
+      if (img.complete) img.classList.add('loaded');
+      imgObserver.unobserve(img);
+    }
+  });
+}, { rootMargin: '200px' });
+
+document.querySelectorAll('.gallery-item img').forEach(img => {
+  imgObserver.observe(img);
 });
