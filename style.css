@@ -1644,3 +1644,82 @@ body.menu-open {
   right: 0;
   overflow: hidden;
 }
+
+/* ===== AUDIO CTRL - ZAWSZE W NAV-RIGHT ===== */
+#audioCtrl {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  position: static;
+  background: none;
+  border: none;
+  backdrop-filter: none;
+  padding: 0;
+  border-radius: 0;
+}
+#volumeSlider {
+  width: 70px;
+  height: 3px;
+  -webkit-appearance: none;
+  background: rgba(123,47,255,0.4);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+#volumeSlider::-moz-range-thumb {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+}
+#muteBtn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: color 0.3s;
+}
+#muteBtn:hover { color: var(--accent); }
+
+/* Na mobile schowaj suwak, zostaw tylko ikonę */
+@media (max-width: 768px) {
+  #audioCtrl {
+    gap: 4px;
+  }
+  #volumeSlider {
+    width: 50px;
+  }
+}
+
+/* ===== GALLERY BLUR KLASY ===== */
+.gallery-item img.img-loading {
+  filter: blur(8px) !important;
+  transform: scale(1.03) !important;
+  transition: filter 0.6s ease, transform 0.6s ease !important;
+}
+.gallery-item img.img-loaded {
+  filter: none !important;
+  transform: none !important;
+  transition: filter 0.6s ease, transform 0.6s ease !important;
+}
+/* Bez IntersectionObserver - zdjęcia nie resetują przy scrollu */
+.gallery-item img {
+  opacity: 1 !important;
+}
+
+/* ===== TRĄBKA POPUP ===== */
+.stat-num:not([data-target]) {
+  display: inline-block;
+  transform-origin: center;
+}

@@ -37,7 +37,6 @@ function closeMenu() {
     s.style.transform = '';
     s.style.opacity = '';
   });
-  // Przywróć scroll BEZ przeskakiwania na górę
   const scrollY = parseInt(document.body.style.top || '0') * -1;
   document.body.classList.remove('menu-open');
   document.body.style.top = '';
@@ -47,7 +46,6 @@ function closeMenu() {
 hamburger.addEventListener('click', () => {
   const isOpen = !navLinks.classList.contains('open');
   if (isOpen) {
-    // Zapisz pozycję scrolla przed blokowaniem
     const scrollY = window.scrollY;
     document.body.style.top = `-${scrollY}px`;
     document.body.classList.add('menu-open');
@@ -63,9 +61,7 @@ hamburger.addEventListener('click', () => {
 });
 
 navLinks.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => {
-    closeMenu();
-  });
+  a.addEventListener('click', () => closeMenu());
 });
 
 // ===== SMOOTH SCROLL =====
@@ -84,7 +80,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 // ===== FOOTER YEAR =====
 document.getElementById('year').textContent = new Date().getFullYear();
 
-// ===== FADE IN ON SCROLL =====
+// ===== FADE IN ON SCROLL (bez gallery-grid!) =====
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if (e.isIntersecting) {
@@ -94,12 +90,14 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 
-document.querySelectorAll('.bio-grid, .section-title, .gallery-grid, .event-item, .track-card').forEach(el => {
+// Celowo NIE dodajemy gallery-grid do observera - to powodowało reload zdjęć
+document.querySelectorAll('.bio-grid, .section-title, .event-item, .track-card').forEach(el => {
   el.classList.add('fade-in');
   observer.observe(el);
 });
 
 // ===== ANIMOWANE LICZNIKI =====
+// Uruchamiane TYLKO przez enterSite() - nie przez scroll
 let countersStarted = false;
 
 function animateCounter(el, target, suffix, duration) {
@@ -114,8 +112,7 @@ function animateCounter(el, target, suffix, duration) {
 
     let display;
     if (target >= 1000000) {
-      const m = current / 1000000;
-      display = (m >= 1 ? m.toFixed(0) : m.toFixed(1)) + 'M';
+      display = Math.floor(current / 1000000) + 'M';
     } else if (target >= 1000) {
       display = Math.floor(current / 1000) + 'K';
     } else {
@@ -132,37 +129,33 @@ function animateCounter(el, target, suffix, duration) {
   requestAnimationFrame(update);
 }
 
-window.startCounters = function startCounters() {
+function startCounters() {
   if (countersStarted) return;
   countersStarted = true;
   document.querySelectorAll('.stat-num[data-target]').forEach(el => {
     const target = parseInt(el.getAttribute('data-target'));
     const suffix = el.getAttribute('data-suffix') || '';
-    animateCounter(el, target, suffix, 2200);
+    animateCounter(el, target, suffix, 2500);
   });
 }
 
-// Obserwuj hero stats
-const heroStats = document.querySelector('.hero-stats');
-if (heroStats) {
-  const statsObserver = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        startCounters();
-        statsObserver.disconnect();
-      }
-    });
-  }, { threshold: 0.3 });
-  statsObserver.observe(heroStats);
+// ===== TRĄBKA POPUP =====
+function animateTrumpet() {
+  const trumpet = document.querySelector('.stat-num:not([data-target])');
+  if (!trumpet) return;
+  trumpet.style.transition = 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)';
+  trumpet.style.display = 'inline-block';
+  // Sekwencja: małe → duże → normalne
+  setTimeout(() => { trumpet.style.transform = 'scale(1.8) rotate(-15deg)'; }, 100);
+  setTimeout(() => { trumpet.style.transform = 'scale(0.9) rotate(5deg)'; }, 450);
+  setTimeout(() => { trumpet.style.transform = 'scale(1) rotate(0deg)'; }, 650);
 }
 
-// ===== GALLERY BLUR PLACEHOLDER =====
+// ===== GALLERY BLUR =====
 function initGallery() {
   document.querySelectorAll('.gallery-item img').forEach(img => {
     if (img.dataset.galleryInit) return;
     img.dataset.galleryInit = '1';
-
-    // Dodaj klasę loading - CSS zrobi blur
     img.classList.add('img-loading');
 
     function onLoad() {
@@ -176,6 +169,32 @@ function initGallery() {
       img.addEventListener('load', onLoad, { once: true });
       img.addEventListener('error', onLoad, { once: true });
     }
+  });
+}
+
+// ===== GALLERY LIGHTBOX =====
+function openLightbox(src) {
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  img.src = src;
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+function setupGalleryClicks() {
+  document.querySelectorAll('.gallery-item').forEach(item => {
+    const img = item.querySelector('img');
+    if (!img) return;
+    item.onclick = () => openLightbox(img.getAttribute('src'));
   });
 }
 
@@ -196,26 +215,13 @@ async function loadTracks() {
       if (t.youtube) platforms.push(`<a href="${t.youtube}" target="_blank" rel="noopener" aria-label="YouTube" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>`);
       if (t.beatport) platforms.push(`<a href="${t.beatport}" target="_blank" rel="noopener" aria-label="Beatport" onclick="event.stopPropagation()"><svg viewBox="550 415 220 200" fill="white"><path d="M715.4,539.8c0,28.1-22.5,50.8-51.1,50.8c-28.5,0-50.8-22.2-50.8-50.8c0-13.5,5.1-25.4,13.3-34.4l-34.5,34.4l-18.1-18l38.9-38.4c5.3-5.3,8-12.1,8-19.6v-48.1h25.5v48.1c0,14.8-5.3,27.3-15.5,37.5l-1.1,1.1c9-8.2,21.3-13.2,34.4-13.2C693.3,489.3,715.4,512.1,715.4,539.8z M692.3,539.8c0-15.1-12.6-27.3-28-27.3c-15.4,0-27.7,12.8-27.7,27.3c0,14.5,12.3,27.6,27.7,27.6C679.8,567.4,692.3,554.4,692.3,539.8z"/></svg></a>`);
 
-      return `
-        <div class="track-card" onclick="window.open('${spotifyUrl}','_blank')" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
-          <img src="${t.cover || 'images/covers/placeholder.jpg'}" alt="${t.title}" loading="lazy" decoding="async">
-          <div class="track-info-overlay">
-            <div class="track-title">${t.title}</div>
-            <div class="track-date">${dateStr}</div>
-          </div>
-          <div class="track-overlay">
-            <div class="track-platforms">${platforms.join('')}</div>
-          </div>
+      return `<div class="track-card" onclick="window.open('${spotifyUrl}','_blank')" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
+          <img src="${t.cover || ''}" alt="${t.title}" loading="lazy" decoding="async">
+          <div class="track-info-overlay"><div class="track-title">${t.title}</div><div class="track-date">${dateStr}</div></div>
+          <div class="track-overlay"><div class="track-platforms">${platforms.join('')}</div></div>
         </div>`;
     }).join('');
-
-    grid.querySelectorAll('.track-card').forEach(el => {
-      el.classList.add('fade-in');
-      observer.observe(el);
-    });
-  } catch (e) {
-    console.warn('tracks.json not found');
-  }
+  } catch (e) { console.warn('tracks.json not found'); }
 }
 
 // ===== LOAD EVENTS =====
@@ -227,69 +233,31 @@ async function loadEvents() {
     const empty = document.getElementById('eventsEmpty');
     if (!list) return;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    const today = new Date(); today.setHours(0,0,0,0);
     const sorted = events.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    if (sorted.length === 0) {
-      list.style.display = 'none';
-      if (empty) empty.style.display = 'block';
-      return;
-    }
+    if (!sorted.length) { list.style.display='none'; if(empty) empty.style.display='block'; return; }
 
-    const monthsPl = ['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
-    const monthsEn = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const mPl=['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
+    const mEn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
     list.innerHTML = sorted.map(e => {
       const d = new Date(e.date);
-      const day = d.getDate();
-      const mPl = monthsPl[d.getMonth()];
-      const mEn = monthsEn[d.getMonth()];
-      const year = d.getFullYear();
       const isPast = d < today;
       const linkHtml = e.link ? `<a href="${e.link}" target="_blank" rel="noopener" class="event-link" data-pl="Dołącz" data-en="Join">Dołącz</a>` : '';
-
-      return `
-        <div class="event-item fade-in${isPast ? ' event-past' : ''}">
+      return `<div class="event-item${isPast?' event-past':''}">
           <div class="event-date">
-            <div class="event-day">${String(day).padStart(2,'0')}</div>
-            <div class="event-month" data-pl="${mPl}" data-en="${mEn}">${currentLang==='pl'?mPl:mEn}</div>
-            <div class="event-year">${year}</div>
+            <div class="event-day">${String(d.getDate()).padStart(2,'0')}</div>
+            <div class="event-month" data-pl="${mPl[d.getMonth()]}" data-en="${mEn[d.getMonth()]}">${currentLang==='pl'?mPl[d.getMonth()]:mEn[d.getMonth()]}</div>
+            <div class="event-year">${d.getFullYear()}</div>
           </div>
-          <div class="event-info">
-            <h3>${e.name}</h3>
-            <div class="event-location">${e.location}</div>
-            ${e.stage?`<div class="event-stage">${e.stage}</div>`:''}
-          </div>
+          <div class="event-info"><h3>${e.name}</h3><div class="event-location">${e.location}</div>${e.stage?`<div class="event-stage">${e.stage}</div>`:''}</div>
           ${linkHtml}
         </div>`;
     }).join('');
-
-    list.querySelectorAll('.event-item').forEach(el => observer.observe(el));
     setLang(currentLang);
-  } catch (e) {
-    console.warn('events.json not found');
-  }
+  } catch(e) { console.warn('events.json not found'); }
 }
-
-// ===== LIGHTBOX =====
-function openLightbox(src) {
-  const lb = document.getElementById('lightbox');
-  const img = document.getElementById('lightboxImg');
-  img.src = src;
-  lb.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeLightbox();
-});
 
 // ===== BACK TO TOP =====
 const backToTop = document.getElementById('backToTop');
@@ -303,49 +271,39 @@ let lastVolume = 0.6;
 
 function toggleMute() {
   const audio = document.getElementById('bgAudio');
-  const iconSound = document.getElementById('iconSound');
-  const iconMute = document.getElementById('iconMute');
-  const slider = document.getElementById('volumeSlider');
   if (!audio) return;
   isMuted = !isMuted;
   audio.muted = isMuted;
-  iconSound.style.display = isMuted ? 'none' : 'block';
-  iconMute.style.display = isMuted ? 'block' : 'none';
+  document.getElementById('iconSound').style.display = isMuted ? 'none' : 'block';
+  document.getElementById('iconMute').style.display = isMuted ? 'block' : 'none';
+  const slider = document.getElementById('volumeSlider');
   if (slider) slider.value = isMuted ? 0 : Math.round(lastVolume * 100);
 }
 
 function setVolume(val) {
   const audio = document.getElementById('bgAudio');
-  const iconSound = document.getElementById('iconSound');
-  const iconMute = document.getElementById('iconMute');
   if (!audio) return;
   const v = val / 100;
   audio.volume = v;
   lastVolume = v > 0 ? v : lastVolume;
   isMuted = v === 0;
   audio.muted = isMuted;
-  if (iconSound) iconSound.style.display = isMuted ? 'none' : 'block';
-  if (iconMute) iconMute.style.display = isMuted ? 'block' : 'none';
-}
-
-// ===== SHOW AUDIO CONTROLLER =====
-function showAudioCtrl() {
-  const ctrl = document.getElementById('audioCtrl');
-  if (!ctrl) return;
-  ctrl.classList.add('visible');
+  document.getElementById('iconSound').style.display = isMuted ? 'none' : 'block';
+  document.getElementById('iconMute').style.display = isMuted ? 'block' : 'none';
 }
 
 // ===== INTRO OVERLAY + AUDIO =====
 function enterSite() {
   const overlay = document.getElementById('introOverlay');
   const audio = document.getElementById('bgAudio');
-  const ctrl = document.getElementById('audioCtrl');
 
   document.body.classList.remove('locked');
   overlay.classList.add('hidden');
 
-  // Start liczników po wejściu
-  setTimeout(startCounters, 600);
+  // Liczniki startują po wejściu
+  setTimeout(startCounters, 500);
+  // Trąbka popup
+  setTimeout(animateTrumpet, 1200);
 
   if (audio) {
     audio.volume = 0;
@@ -358,21 +316,8 @@ function enterSite() {
         if (slider) slider.value = Math.round(vol * 100);
         if (vol >= 0.6) clearInterval(fadeIn);
       }, 80);
-      showAudioCtrl();
-    }).catch(() => {
-      showAudioCtrl();
-    });
+    }).catch(e => console.log('Audio:', e));
   }
-}
-
-// ===== GALLERY LIGHTBOX ONCLICK =====
-function setupGalleryClicks() {
-  document.querySelectorAll('.gallery-item').forEach(item => {
-    const img = item.querySelector('img');
-    if (!img) return;
-    const src = img.getAttribute('src');
-    item.onclick = () => openLightbox(src);
-  });
 }
 
 // ===== INIT =====
