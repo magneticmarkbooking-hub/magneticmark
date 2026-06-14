@@ -1058,3 +1058,41 @@ img {
 .gallery-item img {
   opacity: 1 !important;
 }
+
+/* ===== BIO IMAGE BORDER FIX ===== */
+.bio-image-bordered {
+  position: relative;
+}
+.bio-image-bordered img {
+  border: 2px solid rgba(123,47,255,0.5);
+  box-shadow: 0 0 40px rgba(123,47,255,0.2);
+}
+.bio-image-bordered .bio-image-accent {
+  border-color: rgba(123,47,255,0.3);
+}
+
+/* ===== PLATFORM LINKS ICON SIZES ===== */
+.platform-link.soundcloud svg {
+  width: 18px;
+  height: 21px;
+  flex-shrink: 0;
+}
+.platform-link.beatport svg {
+  width: 20px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.platform-link.spotify svg,
+.platform-link.youtube svg,
+.platform-link.apple svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ===== SOCIAL LINKS SMALL ICONS ===== */
+.social-link svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
