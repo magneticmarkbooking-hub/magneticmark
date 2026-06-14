@@ -168,6 +168,31 @@ function animateTrumpet() {
   setTimeout(() => { trumpet.style.transform = 'scale(1) rotate(0deg)'; }, 1600);
 }
 
+
+// ===== PRELOAD IMAGES PODCZAS INTRO =====
+function preloadAllImages() {
+  // Zdjęcia galerii
+  const gallerySrcs = [
+    'images/15.jpg','images/11.jpg','images/7.jpg','images/6.jpg',
+    'images/13.jpg','images/14.jpg','images/5.jpg','images/12.jpg',
+    'images/hero.png','images/bio.jpg','images/contact.jpg'
+  ];
+  gallerySrcs.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+
+  // Cover arty tracków - zaciągnij z tracks.json
+  fetch('tracks.json').then(r => r.json()).then(tracks => {
+    tracks.forEach(t => {
+      if (t.cover) {
+        const img = new Image();
+        img.src = t.cover;
+      }
+    });
+  }).catch(() => {});
+}
+
 // ===== GALLERY BLUR + CACHE FIX =====
 function initGallery() {
   document.querySelectorAll('.gallery-item img').forEach(img => {
@@ -359,11 +384,13 @@ async function loadPress() {
     if (!grid) return;
 
     grid.innerHTML = articles.map(a => {
+      const dateLang = localStorage.getItem('mm-lang') || 'pl';
       const date = new Date(a.date).toLocaleDateString(
-        currentLang === 'pl' ? 'pl-PL' : 'en-US',
+        dateLang === 'pl' ? 'pl-PL' : 'en-US',
         { year: 'numeric', month: 'long', day: 'numeric' }
       );
-      const excerpt = currentLang === 'pl' ? a.excerpt_pl : a.excerpt_en;
+      const lang = localStorage.getItem('mm-lang') || 'pl';
+      const excerpt = lang === 'pl' ? a.excerpt_pl : a.excerpt_en;
       return `
         <article class="press-card">
           <div class="press-tag">${a.tag}</div>
@@ -390,6 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGallery();
   setupGalleryClicks();
   loadPress();
+  preloadAllImages(); // ładuj zdjęcia podczas intro
 
   // Klawiatura na overlay
   document.addEventListener('keydown', e => {
