@@ -854,3 +854,63 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ===== PERFORMANCE ===== */
+img {
+  content-visibility: auto;
+}
+.hero-img {
+  will-change: transform;
+}
+.track-card img {
+  will-change: auto;
+}
+
+/* ===== RESPONSYWNOŚĆ POPRAWKI ===== */
+@media (max-width: 900px) {
+  .bio-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .video-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+  .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .contact-image { display: none; }
+  .tracks-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+}
+
+@media (max-width: 600px) {
+  :root { --nav-h: 60px; }
+  .hero-stats { gap: 1rem; }
+  .stat-num { font-size: 28px; }
+  .hero-cta { flex-direction: column; align-items: center; }
+  .btn-primary, .btn-secondary { width: 100%; max-width: 260px; text-align: center; }
+  .tracks-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .event-item { grid-template-columns: 70px 1fr; gap: 1rem; }
+  .event-day { font-size: 30px; }
+  .event-info h3 { font-size: 16px; }
+  .section-title { font-size: 28px; }
+  .platform-links { gap: 0.5rem; }
+  .platform-link { padding: 8px 12px; font-size: 11px; }
+  .bio-text h2 { font-size: 28px; }
+  section { padding: 60px 0; }
+  .container { padding: 0 1.25rem; }
+  .video-grid { gap: 1rem; }
+  .social-links { gap: 0.6rem; }
+  .social-link { width: 38px; height: 38px; }
+}
+
+@media (max-width: 380px) {
+  .tracks-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-title { font-size: 48px; }
+}
+
+/* ===== TRACK CARD CLICK ===== */
+.track-card:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== BEATPORT + SC ICON FIX ===== */
+.platform-link svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
