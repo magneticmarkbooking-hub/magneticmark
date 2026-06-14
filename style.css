@@ -1194,6 +1194,7 @@ img {
   gap: 2rem;
   text-align: center;
   position: relative;
+  z-index: 2;
 }
 .intro-logo {
   width: clamp(240px, 50vw, 500px);
@@ -1288,11 +1289,12 @@ body.locked {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  z-index: 0;
 }
 .iball {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.15;
+  opacity: 0.4;
   animation: floatBall linear infinite;
 }
 /* Kolory i rozmiary */
@@ -1856,6 +1858,6 @@ body.menu-open {
 /* ===== HERO IMAGE MOBILE POSITION ===== */
 @media (max-width: 768px) {
   .hero-img {
-    object-position: 50% 20%;
+    object-position: 49% 20%;
   }
 }
