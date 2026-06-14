@@ -265,11 +265,11 @@ async function loadTracks() {
       const dateStr = t.date ? new Date(t.date).toLocaleDateString('en', { month: 'short', year: 'numeric' }).toUpperCase() : '';
 
       const platforms = [];
-      if (t.spotify) platforms.push(`<a href="${t.spotify}" target="_blank" rel="noopener" aria-label="Spotify" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg></a>`);
-      if (t.youtube) platforms.push(`<a href="${t.youtube}" target="_blank" rel="noopener" aria-label="YouTube" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>`);
+      if (t.spotify) platforms.push(`<a href="${t.spotify}" data-app="spotify:album:${t.spotify.split('/').pop()}" target="_blank" rel="noopener" aria-label="Spotify" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg></a>`);
+      if (t.youtube) platforms.push(`<a href="${t.youtube}" data-app="vnd.youtube://${t.youtube.replace('https://','').replace('youtu.be/','youtube.com/watch?v=')}" target="_blank" rel="noopener" aria-label="YouTube" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>`);
       if (t.beatport) platforms.push(`<a href="${t.beatport}" target="_blank" rel="noopener" aria-label="Beatport" onclick="event.stopPropagation()"><svg viewBox="550 415 220 200" fill="white"><path d="M715.4,539.8c0,28.1-22.5,50.8-51.1,50.8c-28.5,0-50.8-22.2-50.8-50.8c0-13.5,5.1-25.4,13.3-34.4l-34.5,34.4l-18.1-18l38.9-38.4c5.3-5.3,8-12.1,8-19.6v-48.1h25.5v48.1c0,14.8-5.3,27.3-15.5,37.5l-1.1,1.1c9-8.2,21.3-13.2,34.4-13.2C693.3,489.3,715.4,512.1,715.4,539.8z M692.3,539.8c0-15.1-12.6-27.3-28-27.3c-15.4,0-27.7,12.8-27.7,27.3c0,14.5,12.3,27.6,27.7,27.6C679.8,567.4,692.3,554.4,692.3,539.8z"/></svg></a>`);
 
-      return `<div class="track-card" onclick="window.open('${spotifyUrl}','_blank')" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
+      return `<div class="track-card" onclick="handleAppLink({currentTarget:{getAttribute:(a)=>a==='data-app'?'spotify:artist:7qnCu8Un2e3gvg1ELX3HNg':'${spotifyUrl}',href:'${spotifyUrl}'}, preventDefault:()=>{}})" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
           <img src="${t.cover || ''}" alt="${t.title}" loading="lazy" decoding="async">
           <div class="track-info-overlay"><div class="track-title">${t.title}</div><div class="track-date">${dateStr}</div></div>
           <div class="track-overlay"><div class="track-platforms">${platforms.join('')}</div></div>
@@ -454,3 +454,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// ===== APP DEEP LINK FALLBACK =====
+// Próbuje otworzyć aplikację, jeśli nie ma - otwiera web
+function handleAppLink(e) {
+  const el = e.currentTarget;
+  const appUrl = el.getAttribute('data-app');
+  const webUrl = el.getAttribute('href');
+  if (!appUrl) return; // brak data-app = normalny link
+
+  e.preventDefault();
+
+  // Próbuj otworzyć aplikację
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  let appOpened = false;
+  const timer = setTimeout(() => {
+    // Aplikacja nie otworzyła się - otwórz web
+    if (!appOpened) {
+      window.open(webUrl, '_blank');
+    }
+    document.body.removeChild(iframe);
+  }, 1500);
+
+  // Nasłuchuj czy strona się ukryła (app się otworzyła)
+  document.addEventListener('visibilitychange', function onVisibility() {
+    if (document.hidden) {
+      appOpened = true;
+      clearTimeout(timer);
+      document.body.removeChild(iframe);
+      document.removeEventListener('visibilitychange', onVisibility);
+    }
+  });
+
+  // Spróbuj otworzyć przez iframe (działa na Android)
+  try {
+    iframe.src = appUrl;
+  } catch(e) {}
+
+  // Na iOS użyj window.location
+  setTimeout(() => {
+    try { window.location.href = appUrl; } catch(e) {}
+  }, 100);
+}
+
+// Dodaj handler do wszystkich linków z data-app
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('a[data-app]').forEach(link => {
+    link.addEventListener('click', handleAppLink);
+  });
+});
+
+// Też dla dynamicznie dodanych elementów (tracki ładowane przez JS)
+const appLinkObserver = new MutationObserver(() => {
+  document.querySelectorAll('a[data-app]:not([data-app-init])').forEach(link => {
+    link.setAttribute('data-app-init', '1');
+    link.addEventListener('click', handleAppLink);
+  });
+});
+appLinkObserver.observe(document.body, { childList: true, subtree: true });
