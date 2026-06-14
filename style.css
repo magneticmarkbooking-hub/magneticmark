@@ -1181,6 +1181,7 @@ img {
   align-items: center;
   justify-content: center;
   transition: opacity 0.8s ease, visibility 0.8s ease;
+  overflow: hidden;
 }
 #introOverlay.hidden {
   opacity: 0;
@@ -1285,11 +1286,10 @@ body.locked {
 
 /* ===== INTRO BALLS ===== */
 .intro-balls {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  overflow: hidden;
   pointer-events: none;
-  z-index: 0;
+  z-index: 9001;
 }
 .iball {
   position: absolute;
@@ -1452,10 +1452,10 @@ body.menu-open {
     font-size: 22px;
     letter-spacing: 0.12em;
   }
-  /* Intro balls mniejsze na mobile */
+  /* Intro balls na mobile */
   .ring-2, .ring-3 { display: none; }
-  .ring-1 { width: 200px; height: 200px; }
-  .iball { opacity: 0.2; }
+  .ring-1 { width: 180px; height: 180px; }
+  .iball { opacity: 0.5 !important; display: block !important; }
 }
 
 /* ===== HAMBURGER X ANIMATION ===== */
@@ -1858,6 +1858,6 @@ body.menu-open {
 /* ===== HERO IMAGE MOBILE POSITION ===== */
 @media (max-width: 768px) {
   .hero-img {
-    object-position: 49% 20%;
+    object-position: 48% 10%;
   }
 }
