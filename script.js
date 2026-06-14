@@ -32,14 +32,28 @@ const navLinks = document.getElementById('navLinks');
 hamburger.addEventListener('click', () => {
   const isOpen = navLinks.classList.toggle('open');
   document.body.classList.toggle('menu-open', isOpen);
-  // Animacja hamburgera
-  hamburger.classList.toggle('active', isOpen);
+  hamburger.setAttribute('aria-expanded', isOpen);
+  // Zmień ikonę na X gdy otwarte, z powrotem na ≡ gdy zamknięte
+  const spans = hamburger.querySelectorAll('span');
+  if (isOpen) {
+    spans[0].style.transform = 'translateY(7px) rotate(45deg)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'translateY(-7px) rotate(-45deg)';
+  } else {
+    spans[0].style.transform = '';
+    spans[1].style.opacity = '';
+    spans[2].style.transform = '';
+  }
 });
 navLinks.querySelectorAll('a').forEach(a => {
   a.addEventListener('click', () => {
     navLinks.classList.remove('open');
     document.body.classList.remove('menu-open');
-    hamburger.classList.remove('active');
+    hamburger.setAttribute('aria-expanded', false);
+    hamburger.querySelectorAll('span').forEach(s => {
+      s.style.transform = '';
+      s.style.opacity = '';
+    });
   });
 });
 
@@ -191,22 +205,37 @@ document.addEventListener('DOMContentLoaded', () => {
   loadEvents();
 });
 
-// ===== LAZY LOAD IMAGES =====
-const imgObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      const img = e.target;
-      img.addEventListener('load', () => img.classList.add('loaded'));
-      img.addEventListener('error', () => img.classList.add('loaded'));
-      if (img.complete) img.classList.add('loaded');
-      imgObserver.unobserve(img);
+// ===== GALLERY BLUR PLACEHOLDER + LAZY LOAD =====
+function initGallery() {
+  document.querySelectorAll('.gallery-item img').forEach(img => {
+    // Dodaj blur podczas ładowania
+    img.style.filter = 'blur(8px)';
+    img.style.transform = 'scale(1.02)';
+    img.style.transition = 'filter 0.5s ease, transform 0.5s ease, opacity 0.4s ease';
+
+    function onLoad() {
+      img.style.filter = '';
+      img.style.transform = '';
+      img.classList.add('loaded');
+    }
+
+    if (img.complete && img.naturalWidth > 0) {
+      onLoad();
+    } else {
+      img.addEventListener('load', onLoad, { once: true });
+      img.addEventListener('error', () => {
+        img.style.filter = '';
+        img.style.transform = '';
+      }, { once: true });
     }
   });
-}, { rootMargin: '200px' });
+}
 
-document.querySelectorAll('.gallery-item img').forEach(img => {
-  imgObserver.observe(img);
-});
+// Uruchom od razu - nie używaj IntersectionObserver dla galerii
+// bo to powoduje ponowne ładowanie przy scrollu
+document.addEventListener('DOMContentLoaded', initGallery);
+// Też po załadowaniu tracków (dynamiczne elementy)
+setTimeout(initGallery, 1000);
 
 // ===== LIGHTBOX =====
 function openLightbox(src) {
@@ -257,6 +286,7 @@ function enterSite() {
 
   document.body.classList.remove('locked');
   overlay.classList.add('hidden');
+  setTimeout(startCounters, 800);
 
   if (audio) {
     audio.volume = 0;
@@ -352,20 +382,25 @@ function animateCounter(el, target, suffix, duration) {
   requestAnimationFrame(update);
 }
 
-// Obserwuj hero stats i uruchom gdy widoczne
+// Uruchom liczniki po wejściu na stronę (po kliknięciu ENTER)
+// i też gdy hero stats wchodzi w viewport
+let countersStarted = false;
+function startCounters() {
+  if (countersStarted) return;
+  countersStarted = true;
+  const nums = document.querySelectorAll('.stat-num[data-target]');
+  nums.forEach(el => {
+    const target = parseInt(el.getAttribute('data-target'));
+    const suffix = el.getAttribute('data-suffix') || '';
+    animateCounter(el, target, suffix, 2200);
+  });
+}
+
 const statsObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => {
-    if (e.isIntersecting) {
-      const nums = document.querySelectorAll('.stat-num[data-target]');
-      nums.forEach(el => {
-        const target = parseInt(el.getAttribute('data-target'));
-        const suffix = el.getAttribute('data-suffix') || '';
-        animateCounter(el, target, suffix, 2000);
-      });
-      statsObserver.disconnect();
-    }
+    if (e.isIntersecting) startCounters();
   });
-}, { threshold: 0.5 });
+}, { threshold: 0.3 });
 
 const heroStats = document.querySelector('.hero-stats');
 if (heroStats) statsObserver.observe(heroStats);

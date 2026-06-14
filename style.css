@@ -1455,3 +1455,63 @@ body.menu-open {
   .ring-1 { width: 200px; height: 200px; }
   .iball { opacity: 0.2; }
 }
+
+/* ===== HAMBURGER X ANIMATION ===== */
+.hamburger span {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* ===== AUDIO CONTROLLER MOBILE - górny pasek ===== */
+@media (max-width: 768px) {
+  #audioCtrl {
+    bottom: auto;
+    top: calc(var(--nav-h) + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    padding: 6px 14px 6px 10px;
+    gap: 8px;
+  }
+  #volumeSlider {
+    width: 80px;
+  }
+}
+
+/* ===== GALLERY BLUR LOADING ===== */
+.gallery-item img {
+  opacity: 1 !important;
+  will-change: filter;
+}
+.gallery-item img.loaded {
+  filter: none !important;
+  transform: none !important;
+}
+
+/* ===== GALLERY - zapobiegaj ponownemu ładowaniu ===== */
+.gallery-item {
+  contain: layout style;
+}
+.gallery-item img {
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 400px;
+}
+
+/* ===== MOBILE MENU - navbar zawsze na wierzchu ===== */
+@media (max-width: 768px) {
+  #navbar {
+    z-index: 1000;
+  }
+  .nav-links {
+    z-index: 999;
+    padding-top: calc(var(--nav-h) + 2rem);
+  }
+  /* Hamburger zawsze widoczny nad menu */
+  .hamburger {
+    z-index: 1001;
+    position: relative;
+  }
+  .lang-toggle {
+    z-index: 1001;
+    position: relative;
+  }
+}
