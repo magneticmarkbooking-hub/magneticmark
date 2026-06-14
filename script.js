@@ -30,10 +30,17 @@ window.addEventListener('scroll', () => {
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 hamburger.addEventListener('click', () => {
-  navLinks.classList.toggle('open');
+  const isOpen = navLinks.classList.toggle('open');
+  document.body.classList.toggle('menu-open', isOpen);
+  // Animacja hamburgera
+  hamburger.classList.toggle('active', isOpen);
 });
 navLinks.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => navLinks.classList.remove('open'));
+  a.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+    document.body.classList.remove('menu-open');
+    hamburger.classList.remove('active');
+  });
 });
 
 // ===== SMOOTH SCROLL =====
@@ -246,26 +253,58 @@ document.querySelectorAll('.gallery-item').forEach(item => {
 function enterSite() {
   const overlay = document.getElementById('introOverlay');
   const audio = document.getElementById('bgAudio');
+  const ctrl = document.getElementById('audioCtrl');
 
-  // Odblokuj scroll
   document.body.classList.remove('locked');
-
-  // Fade out overlay
   overlay.classList.add('hidden');
 
-  // Odtwórz muzykę
   if (audio) {
     audio.volume = 0;
     audio.play().then(() => {
-      // Fade in audio
       let vol = 0;
       const fadeIn = setInterval(() => {
         vol = Math.min(vol + 0.02, 0.6);
         audio.volume = vol;
+        document.getElementById('volumeSlider').value = Math.round(vol * 100);
         if (vol >= 0.6) clearInterval(fadeIn);
       }, 80);
-    }).catch(e => console.log('Audio blocked:', e));
+      if (ctrl) ctrl.style.display = 'flex';
+    }).catch(e => {
+      console.log('Audio blocked:', e);
+      if (ctrl) ctrl.style.display = 'flex';
+    });
   }
+}
+
+// ===== AUDIO CONTROLS =====
+let isMuted = false;
+let lastVolume = 0.6;
+
+function toggleMute() {
+  const audio = document.getElementById('bgAudio');
+  const iconSound = document.getElementById('iconSound');
+  const iconMute = document.getElementById('iconMute');
+  const slider = document.getElementById('volumeSlider');
+  if (!audio) return;
+  isMuted = !isMuted;
+  audio.muted = isMuted;
+  iconSound.style.display = isMuted ? 'none' : 'block';
+  iconMute.style.display = isMuted ? 'block' : 'none';
+  slider.value = isMuted ? 0 : Math.round(lastVolume * 100);
+}
+
+function setVolume(val) {
+  const audio = document.getElementById('bgAudio');
+  const iconSound = document.getElementById('iconSound');
+  const iconMute = document.getElementById('iconMute');
+  if (!audio) return;
+  const v = val / 100;
+  audio.volume = v;
+  lastVolume = v > 0 ? v : lastVolume;
+  isMuted = v === 0;
+  audio.muted = isMuted;
+  iconSound.style.display = isMuted ? 'none' : 'block';
+  iconMute.style.display = isMuted ? 'block' : 'none';
 }
 
 // Init overlay
@@ -280,3 +319,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// ===== ANIMOWANE LICZNIKI =====
+function animateCounter(el, target, suffix, duration) {
+  const start = 0;
+  const startTime = performance.now();
+
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Easing - zwalnia pod koniec
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(eased * target);
+
+    // Formatuj liczbę
+    let display;
+    if (target >= 1000000) {
+      display = (current / 1000000).toFixed(current >= target ? 0 : 1) + 'M';
+    } else if (target >= 1000) {
+      display = (current / 1000).toFixed(current >= target ? 0 : 0) + 'K';
+    } else {
+      display = current;
+    }
+    el.textContent = display + suffix;
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = el.getAttribute('data-final');
+    }
+  }
+  requestAnimationFrame(update);
+}
+
+// Obserwuj hero stats i uruchom gdy widoczne
+const statsObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const nums = document.querySelectorAll('.stat-num[data-target]');
+      nums.forEach(el => {
+        const target = parseInt(el.getAttribute('data-target'));
+        const suffix = el.getAttribute('data-suffix') || '';
+        animateCounter(el, target, suffix, 2000);
+      });
+      statsObserver.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+
+const heroStats = document.querySelector('.hero-stats');
+if (heroStats) statsObserver.observe(heroStats);

@@ -101,14 +101,33 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 
 <!-- INTRO OVERLAY -->
 <div id="introOverlay">
+  <!-- Pływające kulki w tle -->
+  <div class="intro-balls">
+    <div class="iball iball-1"></div>
+    <div class="iball iball-2"></div>
+    <div class="iball iball-3"></div>
+    <div class="iball iball-4"></div>
+    <div class="iball iball-5"></div>
+    <div class="iball iball-6"></div>
+    <div class="iball iball-7"></div>
+    <div class="iball iball-8"></div>
+    <div class="iball iball-9"></div>
+    <div class="iball iball-10"></div>
+    <div class="iball iball-11"></div>
+    <div class="iball iball-12"></div>
+  </div>
   <div class="intro-inner">
     <img src="images/logo-white.png" alt="MagneticMark" class="intro-logo">
-    <div class="intro-pulse"></div>
+    <p class="intro-welcome" data-pl="WELCOME TO MY WORLD" data-en="WELCOME TO MY WORLD">WELCOME TO MY WORLD</p>
+    <div class="intro-rings">
+      <div class="intro-ring ring-1"></div>
+      <div class="intro-ring ring-2"></div>
+      <div class="intro-ring ring-3"></div>
+    </div>
     <button id="enterBtn" onclick="enterSite()">
       <span class="enter-text" data-pl="WEJDŹ" data-en="ENTER">WEJDŹ</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
-    <p class="intro-sub" data-pl="Big Room · Hardstyle · Peak Time Techno" data-en="Big Room · Hardstyle · Peak Time Techno">Big Room · Hardstyle · Peak Time Techno</p>
   </div>
 </div>
 
@@ -128,7 +147,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     </ul>
     <div class="nav-right">
       <button class="lang-toggle" id="langToggle">EN</button>
-      <button class="hamburger" id="hamburger" aria-label="Menu">
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -149,12 +168,12 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     <p class="hero-sub" data-pl="Big Room · Hardstyle · Peak Time Techno" data-en="Big Room · Hardstyle · Peak Time Techno">Big Room · Hardstyle · Peak Time Techno</p>
     <div class="hero-stats">
       <div class="stat">
-        <span class="stat-num">500K+</span>
+        <span class="stat-num" data-target="500000" data-suffix="+" data-final="500K+">500K+</span>
         <span class="stat-label" data-pl="Słuchaczy miesięcznie" data-en="Monthly listeners">Słuchaczy miesięcznie</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
-        <span class="stat-num">15M+</span>
+        <span class="stat-num" data-target="15000000" data-suffix="+" data-final="15M+">15M+</span>
         <span class="stat-label" data-pl="Odtworzeń" data-en="Total streams">Odtworzeń</span>
       </div>
       <div class="stat-divider"></div>
@@ -358,6 +377,15 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
+
+<!-- AUDIO CONTROLLER -->
+<div id="audioCtrl" style="display:none;">
+  <button id="muteBtn" onclick="toggleMute()" aria-label="Toggle mute">
+    <svg id="iconSound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    <svg id="iconMute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+  </button>
+  <input type="range" id="volumeSlider" min="0" max="100" value="60" oninput="setVolume(this.value)" aria-label="Volume">
+</div>
 <script src="script.js"></script>
 </body>
 </html>
