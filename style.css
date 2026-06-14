@@ -1856,6 +1856,6 @@ body.menu-open {
 /* ===== HERO IMAGE MOBILE POSITION ===== */
 @media (max-width: 768px) {
   .hero-img {
-    object-position: 40% 20%;
+    object-position: 50% 20%;
   }
 }
