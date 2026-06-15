@@ -546,3 +546,78 @@ const appLinkObserver = new MutationObserver(() => {
   });
 });
 appLinkObserver.observe(document.body, { childList: true, subtree: true });
+
+// ===== META PIXEL EVENTS =====
+
+// ViewContent – wszystkie linki muzyczne i social media
+function setupPixelEvents() {
+
+  // Linki muzyczne i social (ViewContent)
+  const viewContentSelectors = [
+    'a.platform-link',        // Spotify, YouTube, SoundCloud, Beatport, Apple Music
+    'a.social-link',          // Instagram, TikTok, Facebook, YouTube, Spotify, Shazam, Beatport, Apple Music
+    '.track-card',            // kliknięcie w wydanie
+  ];
+
+  viewContentSelectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.addEventListener('click', function() {
+        if (typeof fbq !== 'undefined') {
+          fbq('track', 'ViewContent', {
+            content_name: 'MagneticMark Music & Social',
+            content_category: 'DJ Producer',
+            content_type: 'music_social'
+          });
+        }
+      });
+    });
+  });
+
+  // Contact – pobranie Press Pack
+  const pressPackBtn = document.querySelector('a[href*="dropbox"]');
+  if (pressPackBtn) {
+    pressPackBtn.addEventListener('click', function() {
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'Contact', {
+          content_name: 'Press Pack Download',
+          content_category: 'Booking'
+        });
+      }
+    });
+  }
+
+  // Lead – klik w mailto
+  const mailtoBtn = document.getElementById('mailtoBtn');
+  if (mailtoBtn) {
+    mailtoBtn.addEventListener('click', function(e) {
+      if (e.target.id === 'copyEmailBtn') return; // COPY obsługuje osobno
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'Lead', {
+          content_name: 'Email Click',
+          content_category: 'Booking'
+        });
+      }
+    });
+  }
+}
+
+// Lead + kopiowanie – przycisk COPY
+function copyEmail() {
+  const email = 'management@magneticmarkdj.com';
+  navigator.clipboard.writeText(email).then(() => {
+    const btn = document.getElementById('copyEmailBtn');
+    if (btn) {
+      btn.textContent = '✓ OK';
+      setTimeout(() => { btn.textContent = 'COPY'; }, 2000);
+    }
+    if (typeof fbq !== 'undefined') {
+      fbq('track', 'Lead', {
+        content_name: 'Email Copy',
+        content_category: 'Booking'
+      });
+    }
+  });
+}
+
+// Inicjalizacja po załadowaniu strony
+document.addEventListener('DOMContentLoaded', setupPixelEvents);
