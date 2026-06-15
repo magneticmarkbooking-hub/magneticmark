@@ -300,7 +300,7 @@ async function loadTracks() {
 
       const albumId = t.spotify ? t.spotify.split('/').pop().split('?')[0] : '';
       const spotifyApp = albumId ? `spotify:album:${albumId}` : 'spotify:artist:7qnCu8Un2e3gvg1ELX3HNg';
-      return `<div class="track-card" onclick="handleAppLink({currentTarget:{getAttribute:(a)=>a==='data-app'?'${spotifyApp}':'${spotifyUrl}',href:'${spotifyUrl}'}, preventDefault:()=>{}})" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
+      return `<div class="track-card" onclick="if(typeof fbq!=='undefined'){fbq('track','ViewContent',{content_name:'${t.title}',content_category:'Music Release',content_type:'music_release'});}handleAppLink({currentTarget:{getAttribute:(a)=>a==='data-app'?'${spotifyApp}':'${spotifyUrl}',href:'${spotifyUrl}'}, preventDefault:()=>{}})" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
           <img src="${t.cover || ''}" alt="${t.title}" loading="lazy" decoding="async">
           <div class="track-info-overlay"><div class="track-title">${t.title}</div><div class="track-date">${dateStr}</div></div>
           <div class="track-overlay"><div class="track-platforms">${platforms.join('')}</div></div>
@@ -556,7 +556,7 @@ function setupPixelEvents() {
   const viewContentSelectors = [
     'a.platform-link',        // Spotify, YouTube, SoundCloud, Beatport, Apple Music
     'a.social-link',          // Instagram, TikTok, Facebook, YouTube, Spotify, Shazam, Beatport, Apple Music
-    '.track-card',            // kliknięcie w wydanie
+    // '.track-card' - obsługiwane inline w renderTrack()
   ];
 
   viewContentSelectors.forEach(sel => {
