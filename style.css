@@ -1029,6 +1029,52 @@ img {
   transform: translateY(-2px);
   box-shadow: 0 0 50px rgba(102,0,255,0.5);
 }
+
+/* Press Pack button */
+.contact-presspack-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 32px;
+  background: transparent;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  border: 2px solid var(--accent);
+  margin-bottom: 1.2rem;
+  transition: all var(--transition);
+  box-shadow: 0 0 20px rgba(123,47,255,0.2);
+}
+.contact-presspack-btn:hover {
+  background: rgba(123,47,255,0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(123,47,255,0.45);
+  border-color: var(--accent2);
+}
+.contact-presspack-btn svg {
+  flex-shrink: 0;
+}
+
+/* Overall dopisek pod statystykami */
+.stat-overall {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(170,170,204,0.5);
+  margin-top: 2px;
+}
+
+/* Lightbox strzałki hover */
+#lightboxPrev:hover,
+#lightboxNext:hover {
+  background: rgba(123,47,255,0.6) !important;
+  border-color: rgba(123,47,255,0.9) !important;
+}
 .contact-image img {
   width: 100%;
   height: 500px;
