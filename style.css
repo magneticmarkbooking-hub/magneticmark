@@ -1900,3 +1900,115 @@ body.menu-open {
   #lightboxNext { right: 6px !important; }
   #lightboxWrap { max-width: 96vw !important; }
 }
+
+/* ===== EMAIL POPUP ===== */
+.email-popup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.email-popup.open {
+  display: flex;
+}
+.email-popup-inner {
+  background: linear-gradient(135deg,#0a0015 0%,#1a0035 100%);
+  border: 1px solid rgba(123,47,255,0.4);
+  border-radius: 8px;
+  max-width: 420px;
+  width: 100%;
+  padding: 40px 32px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 0 60px rgba(123,47,255,0.3);
+}
+.email-popup-inner h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.email-popup-inner p {
+  color: rgba(170,170,204,0.7);
+  font-size: 14px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.email-popup-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.email-popup-row input {
+  flex: 1;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(123,47,255,0.4);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+.email-popup-row input:focus {
+  border-color: rgba(123,47,255,0.8);
+}
+.email-popup-row button {
+  padding: 13px 20px;
+  background: var(--gradient);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+.email-popup-row button:hover { opacity: 0.85; }
+.email-popup-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.email-popup-close:hover { color: #fff; }
+.email-popup-msg {
+  font-size: 12px;
+  color: rgba(170,170,204,0.5);
+  min-height: 16px;
+}
+.email-popup-fine {
+  font-size: 11px;
+  color: rgba(170,170,204,0.3);
+  margin-top: 12px;
+}
+@media (max-width: 480px) {
+  .email-popup-inner {
+    padding: 32px 20px;
+  }
+  .email-popup-row {
+    flex-direction: column;
+  }
+  .email-popup-row button {
+    width: 100%;
+  }
+}

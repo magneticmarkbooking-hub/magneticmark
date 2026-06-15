@@ -300,7 +300,7 @@ async function loadTracks() {
 
       const albumId = t.spotify ? t.spotify.split('/').pop().split('?')[0] : '';
       const spotifyApp = albumId ? `spotify:album:${albumId}` : 'spotify:artist:7qnCu8Un2e3gvg1ELX3HNg';
-      return `<div class="track-card" onclick="if(typeof fbq!=='undefined'){fbq('track','ViewContent',{content_name:'${t.title}',content_category:'Music Release',content_type:'music_release'});}triggerPopupOnViewContent();handleAppLink({currentTarget:{getAttribute:(a)=>a==='data-app'?'${spotifyApp}':'${spotifyUrl}',href:'${spotifyUrl}'}, preventDefault:()=>{}})" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
+      return `<div class="track-card" onclick="trackCardClick('${spotifyUrl}','${spotifyApp}','${t.title.replace(/'/g,"\'")}')" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
           <img src="${t.cover || ''}" alt="${t.title}" loading="lazy" decoding="async">
           <div class="track-info-overlay"><div class="track-title">${t.title}</div><div class="track-date">${dateStr}</div></div>
           <div class="track-overlay"><div class="track-platforms">${platforms.join('')}</div></div>
@@ -488,6 +488,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== APP DEEP LINK FALLBACK =====
 // Próbuje otworzyć aplikację, jeśli nie ma - otwiera web
+function trackCardClick(webUrl, appUrl, title) {
+  // Pixel
+  if (typeof fbq !== 'undefined') {
+    fbq('track', 'ViewContent', {
+      content_name: title,
+      content_category: 'Music Release',
+      content_type: 'music_release'
+    });
+  }
+  // Popup trigger
+  triggerPopupOnViewContent();
+  // Przekierowanie
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  if (isIOS || isAndroid) {
+    let fallbackTimer = setTimeout(() => { window.open(webUrl, '_blank'); }, 1200);
+    document.addEventListener('visibilitychange', function onHide() {
+      if (document.hidden) { clearTimeout(fallbackTimer); }
+      document.removeEventListener('visibilitychange', onHide);
+    }, { once: true });
+    window.location.href = appUrl;
+  } else {
+    window.open(webUrl, '_blank');
+  }
+}
+
 function handleAppLink(e) {
   const el = e.currentTarget;
   const appUrl = el.getAttribute('data-app');
@@ -623,13 +649,18 @@ function showEmailPopup() {
   if (popupShown || localStorage.getItem('mm_popup_closed')) return;
   const popup = document.getElementById('emailPopup');
   if (!popup) return;
-  popup.style.display = 'flex';
+  popup.classList.add('open');
   popupShown = true;
+  // Focus na input
+  setTimeout(() => {
+    const input = document.getElementById('popupEmail');
+    if (input) input.focus();
+  }, 100);
 }
 
 function closeEmailPopup() {
   const popup = document.getElementById('emailPopup');
-  if (popup) popup.style.display = 'none';
+  if (popup) popup.classList.remove('open');
   localStorage.setItem('mm_popup_closed', '1');
 }
 
