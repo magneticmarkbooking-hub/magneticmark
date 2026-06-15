@@ -300,7 +300,7 @@ async function loadTracks() {
 
       const albumId = t.spotify ? t.spotify.split('/').pop().split('?')[0] : '';
       const spotifyApp = albumId ? `spotify:album:${albumId}` : 'spotify:artist:7qnCu8Un2e3gvg1ELX3HNg';
-      return `<div class="track-card" onclick="trackCardClick('${spotifyUrl}','${spotifyApp}','${t.title.replace(/'/g,"\'")}')" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
+      return `<div class="track-card" onclick="trackCardClick(this)" data-web="${spotifyUrl}" data-app="${spotifyApp}" data-title="${t.title.replace(/"/g,'&quot;')}" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
           <img src="${t.cover || ''}" alt="${t.title}" loading="lazy" decoding="async">
           <div class="track-info-overlay"><div class="track-title">${t.title}</div><div class="track-date">${dateStr}</div></div>
           <div class="track-overlay"><div class="track-platforms">${platforms.join('')}</div></div>
@@ -488,7 +488,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== APP DEEP LINK FALLBACK =====
 // Próbuje otworzyć aplikację, jeśli nie ma - otwiera web
-function trackCardClick(webUrl, appUrl, title) {
+function trackCardClick(el) {
+  const webUrl = el.dataset.web;
+  const appUrl = el.dataset.app;
+  const title  = el.dataset.title;
   // Pixel
   if (typeof fbq !== 'undefined') {
     fbq('track', 'ViewContent', {
@@ -726,8 +729,16 @@ setInterval(() => { timeOnPage++; }, 1000);
 function triggerPopupOnViewContent() {
   if (timeOnPage >= 3 && !popupShown && !localStorage.getItem('mm_popup_closed')) {
     clearTimeout(popupTimer);
-    setTimeout(showEmailPopup, 1500); // małe opóźnienie po kliknięciu
+    setTimeout(showEmailPopup, 1500);
   }
 }
 
-document.addEventListener('DOMContentLoaded', initEmailPopup);
+// Init - używamy load zamiast DOMContentLoaded żeby mieć pewność że DOM jest gotowy
+window.addEventListener('load', initEmailPopup);
+
+// Debug helper - wpisz w konsoli: resetPopup() żeby wyczyścić localStorage i przetestować
+window.resetPopup = function() {
+  localStorage.removeItem('mm_popup_closed');
+  popupShown = false;
+  console.log('Popup reset - pojawi się za 20s lub po kliknięciu w wydanie');
+};

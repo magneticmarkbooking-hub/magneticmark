@@ -1025,23 +1025,39 @@ img {
   line-height: 1.6;
 }
 .contact-email-btn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 12px;
-  padding: 18px 32px;
+  padding: 18px 24px;
   background: var(--gradient);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   border-radius: 4px;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.2rem;
   transition: all var(--transition);
   box-shadow: 0 0 30px rgba(102,0,255,0.3);
+  width: 100%;
+  box-sizing: border-box;
   word-break: break-all;
 }
 .contact-email-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 50px rgba(102,0,255,0.5);
+}
+.contact-email-btn svg {
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .contact-email-btn {
+    font-size: 13px;
+    padding: 15px 16px;
+    gap: 10px;
+  }
+  #copyEmailBtn {
+    font-size: 10px !important;
+    padding: 4px 8px !important;
+  }
 }
 .contact-image img {
   width: 100%;
