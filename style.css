@@ -1877,3 +1877,26 @@ body.menu-open {
     object-position: 49.2% 30%;
   }
 }
+
+/* Overall dopisek pod statystykami */
+.stat-overall {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(170,170,204,0.55);
+  margin-top: 1px;
+}
+
+/* Lightbox strzałki hover */
+#lightboxPrev:hover,
+#lightboxNext:hover {
+  background: rgba(123,47,255,0.5) !important;
+}
+
+/* Na mobile strzałki wewnątrz */
+@media (max-width: 600px) {
+  #lightboxPrev { left: 6px !important; }
+  #lightboxNext { right: 6px !important; }
+  #lightboxWrap { max-width: 96vw !important; }
+}
