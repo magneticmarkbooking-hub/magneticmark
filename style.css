@@ -1036,7 +1036,7 @@ img {
   font-size: 8px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.12);
+  color: rgba(170,170,204,0.55);
   margin-top: 1px;
 }
 
@@ -1044,6 +1044,19 @@ img {
 #lightboxPrev:hover,
 #lightboxNext:hover {
   background: rgba(123,47,255,0.5) !important;
+}
+
+/* Na mobile strzałki wewnątrz wrappera, przy samej krawędzi zdjęcia */
+@media (max-width: 600px) {
+  #lightboxPrev {
+    left: 6px !important;
+  }
+  #lightboxNext {
+    right: 6px !important;
+  }
+  #lightboxWrap {
+    max-width: 96vw !important;
+  }
 }
 .contact-image img {
   width: 100%;
