@@ -231,14 +231,12 @@ let lightboxImages = [];
 let lightboxIndex = 0;
 
 function openLightbox(src) {
-  const lb = document.getElementById('lightbox');
-  const img = document.getElementById('lightboxImg');
-
-  // Zbierz wszystkie zdjęcia galerii
   lightboxImages = Array.from(document.querySelectorAll('.gallery-item img')).map(i => i.getAttribute('src'));
   lightboxIndex = lightboxImages.indexOf(src);
   if (lightboxIndex === -1) { lightboxImages = [src]; lightboxIndex = 0; }
 
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
   img.src = src;
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -247,8 +245,8 @@ function openLightbox(src) {
 
 function updateLightboxCounter() {
   const counter = document.getElementById('lightboxCounter');
-  if (counter && lightboxImages.length > 1) {
-    counter.textContent = `${lightboxIndex + 1} / ${lightboxImages.length}`;
+  if (counter) {
+    counter.textContent = lightboxImages.length > 1 ? `${lightboxIndex + 1} / ${lightboxImages.length}` : '';
   }
 }
 
@@ -256,16 +254,13 @@ function lightboxNav(dir) {
   if (!lightboxImages.length) return;
   lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
   const img = document.getElementById('lightboxImg');
-  // Płynne przejście
   img.style.opacity = '0';
-  img.style.transition = 'opacity 0.18s ease';
+  img.style.transition = 'opacity 0.15s ease';
   setTimeout(() => {
     img.src = lightboxImages[lightboxIndex];
-    img.onload = () => { img.style.opacity = '1'; };
-    // fallback jeśli obraz już w cache
-    if (img.complete) img.style.opacity = '1';
+    img.style.opacity = '1';
     updateLightboxCounter();
-  }, 180);
+  }, 150);
 }
 
 function closeLightbox() {
