@@ -300,7 +300,7 @@ async function loadTracks() {
 
       const albumId = t.spotify ? t.spotify.split('/').pop().split('?')[0] : '';
       const spotifyApp = albumId ? `spotify:album:${albumId}` : 'spotify:artist:7qnCu8Un2e3gvg1ELX3HNg';
-      return `<div class="track-card" onclick="if(typeof fbq!=='undefined'){fbq('track','ViewContent',{content_name:'${t.title}',content_category:'Music Release',content_type:'music_release'});}handleAppLink({currentTarget:{getAttribute:(a)=>a==='data-app'?'${spotifyApp}':'${spotifyUrl}',href:'${spotifyUrl}'}, preventDefault:()=>{}})" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
+      return `<div class="track-card" onclick="if(typeof fbq!=='undefined'){fbq('track','ViewContent',{content_name:'${t.title}',content_category:'Music Release',content_type:'music_release'});}triggerPopupOnViewContent();handleAppLink({currentTarget:{getAttribute:(a)=>a==='data-app'?'${spotifyApp}':'${spotifyUrl}',href:'${spotifyUrl}'}, preventDefault:()=>{}})" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
           <img src="${t.cover || ''}" alt="${t.title}" loading="lazy" decoding="async">
           <div class="track-info-overlay"><div class="track-title">${t.title}</div><div class="track-date">${dateStr}</div></div>
           <div class="track-overlay"><div class="track-platforms">${platforms.join('')}</div></div>
@@ -491,43 +491,36 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleAppLink(e) {
   const el = e.currentTarget;
   const appUrl = el.getAttribute('data-app');
-  const webUrl = el.getAttribute('href');
-  if (!appUrl) return; // brak data-app = normalny link
+  const webUrl = el.getAttribute('href') || webUrl;
+  if (!appUrl) return;
 
   e.preventDefault();
 
-  // Próbuj otworzyć aplikację
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  document.body.appendChild(iframe);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
 
-  let appOpened = false;
-  const timer = setTimeout(() => {
-    // Aplikacja nie otworzyła się - otwórz web
-    if (!appOpened) {
+  if (isIOS || isAndroid) {
+    // Mobile: próbuj app, fallback do web po 1.2s
+    let fallbackTimer = setTimeout(() => {
       window.open(webUrl, '_blank');
-    }
-    document.body.removeChild(iframe);
-  }, 1500);
+    }, 1200);
 
-  // Nasłuchuj czy strona się ukryła (app się otworzyła)
-  document.addEventListener('visibilitychange', function onVisibility() {
-    if (document.hidden) {
-      appOpened = true;
-      clearTimeout(timer);
-      document.body.removeChild(iframe);
-      document.removeEventListener('visibilitychange', onVisibility);
-    }
-  });
+    document.addEventListener('visibilitychange', function onHide() {
+      if (document.hidden) {
+        clearTimeout(fallbackTimer);
+        document.removeEventListener('visibilitychange', onHide);
+      }
+    }, { once: true });
 
-  // Spróbuj otworzyć przez iframe (działa na Android)
-  try {
-    iframe.src = appUrl;
-  } catch(e) {}
+    window.location.href = appUrl;
+  } else {
+    // Desktop: otwórz web link bezpośrednio
+    window.open(webUrl, '_blank');
+  }
 
-  // Na iOS użyj window.location
+  // Dummy - zachowaj zgodność ze starym kodem
   setTimeout(() => {
-    try { window.location.href = appUrl; } catch(e) {}
+    try { void(0); } catch(e) {}
   }, 100);
 }
 
@@ -621,3 +614,89 @@ function copyEmail() {
 
 // Inicjalizacja po załadowaniu strony
 document.addEventListener('DOMContentLoaded', setupPixelEvents);
+
+// ===== EMAIL POPUP =====
+let popupShown = false;
+let popupTimer = null;
+
+function showEmailPopup() {
+  if (popupShown || localStorage.getItem('mm_popup_closed')) return;
+  const popup = document.getElementById('emailPopup');
+  if (!popup) return;
+  popup.style.display = 'flex';
+  popupShown = true;
+}
+
+function closeEmailPopup() {
+  const popup = document.getElementById('emailPopup');
+  if (popup) popup.style.display = 'none';
+  localStorage.setItem('mm_popup_closed', '1');
+}
+
+function submitEmailPopup() {
+  const email = document.getElementById('popupEmail').value.trim();
+  const msg = document.getElementById('popupMsg');
+
+  if (!email || !email.includes('@')) {
+    msg.style.color = '#ff4466';
+    msg.textContent = 'Wpisz poprawny adres email.';
+    return;
+  }
+
+  msg.style.color = 'rgba(170,170,204,0.6)';
+  msg.textContent = 'Zapisuję...';
+
+  // Brevo API - podmień YOUR_BREVO_API_KEY i LIST_ID
+  fetch('https://api.brevo.com/v3/contacts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': 'YOUR_BREVO_API_KEY'
+    },
+    body: JSON.stringify({
+      email: email,
+      listIds: [2], // ID listy w Brevo - podmień
+      updateEnabled: true
+    })
+  })
+  .then(res => {
+    if (res.ok || res.status === 204) {
+      msg.style.color = '#44ff88';
+      msg.textContent = '✓ Zapisano! Dzięki 🎺';
+      document.getElementById('popupEmail').value = '';
+      setTimeout(closeEmailPopup, 2000);
+      // Pixel event
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'Lead', {
+          content_name: 'Email Signup',
+          content_category: 'Newsletter'
+        });
+      }
+    } else {
+      throw new Error('API error');
+    }
+  })
+  .catch(() => {
+    msg.style.color = '#ff4466';
+    msg.textContent = 'Coś poszło nie tak. Spróbuj ponownie.';
+  });
+}
+
+// Trigger 1: po 20 sekundach
+function initEmailPopup() {
+  if (localStorage.getItem('mm_popup_closed')) return;
+  popupTimer = setTimeout(showEmailPopup, 20000);
+}
+
+// Trigger 2: po ViewContent (klik w wydanie) - min. 3s na stronie
+let timeOnPage = 0;
+setInterval(() => { timeOnPage++; }, 1000);
+
+function triggerPopupOnViewContent() {
+  if (timeOnPage >= 3 && !popupShown && !localStorage.getItem('mm_popup_closed')) {
+    clearTimeout(popupTimer);
+    setTimeout(showEmailPopup, 1500); // małe opóźnienie po kliknięciu
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initEmailPopup);
