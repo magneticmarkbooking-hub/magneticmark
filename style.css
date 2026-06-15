@@ -36,6 +36,20 @@ body {
   overflow-x: hidden;
 }
 
+/* ===== SCREEN READER ONLY (SEO / Accessibility) ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
 img { max-width: 100%; display: block; }
 a { text-decoration: none; color: inherit; }
 
@@ -1020,7 +1034,7 @@ img {
   font-size: 15px;
   font-weight: 600;
   border-radius: 4px;
-  margin-bottom: 1.2rem;
+  margin-bottom: 2.5rem;
   transition: all var(--transition);
   box-shadow: 0 0 30px rgba(102,0,255,0.3);
   word-break: break-all;
@@ -1028,35 +1042,6 @@ img {
 .contact-email-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 50px rgba(102,0,255,0.5);
-}
-
-/* Overall - ultra subtelny dopisek */
-.stat-overall {
-  display: block;
-  font-size: 8px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(170,170,204,0.55);
-  margin-top: 1px;
-}
-
-/* Lightbox strzałki hover */
-#lightboxPrev:hover,
-#lightboxNext:hover {
-  background: rgba(123,47,255,0.5) !important;
-}
-
-/* Na mobile strzałki wewnątrz wrappera, przy samej krawędzi zdjęcia */
-@media (max-width: 600px) {
-  #lightboxPrev {
-    left: 6px !important;
-  }
-  #lightboxNext {
-    right: 6px !important;
-  }
-  #lightboxWrap {
-    max-width: 96vw !important;
-  }
 }
 .contact-image img {
   width: 100%;

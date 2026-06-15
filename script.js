@@ -227,40 +227,12 @@ function initGallery() {
 }
 
 // ===== GALLERY LIGHTBOX =====
-let lightboxImages = [];
-let lightboxIndex = 0;
-
 function openLightbox(src) {
-  lightboxImages = Array.from(document.querySelectorAll('.gallery-item img')).map(i => i.getAttribute('src'));
-  lightboxIndex = lightboxImages.indexOf(src);
-  if (lightboxIndex === -1) { lightboxImages = [src]; lightboxIndex = 0; }
-
   const lb = document.getElementById('lightbox');
   const img = document.getElementById('lightboxImg');
   img.src = src;
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
-  updateLightboxCounter();
-}
-
-function updateLightboxCounter() {
-  const counter = document.getElementById('lightboxCounter');
-  if (counter) {
-    counter.textContent = lightboxImages.length > 1 ? `${lightboxIndex + 1} / ${lightboxImages.length}` : '';
-  }
-}
-
-function lightboxNav(dir) {
-  if (!lightboxImages.length) return;
-  lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
-  const img = document.getElementById('lightboxImg');
-  img.style.opacity = '0';
-  img.style.transition = 'opacity 0.15s ease';
-  setTimeout(() => {
-    img.src = lightboxImages[lightboxIndex];
-    img.style.opacity = '1';
-    updateLightboxCounter();
-  }, 150);
 }
 
 function closeLightbox() {
@@ -269,11 +241,7 @@ function closeLightbox() {
 }
 
 document.addEventListener('keydown', e => {
-  const lb = document.getElementById('lightbox');
-  if (!lb || !lb.classList.contains('open')) return;
   if (e.key === 'Escape') closeLightbox();
-  if (e.key === 'ArrowLeft') lightboxNav(-1);
-  if (e.key === 'ArrowRight') lightboxNav(1);
 });
 
 function setupGalleryClicks() {
@@ -301,9 +269,7 @@ async function loadTracks() {
       if (t.youtube) platforms.push(`<a href="${t.youtube}" data-app="vnd.youtube://${t.youtube.replace('https://','').replace('youtu.be/','youtube.com/watch?v=')}" target="_blank" rel="noopener" aria-label="YouTube" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>`);
       if (t.beatport) platforms.push(`<a href="${t.beatport}" target="_blank" rel="noopener" aria-label="Beatport" onclick="event.stopPropagation()"><svg viewBox="550 415 220 200" fill="white"><path d="M715.4,539.8c0,28.1-22.5,50.8-51.1,50.8c-28.5,0-50.8-22.2-50.8-50.8c0-13.5,5.1-25.4,13.3-34.4l-34.5,34.4l-18.1-18l38.9-38.4c5.3-5.3,8-12.1,8-19.6v-48.1h25.5v48.1c0,14.8-5.3,27.3-15.5,37.5l-1.1,1.1c9-8.2,21.3-13.2,34.4-13.2C693.3,489.3,715.4,512.1,715.4,539.8z M692.3,539.8c0-15.1-12.6-27.3-28-27.3c-15.4,0-27.7,12.8-27.7,27.3c0,14.5,12.3,27.6,27.7,27.6C679.8,567.4,692.3,554.4,692.3,539.8z"/></svg></a>`);
 
-      const albumId = t.spotify ? t.spotify.split('/').pop().split('?')[0] : '';
-      const spotifyApp = albumId ? `spotify:album:${albumId}` : 'spotify:artist:7qnCu8Un2e3gvg1ELX3HNg';
-      return `<div class="track-card" onclick="handleAppLink({currentTarget:{getAttribute:(a)=>a==='data-app'?'${spotifyApp}':'${spotifyUrl}',href:'${spotifyUrl}'}, preventDefault:()=>{}})" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
+      return `<div class="track-card" onclick="handleAppLink({currentTarget:{getAttribute:(a)=>a==='data-app'?'spotify:artist:7qnCu8Un2e3gvg1ELX3HNg':'${spotifyUrl}',href:'${spotifyUrl}'}, preventDefault:()=>{}})" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
           <img src="${t.cover || ''}" alt="${t.title}" loading="lazy" decoding="async">
           <div class="track-info-overlay"><div class="track-title">${t.title}</div><div class="track-date">${dateStr}</div></div>
           <div class="track-overlay"><div class="track-platforms">${platforms.join('')}</div></div>
