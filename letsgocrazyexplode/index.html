@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MagneticMark</title>
+<meta name="description" content="Nowe wydanie MagneticMark - słuchaj teraz na Spotify.">
+<meta name="robots" content="noindex, nofollow">
+
+<!-- Open Graph (podgląd linku na Facebooku/Instagramie) -->
+<meta property="og:type" content="music.song">
+<meta property="og:title" content="MagneticMark">
+<meta property="og:description" content="Nowe wydanie MagneticMark - słuchaj teraz na Spotify.">
+<meta property="og:image" content="">
+<meta property="og:site_name" content="MagneticMark">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="release.css">
+
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '27127010080316320');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel -->
+</head>
+<body>
+
+<div class="ambient-glow"></div>
+
+<main class="release-card">
+  <div class="cover-wrap">
+    <div class="cover-glow"></div>
+    <div class="cover-frame">
+      <img id="coverImg" class="cover-img" src="" alt="">
+      <div class="cover-sheen"></div>
+    </div>
+  </div>
+
+  <p id="eyebrowText" class="eyebrow"></p>
+  <h1 id="titleText" class="release-title"></h1>
+  <p class="release-artist">MagneticMark</p>
+
+  <a id="spotifyBtn" href="#" class="spotify-btn" aria-label="Słuchaj na Spotify">
+    <svg class="spotify-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 4.32-1.32 9.66-.66 13.32 1.621.42.18.6.84.42 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.18-1.38-.78-.18-.6.18-1.2.78-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.299.421-1.02.599-1.559.299z"/>
+    </svg>
+    <span>Słuchaj na Spotify</span>
+  </a>
+  <p class="cta-note">Dostępne też na Apple Music, YouTube i SoundCloud</p>
+
+  <a href="https://magneticmarkdj.com" class="brand-mark">MagneticMark</a>
+</main>
+
+<!-- Custom cursor - identyczny jak na magneticmarkdj.com -->
+<canvas id="cursorTrailCanvas"></canvas>
+<div id="customCursorCore" style="position:fixed;width:19px;height:19px;pointer-events:none;top:0;left:0;z-index:99999;display:none;">
+  <svg viewBox="0 0 24 24" width="100%" height="100%" style="filter:drop-shadow(0 0 4px rgba(123,47,255,0.9)) drop-shadow(0 0 9px rgba(123,47,255,0.5));">
+    <path d="M4 2 L20 13.5 L12 14.5 L9 22 Z" fill="#ffffff" stroke="#7b2fff" stroke-width="1"/>
+  </svg>
+</div>
+
+<script src="release-config.js"></script>
+<script src="release.js"></script>
+</body>
+</html>
