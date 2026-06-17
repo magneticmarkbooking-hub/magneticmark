@@ -811,9 +811,9 @@ function initCustomCursor() {
     points = [];
   }
   function showCursor() {
-    if (cursorVisible) return;
     core.style.display = 'block';
     cursorVisible = true;
+    document.body.classList.add('has-custom-cursor');
   }
   window.__hideCustomCursor = hideCursor;
   window.__showCustomCursor = showCursor;
