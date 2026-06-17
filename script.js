@@ -881,14 +881,20 @@ function wrapIframeWithCursorOverlay(iframe) {
   syncOverlaySize();
   window.addEventListener('resize', syncOverlaySize);
 
-  overlay.addEventListener('click', function() {
-    overlay.style.pointerEvents = 'none';
-    iframe.style.pointerEvents = 'auto';
-    iframe.focus();
-    setTimeout(() => {
-      overlay.style.pointerEvents = 'auto';
-    }, 300);
-  });
+  // Klik: wyłączamy pointer-events na overlay W FAZIE CAPTURE, czyli
+  // zanim zdarzenie mousedown w ogóle "dotknie" overlay - dzięki temu
+  // ten sam, pierwszy klik przechodzi prosto do iframe (bez podwójnego klikania).
+  document.addEventListener('mousedown', function(e) {
+    const rect = overlay.getBoundingClientRect();
+    const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
+                   e.clientY >= rect.top && e.clientY <= rect.bottom;
+    if (inside && overlay.style.pointerEvents !== 'none') {
+      overlay.style.pointerEvents = 'none';
+      setTimeout(() => {
+        overlay.style.pointerEvents = 'auto';
+      }, 500);
+    }
+  }, true); // true = capture phase, wykonuje się PRZED dotarciem do overlay
 
   iframe.insertAdjacentElement('afterend', overlay);
 }
