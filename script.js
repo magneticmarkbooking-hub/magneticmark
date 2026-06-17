@@ -744,24 +744,14 @@ window.resetPopup = function() {
 };
 
 // ===== CUSTOM CURSOR =====
-(function initCustomCursor() {
-  // Wyłącz na urządzeniach dotykowych (telefon/tablet) - tam nie ma sensu
-  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-  if (isTouchDevice) {
-    console.log('Custom cursor: urządzenie dotykowe, pomijam');
-    return;
-  }
-
+function initCustomCursor() {
   const canvas = document.getElementById('cursorTrailCanvas');
   const core = document.getElementById('customCursorCore');
   if (!canvas || !core) {
-    console.warn('Custom cursor: canvas lub core element nie znaleziony w DOM');
     return;
   }
 
-  document.body.classList.add('has-custom-cursor');
   canvas.style.display = 'block';
-  console.log('Custom cursor: zainicjalizowany, klasa has-custom-cursor dodana do body');
 
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
@@ -794,6 +784,7 @@ window.resetPopup = function() {
     if (!cursorVisible) {
       core.style.display = 'block';
       cursorVisible = true;
+      document.body.classList.add('has-custom-cursor');
     }
 
     const tipX = mouseX + TIP_OFFSET_X;
@@ -842,4 +833,10 @@ window.resetPopup = function() {
     requestAnimationFrame(drawTrail);
   }
   drawTrail();
-})();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCustomCursor);
+} else {
+  initCustomCursor();
+}
