@@ -22,24 +22,56 @@
   if (ogImage) ogImage.setAttribute('content', RELEASE.coverRaw || RELEASE.cover);
 })();
 
-// Klik na przycisk: odpalamy NASZ Meta Pixel (27127010080316320) z eventem
-// ViewContent, a potem przechodzimy na stronę Tonden/fanlink. Pixel na tamtej
-// stronie (inny ID, zarządzany przez Tonden) jest całkowicie niezależny -
-// odpali się dodatkowo tam, bez żadnej kolizji z naszym trackingiem tutaj.
+// Klik na przycisk: odpalamy nasze Meta Piksele (główny 27127010080316320
+// i Tonden/fanlink 8169582049794791 - oba zainicjowane w <head>) z eventem
+// ViewContent, JEDNYM wywołaniem fbq (bez podania ID, fbq wysyła event do
+// wszystkich zainicjowanych Pixeli na raz). Potem przechodzimy WPROST na
+// link docelowy (np. Spotify) - bez przystanku na fanlink.tv. Oba Piksele
+// łapią dane (IP, User Agent, fbp, fbc) bezpośrednio tutaj, na tej stronie.
+//
+// Dla bezpieczeństwa dodajemy unikalny eventID - gdybyś kiedyś wrócił do
+// wysyłania ruchu przez fanlink.tv i tam też skonfigurował ten sam eventID
+// dla ViewContent, Meta automatycznie wykryje duplikat i zliczy zdarzenie
+// tylko raz (deduplikacja po stronie Meta).
+//
+// WAŻNE dla jakości dopasowania zdarzeń (Event Match Quality): jeśli ktoś
+// trafia tutaj z reklamy Meta, w URL tej strony jest parametr "fbclid" -
+// to on pozwala Facebookowi dopasować kliknięcie do konkretnej osoby.
+// Doklejamy go (i ewentualne parametry utm_*) do linku docelowego - nie
+// szkodzi nawet jeśli link prowadzi na Spotify, a daje elastyczność, gdyby
+// kiedyś docelowa strona też miała własny tracking.
+function buildForwardedUrl(baseUrl) {
+  const incoming = new URLSearchParams(window.location.search);
+  const keysToForward = ['fbclid', 'gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  const forwarded = new URLSearchParams();
+  keysToForward.forEach((key) => {
+    if (incoming.has(key)) forwarded.set(key, incoming.get(key));
+  });
+  const query = forwarded.toString();
+  if (!query) return baseUrl;
+  return baseUrl + (baseUrl.includes('?') ? '&' : '?') + query;
+}
+
 function handleLinkClick(e) {
   e.preventDefault();
   const el = e.currentTarget;
-  const url = el.dataset.link;
+  const url = buildForwardedUrl(el.dataset.link);
 
   if (typeof fbq !== 'undefined') {
+    const eventId = 'release_' + RELEASE.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_' + Date.now();
     fbq('track', 'ViewContent', {
       content_name: RELEASE.title,
       content_category: 'Music Release',
       content_type: 'music_release'
-    });
+    }, { eventID: eventId });
   }
 
-  window.location.href = url;
+  // Małe opóźnienie, żeby zdarzenie Pixela zdążyło wysłać się do Meta
+  // zanim przeglądarka przejdzie na inną stronę (nawigacja przerywa
+  // trwające żądania sieciowe).
+  setTimeout(() => {
+    window.location.href = url;
+  }, 100);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
