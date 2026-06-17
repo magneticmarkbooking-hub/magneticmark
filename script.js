@@ -815,6 +815,8 @@ function initCustomCursor() {
     core.style.display = 'block';
     cursorVisible = true;
   }
+  window.__hideCustomCursor = hideCursor;
+  window.__showCustomCursor = showCursor;
 
   document.documentElement.addEventListener('mouseleave', hideCursor);
   document.documentElement.addEventListener('mouseenter', showCursor);
@@ -850,67 +852,38 @@ if (document.readyState === 'loading') {
   initCustomCursor();
 }
 
-// ===== IFRAME CURSOR OVERLAY CLICK-THROUGH =====
-// Automatycznie owija KAŻDY iframe na stronie (YouTube, SoundCloud, itp.)
-// przezroczystą nakładką, dzięki której custom kursor jest widoczny nad nim.
-// Na klik nakładka chowa się na chwilę i przepuszcza klik do iframe pod sobą.
-// Działa automatycznie dla nowych iframe dodanych w przyszłości - nie trzeba
-// pamiętać o dopisywaniu nakładki ręcznie w HTML.
-function wrapIframeWithCursorOverlay(iframe) {
-  if (iframe.dataset.cursorOverlayInit) return;
-  iframe.dataset.cursorOverlayInit = '1';
+// ===== CHOWANIE CUSTOM KURSORA NAD IFRAME (YouTube, SoundCloud, itp.) =====
+// Nad filmem/playerem nie da się normalnie śledzić ruchu myszy (to inna domena),
+// więc zamiast próbować to obejść nakładką, po prostu chowamy custom kursor
+// i pokazujemy zwykły systemowy kursor, gdy mysz wjeżdża na obszar iframe.
+// Gdy wyjeżdża - custom kursor wraca. Żadnych nakładek, żadnego ryzyka
+// blokowania kliknięcia - iframe dostaje wszystkie zdarzenia normalnie.
+function attachIframeCursorHandoff(iframe) {
+  if (iframe.dataset.cursorHandoffInit) return;
+  iframe.dataset.cursorHandoffInit = '1';
 
-  const parent = iframe.parentElement;
-  if (!parent) return;
-
-  const parentPosition = getComputedStyle(parent).position;
-  if (parentPosition === 'static') {
-    parent.style.position = 'relative';
-  }
-
-  const overlay = document.createElement('div');
-  overlay.className = 'iframe-cursor-overlay';
-
-  function syncOverlaySize() {
-    overlay.style.position = 'absolute';
-    overlay.style.top = iframe.offsetTop + 'px';
-    overlay.style.left = iframe.offsetLeft + 'px';
-    overlay.style.width = iframe.offsetWidth + 'px';
-    overlay.style.height = iframe.offsetHeight + 'px';
-  }
-  syncOverlaySize();
-  window.addEventListener('resize', syncOverlaySize);
-
-  // Klik: wyłączamy pointer-events na overlay W FAZIE CAPTURE, czyli
-  // zanim zdarzenie mousedown w ogóle "dotknie" overlay - dzięki temu
-  // ten sam, pierwszy klik przechodzi prosto do iframe (bez podwójnego klikania).
-  document.addEventListener('mousedown', function(e) {
-    const rect = overlay.getBoundingClientRect();
-    const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
-                   e.clientY >= rect.top && e.clientY <= rect.bottom;
-    if (inside && overlay.style.pointerEvents !== 'none') {
-      overlay.style.pointerEvents = 'none';
-      setTimeout(() => {
-        overlay.style.pointerEvents = 'auto';
-      }, 500);
-    }
-  }, true); // true = capture phase, wykonuje się PRZED dotarciem do overlay
-
-  iframe.insertAdjacentElement('afterend', overlay);
+  iframe.addEventListener('mouseenter', function() {
+    document.body.classList.add('over-iframe');
+    if (typeof window.__hideCustomCursor === 'function') window.__hideCustomCursor();
+  });
+  iframe.addEventListener('mouseleave', function() {
+    document.body.classList.remove('over-iframe');
+    if (typeof window.__showCustomCursor === 'function') window.__showCustomCursor();
+  });
 }
 
-function initIframeOverlays() {
-  document.querySelectorAll('iframe').forEach(wrapIframeWithCursorOverlay);
+function initIframeCursorHandoff() {
+  document.querySelectorAll('iframe').forEach(attachIframeCursorHandoff);
 }
 
-// Też dla iframe dodanych dynamicznie w przyszłości (np. przez JS po wczytaniu)
-const iframeOverlayObserver = new MutationObserver(() => {
-  document.querySelectorAll('iframe:not([data-cursor-overlay-init])').forEach(wrapIframeWithCursorOverlay);
+// Też dla iframe dodanych dynamicznie w przyszłości (np. nowe filmiki wklejone później)
+const iframeHandoffObserver = new MutationObserver(() => {
+  document.querySelectorAll('iframe:not([data-cursor-handoff-init])').forEach(attachIframeCursorHandoff);
 });
-iframeOverlayObserver.observe(document.body, { childList: true, subtree: true });
+iframeHandoffObserver.observe(document.body, { childList: true, subtree: true });
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initIframeOverlays);
+  document.addEventListener('DOMContentLoaded', initIframeCursorHandoff);
 } else {
-  initIframeOverlays();
+  initIframeCursorHandoff();
 }
