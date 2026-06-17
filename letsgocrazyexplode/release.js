@@ -10,8 +10,7 @@
   document.title = RELEASE.title + ' | MagneticMark';
 
   const spotifyBtn = document.getElementById('spotifyBtn');
-  spotifyBtn.dataset.web = RELEASE.spotifyWeb;
-  spotifyBtn.dataset.app = RELEASE.spotifyApp;
+  spotifyBtn.dataset.link = RELEASE.linkUrl;
 
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) metaDesc.setAttribute('content', RELEASE.description);
@@ -23,11 +22,14 @@
   if (ogImage) ogImage.setAttribute('content', RELEASE.coverRaw || RELEASE.cover);
 })();
 
-function handleSpotifyClick(e) {
+// Klik na przycisk: odpalamy NASZ Meta Pixel (27127010080316320) z eventem
+// ViewContent, a potem przechodzimy na stronę Tonden/fanlink. Pixel na tamtej
+// stronie (inny ID, zarządzany przez Tonden) jest całkowicie niezależny -
+// odpali się dodatkowo tam, bez żadnej kolizji z naszym trackingiem tutaj.
+function handleLinkClick(e) {
   e.preventDefault();
   const el = e.currentTarget;
-  const webUrl = el.dataset.web;
-  const appUrl = el.dataset.app;
+  const url = el.dataset.link;
 
   if (typeof fbq !== 'undefined') {
     fbq('track', 'ViewContent', {
@@ -37,25 +39,11 @@ function handleSpotifyClick(e) {
     });
   }
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isAndroid = /Android/.test(navigator.userAgent);
-
-  if (isIOS || isAndroid) {
-    let fallbackTimer = setTimeout(() => {
-      window.open(webUrl, '_blank');
-    }, 1200);
-    document.addEventListener('visibilitychange', function onHide() {
-      if (document.hidden) { clearTimeout(fallbackTimer); }
-      document.removeEventListener('visibilitychange', onHide);
-    }, { once: true });
-    window.location.href = appUrl;
-  } else {
-    window.open(webUrl, '_blank');
-  }
+  window.location.href = url;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('spotifyBtn').addEventListener('click', handleSpotifyClick);
+  document.getElementById('spotifyBtn').addEventListener('click', handleLinkClick);
 });
 
 // ===== PŁYWAJĄCE KULE ŚWIATŁA W TLE =====

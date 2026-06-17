@@ -264,15 +264,6 @@ body {
   z-index: 1;
 }
 
-.cta-note {
-  margin-top: 20px;
-  font-size: 0.82rem;
-  letter-spacing: 0.02em;
-  color: var(--gray);
-  opacity: 0;
-  animation: fadeInUp 0.8s ease 0.75s both;
-}
-
 .brand-mark {
   margin-top: 44px;
   font-family: var(--font-display);
