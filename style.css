@@ -2028,3 +2028,18 @@ body.menu-open {
     width: 100%;
   }
 }
+
+/* ===== CUSTOM CURSOR ===== */
+@media (hover: hover) and (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+#cursorTrailCanvas, #customCursorCore {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  #cursorTrailCanvas, #customCursorCore {
+    display: block;
+  }
+}

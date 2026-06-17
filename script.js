@@ -742,3 +742,93 @@ window.resetPopup = function() {
   popupShown = false;
   console.log('Popup reset - pojawi się za 20s lub po kliknięciu w wydanie');
 };
+
+// ===== CUSTOM CURSOR =====
+(function initCustomCursor() {
+  // Tylko na desktop z myszką (nie mobile/tablet)
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  const canvas = document.getElementById('cursorTrailCanvas');
+  const core = document.getElementById('customCursorCore');
+  if (!canvas || !core) return;
+
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const TIP_OFFSET_X = 4;
+  const TIP_OFFSET_Y = 2;
+
+  let mouseX = -100, mouseY = -100;
+  let lastX = -100, lastY = -100;
+  let points = [];
+  let cursorVisible = false;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    core.style.left = mouseX + 'px';
+    core.style.top = mouseY + 'px';
+
+    if (!cursorVisible) {
+      core.style.display = 'block';
+      cursorVisible = true;
+    }
+
+    const tipX = mouseX + TIP_OFFSET_X;
+    const tipY = mouseY + TIP_OFFSET_Y;
+
+    const dist = Math.hypot(tipX - lastX, tipY - lastY);
+    const steps = Math.min(Math.max(Math.floor(dist / 4), 1), 12);
+    for (let s = 0; s < steps; s++) {
+      const t = s / steps;
+      points.push({
+        x: lastX + (tipX - lastX) * t,
+        y: lastY + (tipY - lastY) * t,
+        life: 1
+      });
+    }
+    if (points.length > 60) points.splice(0, points.length - 60);
+    lastX = tipX;
+    lastY = tipY;
+  });
+
+  document.addEventListener('mouseleave', () => {
+    core.style.display = 'none';
+    cursorVisible = false;
+  });
+  document.addEventListener('mouseenter', () => {
+    core.style.display = 'block';
+    cursorVisible = true;
+  });
+
+  function drawTrail() {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    for (let i = 0; i < points.length; i++) {
+      const p = points[i];
+      p.life -= 0.05;
+      if (p.life <= 0) continue;
+      const radius = 4 * p.life + 1;
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius * 2.2);
+      grad.addColorStop(0, 'rgba(170,100,255,' + (p.life * 0.55) + ')');
+      grad.addColorStop(1, 'rgba(123,47,255,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius * 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    points = points.filter(p => p.life > 0);
+    requestAnimationFrame(drawTrail);
+  }
+  drawTrail();
+})();
