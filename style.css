@@ -2030,16 +2030,13 @@ body.menu-open {
 }
 
 /* ===== CUSTOM CURSOR ===== */
-@media (hover: hover) and (pointer: fine) {
-  * {
-    cursor: none !important;
-  }
+body.has-custom-cursor,
+body.has-custom-cursor * {
+  cursor: none !important;
 }
-#cursorTrailCanvas, #customCursorCore {
+#cursorTrailCanvas {
   display: none;
 }
-@media (hover: hover) and (pointer: fine) {
-  #cursorTrailCanvas, #customCursorCore {
-    display: block;
-  }
+#customCursorCore {
+  display: none;
 }

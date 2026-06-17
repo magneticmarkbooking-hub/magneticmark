@@ -745,12 +745,23 @@ window.resetPopup = function() {
 
 // ===== CUSTOM CURSOR =====
 (function initCustomCursor() {
-  // Tylko na desktop z myszką (nie mobile/tablet)
-  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  // Wyłącz na urządzeniach dotykowych (telefon/tablet) - tam nie ma sensu
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  if (isTouchDevice) {
+    console.log('Custom cursor: urządzenie dotykowe, pomijam');
+    return;
+  }
 
   const canvas = document.getElementById('cursorTrailCanvas');
   const core = document.getElementById('customCursorCore');
-  if (!canvas || !core) return;
+  if (!canvas || !core) {
+    console.warn('Custom cursor: canvas lub core element nie znaleziony w DOM');
+    return;
+  }
+
+  document.body.classList.add('has-custom-cursor');
+  canvas.style.display = 'block';
+  console.log('Custom cursor: zainicjalizowany, klasa has-custom-cursor dodana do body');
 
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
