@@ -805,13 +805,22 @@ function initCustomCursor() {
     lastY = tipY;
   });
 
-  document.addEventListener('mouseleave', () => {
+  function hideCursor() {
     core.style.display = 'none';
     cursorVisible = false;
-  });
-  document.addEventListener('mouseenter', () => {
+    points = [];
+  }
+  function showCursor() {
+    if (cursorVisible) return;
     core.style.display = 'block';
     cursorVisible = true;
+  }
+
+  document.documentElement.addEventListener('mouseleave', hideCursor);
+  document.documentElement.addEventListener('mouseenter', showCursor);
+  window.addEventListener('blur', hideCursor);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) hideCursor();
   });
 
   function drawTrail() {
