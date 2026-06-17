@@ -849,3 +849,62 @@ if (document.readyState === 'loading') {
 } else {
   initCustomCursor();
 }
+
+// ===== IFRAME CURSOR OVERLAY CLICK-THROUGH =====
+// Automatycznie owija KAŻDY iframe na stronie (YouTube, SoundCloud, itp.)
+// przezroczystą nakładką, dzięki której custom kursor jest widoczny nad nim.
+// Na klik nakładka chowa się na chwilę i przepuszcza klik do iframe pod sobą.
+// Działa automatycznie dla nowych iframe dodanych w przyszłości - nie trzeba
+// pamiętać o dopisywaniu nakładki ręcznie w HTML.
+function wrapIframeWithCursorOverlay(iframe) {
+  if (iframe.dataset.cursorOverlayInit) return;
+  iframe.dataset.cursorOverlayInit = '1';
+
+  const parent = iframe.parentElement;
+  if (!parent) return;
+
+  const parentPosition = getComputedStyle(parent).position;
+  if (parentPosition === 'static') {
+    parent.style.position = 'relative';
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'iframe-cursor-overlay';
+
+  function syncOverlaySize() {
+    overlay.style.position = 'absolute';
+    overlay.style.top = iframe.offsetTop + 'px';
+    overlay.style.left = iframe.offsetLeft + 'px';
+    overlay.style.width = iframe.offsetWidth + 'px';
+    overlay.style.height = iframe.offsetHeight + 'px';
+  }
+  syncOverlaySize();
+  window.addEventListener('resize', syncOverlaySize);
+
+  overlay.addEventListener('click', function() {
+    overlay.style.pointerEvents = 'none';
+    iframe.style.pointerEvents = 'auto';
+    iframe.focus();
+    setTimeout(() => {
+      overlay.style.pointerEvents = 'auto';
+    }, 300);
+  });
+
+  iframe.insertAdjacentElement('afterend', overlay);
+}
+
+function initIframeOverlays() {
+  document.querySelectorAll('iframe').forEach(wrapIframeWithCursorOverlay);
+}
+
+// Też dla iframe dodanych dynamicznie w przyszłości (np. przez JS po wczytaniu)
+const iframeOverlayObserver = new MutationObserver(() => {
+  document.querySelectorAll('iframe:not([data-cursor-overlay-init])').forEach(wrapIframeWithCursorOverlay);
+});
+iframeOverlayObserver.observe(document.body, { childList: true, subtree: true });
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initIframeOverlays);
+} else {
+  initIframeOverlays();
+}
