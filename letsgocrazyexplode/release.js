@@ -50,19 +50,28 @@ document.addEventListener('DOMContentLoaded', function() {
 function initBgOrbs() {
   const colors = ['rgba(123,47,255,0.5)', 'rgba(0,136,255,0.45)', 'rgba(255,215,0,0.3)'];
   const container = document.body;
-  for (let i = 0; i < 5; i++) {
+  // Pozycje w narożnikach/bokach ekranu - centralny pas (gdzie jest karta)
+  // zostaje wolny, żeby kuleczki nie nakładały się na tekst i przycisk.
+  const zones = [
+    { left: [2, 18],  top: [4, 26] },
+    { left: [78, 96], top: [4, 26] },
+    { left: [2, 16],  top: [62, 86] },
+    { left: [80, 96], top: [60, 84] },
+    { left: [4, 20],  top: [38, 52] }
+  ];
+  zones.forEach((zone, i) => {
     const orb = document.createElement('div');
     orb.className = 'bg-orb';
-    const size = 60 + Math.random() * 140;
+    const size = 70 + Math.random() * 150;
     orb.style.width = size + 'px';
     orb.style.height = size + 'px';
-    orb.style.left = Math.random() * 100 + 'vw';
-    orb.style.top = Math.random() * 100 + 'vh';
+    orb.style.left = (zone.left[0] + Math.random() * (zone.left[1] - zone.left[0])) + 'vw';
+    orb.style.top = (zone.top[0] + Math.random() * (zone.top[1] - zone.top[0])) + 'vh';
     orb.style.background = colors[i % colors.length];
-    orb.style.animationDuration = (10 + Math.random() * 10) + 's';
+    orb.style.animationDuration = (9 + Math.random() * 8) + 's';
     orb.style.animationDelay = (Math.random() * -10) + 's';
     container.appendChild(orb);
-  }
+  });
 }
 
 // ===== PARALLAX GLOW - delikatna reakcja na ruch myszy (tylko desktop fine pointer) =====
