@@ -2028,18 +2028,3 @@ body.menu-open {
     width: 100%;
   }
 }
-
-/* ===== CUSTOM CURSOR ===== */
-body.has-custom-cursor,
-body.has-custom-cursor * {
-  cursor: none !important;
-}
-body.has-custom-cursor iframe {
-  cursor: auto !important;
-}
-#cursorTrailCanvas {
-  display: none;
-}
-#customCursorCore {
-  display: none;
-}
