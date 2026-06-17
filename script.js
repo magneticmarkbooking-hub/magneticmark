@@ -8,7 +8,8 @@ let currentLang = localStorage.getItem('mm-lang') || 'pl';
 function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('mm-lang', lang);
-  document.getElementById('langToggle').textContent = lang === 'pl' ? 'EN' : 'PL';
+  const langToggle = document.getElementById('langToggle');
+  if (langToggle) langToggle.textContent = lang === 'pl' ? 'EN' : 'PL';
   document.querySelectorAll('[data-pl]').forEach(el => {
     const val = el.getAttribute('data-' + lang);
     if (val) el.innerHTML = val;
@@ -16,14 +17,17 @@ function setLang(lang) {
   document.documentElement.lang = lang;
 }
 
-document.getElementById('langToggle').addEventListener('click', () => {
-  setLang(currentLang === 'pl' ? 'en' : 'pl');
-});
+const langToggleBtn = document.getElementById('langToggle');
+if (langToggleBtn) {
+  langToggleBtn.addEventListener('click', () => {
+    setLang(currentLang === 'pl' ? 'en' : 'pl');
+  });
+}
 
 // ===== NAVBAR =====
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 50);
+  if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 50);
 }, { passive: true });
 
 // ===== HAMBURGER =====
@@ -31,6 +35,7 @@ const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 
 function closeMenu() {
+  if (!navLinks || !hamburger) return;
   navLinks.classList.remove('open');
   hamburger.setAttribute('aria-expanded', false);
   hamburger.querySelectorAll('span').forEach(s => {
@@ -85,7 +90,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-// ===== FADE IN ON SCROLL (bez gallery-grid!) =====
+// ===== FADE IN ON SCROLL =====
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if (e.isIntersecting) {
@@ -165,7 +170,7 @@ function animateTrumpet() {
   setTimeout(() => { trumpet.style.transform = 'scale(1) rotate(0deg)'; }, 1600);
 }
 
-// ===== PRELOAD IMAGES PODCZAS INTRO =====
+// ===== PRELOAD IMAGES =====
 function preloadAllImages() {
   const gallerySrcs = [
     'images/15.jpg','images/11.jpg','images/7.jpg','images/6.jpg',
@@ -176,18 +181,9 @@ function preloadAllImages() {
     const img = new Image();
     img.src = src;
   });
-
-  fetch('tracks.json').then(r => r.json()).then(tracks => {
-    tracks.forEach(t => {
-      if (t.cover) {
-        const img = new Image();
-        img.src = t.cover;
-      }
-    });
-  }).catch(() => {});
 }
 
-// ===== GALLERY BLUR + CACHE FIX =====
+// ===== GALLERY BLUR & LIGHTBOX =====
 function initGallery() {
   document.querySelectorAll('.gallery-item img').forEach(img => {
     if (img.dataset.galleryInit) return;
@@ -208,17 +204,8 @@ function initGallery() {
       img.addEventListener('error', onLoad, { once: true });
     }
   });
-
-  document.querySelectorAll('.gallery-item img').forEach(img => {
-    const src = img.getAttribute('src');
-    if (src) {
-      const preload = new Image();
-      preload.src = src;
-    }
-  });
 }
 
-// ===== GALLERY LIGHTBOX =====
 let lightboxImages = [];
 let lightboxIndex = 0;
 
@@ -276,7 +263,7 @@ function setupGalleryClicks() {
   });
 }
 
-// ===== CUSTOM CURSOR (ZABLOKOWANY NA MOBILKACH / EKRANACH DOTYKOWYCH) =====
+// ===== CUSTOM CURSOR (KOMPLETNE ROZWIĄZANIE NA PC + MOBILNE) =====
 function initCustomCursor() {
   const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || 
                         ('ontouchstart' in window) || 
@@ -286,11 +273,20 @@ function initCustomCursor() {
   const core = document.getElementById('customCursorCore');
 
   if (isTouchDevice) {
+    // Mobilne: Czyścimy elementy, usuwamy klasę blokującą i upewniamy się, że kursor systemowy jest widoczny
     if (canvas) canvas.remove();
     if (core) core.remove();
+    document.body.classList.remove('has-custom-cursor');
+    document.body.style.cursor = 'default';
+    
+    // Dynamicznie wstrzykujemy styl wymuszający widoczność kursora mobilnego na wszelki wypadek
+    const style = document.createElement('style');
+    style.innerHTML = '* { cursor: auto !important; }';
+    document.head.appendChild(style);
     return;
   }
 
+  // Komputery: Sprawdzamy czy elementy istnieją, jeśli nie, to przerywamy
   if (!canvas || !core) return;
 
   const ctx = canvas.getContext('2d');
@@ -298,7 +294,16 @@ function initCustomCursor() {
   let points = [];
   const maxPoints = 20;
 
+  // Włączamy custom kursor na PC
   document.body.classList.add('has-custom-cursor');
+  core.style.opacity = '1';
+  canvas.style.opacity = '1';
+  document.body.style.cursor = 'none';
+
+  // Wymuszamy ukrycie domyślnego kursora systemowego w CSS tylko na PC
+  const stylePC = document.createElement('style');
+  stylePC.innerHTML = 'body.has-custom-cursor, body.has-custom-cursor * { cursor: none !important; }';
+  document.head.appendChild(stylePC);
 
   function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -376,12 +381,7 @@ function initIframeCursorHandoff() {
   document.querySelectorAll('iframe').forEach(attachIframeCursorHandoff);
 }
 
-const iframeHandoffObserver = new MutationObserver(() => {
-  document.querySelectorAll('iframe:not([data-cursor-handoff-init])').forEach(attachIframeCursorHandoff);
-});
-iframeHandoffObserver.observe(document.body, { childList: true, subtree: true });
-
-// ===== ENTER SITE & AUDIO INITIALIZATION =====
+// ===== ENTER SITE & AUDIO =====
 window.enterSite = function() {
   const intro = document.getElementById('introOverlay');
   if (intro) {
