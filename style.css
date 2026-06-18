@@ -1973,3 +1973,23 @@ body.menu-open {
   .email-popup-row { flex-direction: column; }
   .email-popup-row button { width: 100%; }
 }
+
+/* Overall - ultra subtelny dopisek pod liczbami statystyk */
+.stat-overall {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.12);
+  margin-top: 1px;
+}
+
+/* Lightbox - hover strzałek nawigacji */
+#lightboxPrev:hover,
+#lightboxNext:hover {
+  background: rgba(123,47,255,0.5) !important;
+}
+@media (max-width: 600px) {
+  #lightboxPrev { left: 6px !important; }
+  #lightboxNext { right: 6px !important; }
+}
