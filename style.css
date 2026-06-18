@@ -36,20 +36,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ===== SCREEN READER ONLY (SEO / Accessibility) ===== */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-
 img { max-width: 100%; display: block; }
 a { text-decoration: none; color: inherit; }
 
@@ -1025,39 +1011,23 @@ img {
   line-height: 1.6;
 }
 .contact-email-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 18px 24px;
+  padding: 18px 32px;
   background: var(--gradient);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   border-radius: 4px;
-  margin-bottom: 1.2rem;
+  margin-bottom: 2.5rem;
   transition: all var(--transition);
   box-shadow: 0 0 30px rgba(102,0,255,0.3);
-  width: 100%;
-  box-sizing: border-box;
   word-break: break-all;
 }
 .contact-email-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 50px rgba(102,0,255,0.5);
-}
-.contact-email-btn svg {
-  flex-shrink: 0;
-}
-@media (max-width: 600px) {
-  .contact-email-btn {
-    font-size: 13px;
-    padding: 15px 16px;
-    gap: 10px;
-  }
-  #copyEmailBtn {
-    font-size: 10px !important;
-    padding: 4px 8px !important;
-  }
 }
 .contact-image img {
   width: 100%;
@@ -1894,29 +1864,6 @@ body.menu-open {
   }
 }
 
-/* Overall dopisek pod statystykami */
-.stat-overall {
-  display: block;
-  font-size: 8px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(170,170,204,0.55);
-  margin-top: 1px;
-}
-
-/* Lightbox strzałki hover */
-#lightboxPrev:hover,
-#lightboxNext:hover {
-  background: rgba(123,47,255,0.5) !important;
-}
-
-/* Na mobile strzałki wewnątrz */
-@media (max-width: 600px) {
-  #lightboxPrev { left: 6px !important; }
-  #lightboxNext { right: 6px !important; }
-  #lightboxWrap { max-width: 96vw !important; }
-}
-
 /* ===== EMAIL POPUP ===== */
 .email-popup {
   display: none;
@@ -1932,7 +1879,7 @@ body.menu-open {
   display: flex;
 }
 .email-popup-inner {
-  background: linear-gradient(135deg,#0a0015 0%,#1a0035 100%);
+  background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
   border: 1px solid rgba(123,47,255,0.4);
   border-radius: 8px;
   max-width: 420px;
@@ -1941,6 +1888,10 @@ body.menu-open {
   text-align: center;
   position: relative;
   box-shadow: 0 0 60px rgba(123,47,255,0.3);
+}
+.email-popup-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
 }
 .email-popup-inner h3 {
   font-family: var(--font-display);
@@ -1964,6 +1915,7 @@ body.menu-open {
 }
 .email-popup-row input {
   flex: 1;
+  min-width: 0;
   padding: 13px 16px;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(123,47,255,0.4);
@@ -1972,12 +1924,12 @@ body.menu-open {
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
-  min-width: 0;
 }
 .email-popup-row input:focus {
   border-color: rgba(123,47,255,0.8);
 }
 .email-popup-row button {
+  flex-shrink: 0;
   padding: 13px 20px;
   background: var(--gradient);
   border: none;
@@ -1991,7 +1943,6 @@ body.menu-open {
   cursor: pointer;
   white-space: nowrap;
   transition: opacity 0.2s;
-  flex-shrink: 0;
 }
 .email-popup-row button:hover { opacity: 0.85; }
 .email-popup-close {
@@ -2018,13 +1969,7 @@ body.menu-open {
   margin-top: 12px;
 }
 @media (max-width: 480px) {
-  .email-popup-inner {
-    padding: 32px 20px;
-  }
-  .email-popup-row {
-    flex-direction: column;
-  }
-  .email-popup-row button {
-    width: 100%;
-  }
+  .email-popup-inner { padding: 32px 20px; }
+  .email-popup-row { flex-direction: column; }
+  .email-popup-row button { width: 100%; }
 }
