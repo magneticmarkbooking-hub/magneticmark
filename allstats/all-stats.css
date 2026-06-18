@@ -245,3 +245,75 @@ body {
   .release-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
   .release-card-meta { font-size: 0.74rem; }
 }
+
+/* ===== EMAIL SIGNUPS SECTION ===== */
+.email-section {
+  margin-top: 48px;
+  animation: fadeInUp 0.6s ease both;
+  animation-delay: 0.25s;
+}
+
+.email-section-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.email-section-header h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--white);
+}
+
+.export-csv-btn {
+  background: var(--gradient);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--white);
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+.export-csv-btn:hover { opacity: 0.85; }
+.export-csv-btn:disabled { opacity: 0.5; cursor: default; }
+
+.email-count {
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-bottom: 14px;
+}
+
+.email-list {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.email-list-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--card-border);
+  font-size: 0.85rem;
+}
+.email-list-row:last-child { border-bottom: none; }
+
+.email-list-address {
+  color: var(--text);
+  word-break: break-all;
+}
+
+.email-list-date {
+  color: var(--gray);
+  flex-shrink: 0;
+  font-size: 0.78rem;
+}

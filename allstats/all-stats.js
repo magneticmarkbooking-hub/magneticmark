@@ -242,4 +242,91 @@ async function onApplyClick(e) {
 }
 
 loadReleases();
+loadEmailSignups();
 
+
+/* ===========================================================
+   EMAIL SIGNUPS - lista zapisanych adresów (tabela email_signups)
+   z możliwością eksportu do CSV. Maile wpisane przez popup na
+   stronie głównej (script.js -> submitEmailPopup()).
+   =========================================================== */
+
+let emailSignupsCache = [];
+
+async function loadEmailSignups() {
+  const countEl = document.getElementById('emailCount');
+  const listEl = document.getElementById('emailList');
+  const exportBtn = document.getElementById('exportCsvBtn');
+
+  if (!isSupabaseConfigured()) {
+    countEl.textContent = 'Supabase not configured yet.';
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/email_signups?select=email,created_at&order=created_at.desc`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY } }
+    );
+    if (!res.ok) throw new Error('email_signups fetch failed: ' + res.status);
+    emailSignupsCache = await res.json();
+  } catch (err) {
+    console.error(err);
+    countEl.textContent = 'Could not load email signups right now.';
+    return;
+  }
+
+  countEl.textContent = `${emailSignupsCache.length} signup${emailSignupsCache.length === 1 ? '' : 's'}`;
+
+  if (emailSignupsCache.length === 0) {
+    listEl.innerHTML = '<p class="empty-state" style="padding:16px;">No signups yet.</p>';
+    exportBtn.disabled = true;
+    return;
+  }
+
+  listEl.innerHTML = emailSignupsCache.map((row) => `
+    <div class="email-list-row">
+      <span class="email-list-address">${escapeHtml(row.email)}</span>
+      <span class="email-list-date">${formatDate(row.created_at)}</span>
+    </div>
+  `).join('');
+
+  exportBtn.disabled = false;
+  exportBtn.onclick = exportEmailsToCsv;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatDate(isoString) {
+  if (!isoString) return '';
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function exportEmailsToCsv() {
+  if (emailSignupsCache.length === 0) return;
+
+  const header = 'email,created_at';
+  const rows = emailSignupsCache.map((row) => {
+    // Cudzysłów wokół email na wszelki wypadek (gdyby zawierał przecinek
+    // - w praktyce e-maile nie zawierają przecinków, ale to bezpieczne).
+    const email = `"${(row.email || '').replace(/"/g, '""')}"`;
+    return `${email},${row.created_at || ''}`;
+  });
+  const csvContent = [header, ...rows].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `magneticmark-email-signups-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
