@@ -36,6 +36,17 @@
 //   content_name: nazwa platformy, np. "spotify" (Tonden: content_name=spotify)
 //   content_category: "stream"  (Tonden też używał "stream")
 //
+// Dodatkowo wysyłamy jako custom_data parametry kampanii (utm_*, fbclid,
+// gclid) i lekki session_id - przydatne gdybyś kiedyś chciał rozbić raporty
+// w Meta po konkretnej kampanii/źródle ruchu, nie tylko po samym kliknięciu.
+//
+// CZEGO NIE wysyłamy i czemu:
+// - event_time, page URL, referrer - Pixel zbiera to sam automatycznie przy
+//   każdym evencie, ręczne dorzucanie tego przez fbq() nic by nie zmieniło
+//   (to nie są parametry, które standardowy klientowy Pixel akceptuje).
+// - user_id - ta strona nie ma logowania, nie ma czego wysłać; dodanie pola
+//   "na zapas" tylko zaśmieciłoby dane fałszywymi/pustymi wartościami.
+//
 // Dla bezpieczeństwa dodajemy unikalny eventID - gdybyś kiedyś wrócił do
 // wysyłania ruchu przez fanlink.tv i tam też skonfigurował ten sam eventID
 // dla ViewContent, Meta automatycznie wykryje duplikat i zliczy zdarzenie
@@ -59,6 +70,34 @@ function buildForwardedUrl(baseUrl) {
   return baseUrl + (baseUrl.includes('?') ? '&' : '?') + query;
 }
 
+// Zbiera parametry kampanii z URL tej strony, do wysłania jako custom_data
+// w evencie Pixela (osobno od buildForwardedUrl, które robi to samo dla
+// linku wyjściowego - tu zostają jako dane analityczne w samym evencie).
+function getCampaignParams() {
+  const incoming = new URLSearchParams(window.location.search);
+  const keys = ['fbclid', 'gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  const params = {};
+  keys.forEach((key) => {
+    if (incoming.has(key)) params[key] = incoming.get(key);
+  });
+  return params;
+}
+
+// Lekki identyfikator sesji - losowy, trzymany w sessionStorage (czyli żyje
+// tylko do zamknięcia karty/przeglądarki). Nie jest to "session_id" w sensie
+// systemu logowania - to tylko sposób na odróżnienie "ta sama osoba kliknęła
+// dwa razy w tej samej wizycie" od dwóch różnych wizyt, gdyby kiedyś to było
+// przydatne w analizie.
+function getSessionId() {
+  const key = 'mm_session_id';
+  let id = sessionStorage.getItem(key);
+  if (!id) {
+    id = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+    sessionStorage.setItem(key, id);
+  }
+  return id;
+}
+
 function handleLinkClick(e) {
   e.preventDefault();
   const el = e.currentTarget;
@@ -66,11 +105,16 @@ function handleLinkClick(e) {
 
   if (typeof fbq !== 'undefined') {
     const eventId = 'release_' + RELEASE.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_' + Date.now();
-    fbq('track', 'ViewContent', {
-      content_type: 'product',
-      content_name: RELEASE.platform || 'spotify',
-      content_category: 'stream'
-    }, { eventID: eventId });
+    const eventData = Object.assign(
+      {
+        content_type: 'product',
+        content_name: RELEASE.platform || 'spotify',
+        content_category: 'stream'
+      },
+      getCampaignParams(),
+      { session_id: getSessionId() }
+    );
+    fbq('track', 'ViewContent', eventData, { eventID: eventId });
   }
 
   // Małe opóźnienie, żeby zdarzenie Pixela zdążyło wysłać się do Meta
