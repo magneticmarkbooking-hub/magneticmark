@@ -67,9 +67,20 @@
     </div>
 
     <div class="panel panel-wide">
-      <h2 class="panel-title">Daily activity</h2>
+      <div class="panel-header-row">
+        <h2 class="panel-title">Daily activity</h2>
+        <div class="daily-legend">
+          <span class="legend-item"><span class="legend-dot legend-dot-views"></span>Views</span>
+          <span class="legend-item"><span class="legend-dot legend-dot-clicks"></span>Clicks</span>
+        </div>
+      </div>
       <div class="daily-chart" id="dailyChart">
         <p class="empty-state">No data yet</p>
+      </div>
+      <div class="daily-nav">
+        <button class="daily-nav-btn" id="dailyPrevBtn" aria-label="Earlier period">‹ Earlier</button>
+        <span class="daily-range-label" id="dailyRangeLabel"></span>
+        <button class="daily-nav-btn" id="dailyNextBtn" aria-label="Later period">Later ›</button>
       </div>
     </div>
   </section>

@@ -204,6 +204,41 @@ body {
 }
 
 /* ===== DAILY CHART ===== */
+.panel-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.panel-header-row .panel-title {
+  margin-bottom: 0;
+}
+.daily-legend {
+  display: flex;
+  gap: 16px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--gray);
+}
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.legend-dot-views {
+  background: var(--accent);
+}
+.legend-dot-clicks {
+  background: var(--gold);
+}
+
 .daily-chart {
   display: flex;
   align-items: flex-end;
@@ -220,18 +255,65 @@ body {
   height: 100%;
   gap: 6px;
 }
-.daily-bar {
+.daily-bar-pair {
   width: 100%;
-  max-width: 28px;
+  max-width: 30px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+.daily-bar {
+  flex: 1;
   border-radius: 3px 3px 0 0;
-  background: var(--gradient);
   transition: height 0.6s ease;
-  min-height: 2px;
+  min-height: 0;
+}
+.daily-bar-views {
+  background: var(--gradient);
+}
+.daily-bar-clicks {
+  background: var(--gold);
+  opacity: 0.85;
 }
 .daily-bar-label {
   font-size: 0.66rem;
   color: var(--gray);
   white-space: nowrap;
+}
+
+.daily-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--card-border);
+}
+.daily-nav-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--card-border);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--transition), opacity var(--transition);
+}
+.daily-nav-btn:hover:not(:disabled) {
+  background: rgba(123,47,255,0.25);
+}
+.daily-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.daily-range-label {
+  font-size: 0.78rem;
+  color: var(--gray);
+  font-weight: 600;
 }
 
 .empty-state {

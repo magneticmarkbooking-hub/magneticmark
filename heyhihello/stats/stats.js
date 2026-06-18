@@ -53,31 +53,89 @@ function renderBarList(containerId, items) {
   `).join('');
 }
 
-function renderDailyChart(events) {
-  const container = document.getElementById('dailyChart');
-  if (!events.length) {
-    container.innerHTML = '<p class="empty-state">No data yet</p>';
-    return;
+// Stan przesuwanego okna wykresu dziennego: 0 = najnowsze WINDOW_SIZE dni,
+// 1 = jedno okno wstecz, itd. WINDOW_SIZE dni widoczne na raz w wykresie.
+const DAILY_WINDOW_SIZE = 14; // ile dni widać jednocześnie na ekranie
+const DAILY_RANGE_DAYS = 60;  // ile dni wstecz w sumie można przewinąć
+let dailyWindowOffset = 0;
+let dailyEventsCache = [];
+
+// Zwraca mapę {YYYY-MM-DD: {views: n, clicks: n}} dla wszystkich dni
+// w ostatnich DAILY_RANGE_DAYS dniach (łącznie z dniami bez żadnych zdarzeń,
+// żeby wykres miał ciągłą skalę czasu, a nie tylko dni z ruchem).
+function buildDailyMap(events) {
+  const map = {};
+  const today = new Date();
+  for (let i = 0; i < DAILY_RANGE_DAYS; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    map[key] = { views: 0, clicks: 0 };
   }
-  const byDay = {};
   events.forEach((ev) => {
     const day = (ev.created_at || '').slice(0, 10);
-    byDay[day] = (byDay[day] || 0) + 1;
+    if (!map[day]) return; // poza zakresem 60 dni - ignorujemy
+    if (ev.event_type === 'view') map[day].views++;
+    else if (ev.event_type === 'click') map[day].clicks++;
   });
-  const days = Object.keys(byDay).sort().slice(-14); // ostatnie 14 dni z danymi
-  const max = Math.max(...days.map((d) => byDay[d]), 1);
+  return map;
+}
 
-  container.innerHTML = days.map((day) => {
-    const count = byDay[day];
-    const heightPct = Math.max((count / max) * 100, 3);
+function renderDailyChart() {
+  const container = document.getElementById('dailyChart');
+  const rangeLabel = document.getElementById('dailyRangeLabel');
+
+  if (!dailyEventsCache.length) {
+    container.innerHTML = '<p class="empty-state">No data yet</p>';
+    if (rangeLabel) rangeLabel.textContent = '';
+    return;
+  }
+
+  const map = buildDailyMap(dailyEventsCache);
+  const allDays = Object.keys(map).sort(); // najstarszy -> najnowszy
+
+  // Okno: offset 0 pokazuje najnowsze WINDOW_SIZE dni, offset 1 przesuwa
+  // się WINDOW_SIZE dni w przeszłość, itd.
+  const maxOffset = Math.ceil(DAILY_RANGE_DAYS / DAILY_WINDOW_SIZE) - 1;
+  dailyWindowOffset = Math.max(0, Math.min(dailyWindowOffset, maxOffset));
+
+  const endIndex = allDays.length - (dailyWindowOffset * DAILY_WINDOW_SIZE);
+  const startIndex = Math.max(0, endIndex - DAILY_WINDOW_SIZE);
+  const visibleDays = allDays.slice(startIndex, endIndex);
+
+  const max = Math.max(...visibleDays.map((d) => map[d].views + map[d].clicks > 0 ? Math.max(map[d].views, map[d].clicks) : 0), 1);
+
+  container.innerHTML = visibleDays.map((day) => {
+    const { views, clicks } = map[day];
+    const viewsPct = Math.max((views / max) * 100, views > 0 ? 3 : 0);
+    const clicksPct = Math.max((clicks / max) * 100, clicks > 0 ? 3 : 0);
     const label = day.slice(5).replace('-', '/'); // MM/DD
     return `
       <div class="daily-bar-group">
-        <div class="daily-bar" style="height:${heightPct}%" title="${day}: ${count}"></div>
+        <div class="daily-bar-pair">
+          <div class="daily-bar daily-bar-views" style="height:${viewsPct}%" title="${day} - Views: ${views}"></div>
+          <div class="daily-bar daily-bar-clicks" style="height:${clicksPct}%" title="${day} - Clicks: ${clicks}"></div>
+        </div>
         <span class="daily-bar-label">${label}</span>
       </div>
     `;
   }).join('');
+
+  if (rangeLabel && visibleDays.length) {
+    const first = visibleDays[0].slice(5).replace('-', '/');
+    const last = visibleDays[visibleDays.length - 1].slice(5).replace('-', '/');
+    rangeLabel.textContent = `${first} – ${last}`;
+  }
+
+  const prevBtn = document.getElementById('dailyPrevBtn');
+  const nextBtn = document.getElementById('dailyNextBtn');
+  if (prevBtn) prevBtn.disabled = dailyWindowOffset >= maxOffset;
+  if (nextBtn) nextBtn.disabled = dailyWindowOffset <= 0;
+}
+
+function shiftDailyWindow(direction) {
+  dailyWindowOffset += direction; // +1 = wstecz w czasie, -1 = do przodu
+  renderDailyChart();
 }
 
 async function loadStats() {
@@ -120,7 +178,14 @@ async function loadStats() {
   renderBarList('platformList', tally(views, (e) => e.in_app_browser, platformLabel));
   renderBarList('deviceList', tally(views, (e) => e.device_type, (d) => d ? (d.charAt(0).toUpperCase() + d.slice(1)) : 'Unknown'));
 
-  renderDailyChart(events);
+  dailyEventsCache = events;
+  dailyWindowOffset = 0; // po każdym świeżym wczytaniu wracamy do najnowszego okna
+  renderDailyChart();
+
+  const prevBtn = document.getElementById('dailyPrevBtn');
+  const nextBtn = document.getElementById('dailyNextBtn');
+  if (prevBtn) prevBtn.onclick = () => shiftDailyWindow(1);
+  if (nextBtn) nextBtn.onclick = () => shiftDailyWindow(-1);
 
   document.getElementById('lastUpdated').textContent =
     'Updated ' + new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
