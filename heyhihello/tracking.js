@@ -86,7 +86,6 @@ async function sendStatEvent(eventType) {
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
         'Prefer': 'return=minimal'
       },
       body: JSON.stringify(payload)

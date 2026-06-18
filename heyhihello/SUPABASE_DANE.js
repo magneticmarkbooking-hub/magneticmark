@@ -10,5 +10,5 @@
    (do ich odczytu) - wystarczy ustawić raz, działa dla wszystkich
    wydań.
    =========================================================== */
-const SUPABASE_URL = "PLACEHOLDER_WKLEJ_PROJECT_URL";
-const SUPABASE_ANON_KEY = "PLACEHOLDER_WKLEJ_ANON_KEY";
+const SUPABASE_URL = "https://igtyglcyithqpvgimgif.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_kdbRe7c0iA9c6TivESgQvA_IKvg-UUA";

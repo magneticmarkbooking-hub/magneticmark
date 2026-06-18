@@ -94,8 +94,7 @@ async function loadStats() {
       `${SUPABASE_URL}/rest/v1/release_events?release_slug=eq.${encodeURIComponent(RELEASE_SLUG)}&select=*`,
       {
         headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          'apikey': SUPABASE_ANON_KEY
         }
       }
     );
