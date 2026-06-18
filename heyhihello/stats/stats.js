@@ -111,15 +111,17 @@ function renderDailyChart() {
     const clicksPct = Math.max((clicks / max) * 100, clicks > 0 ? 3 : 0);
     const label = day.slice(5).replace('-', '/'); // MM/DD
     return `
-      <div class="daily-bar-group">
+      <div class="daily-bar-group" data-day="${label}" data-views="${views}" data-clicks="${clicks}">
         <div class="daily-bar-pair">
-          <div class="daily-bar daily-bar-views" style="height:${viewsPct}%" title="${day} - Views: ${views}"></div>
-          <div class="daily-bar daily-bar-clicks" style="height:${clicksPct}%" title="${day} - Clicks: ${clicks}"></div>
+          <div class="daily-bar daily-bar-views" style="height:${viewsPct}%"></div>
+          <div class="daily-bar daily-bar-clicks" style="height:${clicksPct}%"></div>
         </div>
         <span class="daily-bar-label">${label}</span>
       </div>
     `;
   }).join('');
+
+  attachDailyTooltips(container);
 
   if (rangeLabel && visibleDays.length) {
     const first = visibleDays[0].slice(5).replace('-', '/');
@@ -136,6 +138,97 @@ function renderDailyChart() {
 function shiftDailyWindow(direction) {
   dailyWindowOffset += direction; // +1 = wstecz w czasie, -1 = do przodu
   renderDailyChart();
+}
+
+// Własny tooltip (nie natywny "title") - pojawia się od razu na hover,
+// a na dotyk (mobile) po tapnięciu w słupek. Jeden wspólny element
+// tooltipa jest przesuwany nad aktualnie wskazany słupek.
+//
+// WAŻNE: używamy event delegation (jeden listener na całym kontenerze,
+// nie po jednym na każdym słupku) - bo ta funkcja jest wywoływana przy
+// każdym renderDailyChart() (czyli też po każdym kliknięciu Earlier/Later),
+// a kontener wykresu jest zawsze ten sam element w DOM (tylko jego
+// zawartość .innerHTML jest zamieniana). Listenery dodane wprost na
+// słupkach by się nawarstwiały przy każdym rerenderze, bo stare słupki
+// (i ich listenery) są usuwane z DOM, ale nowe nasłuchy z poprzednich
+// wywołań tej funkcji - jeśli przypadkiem zawisły gdzieś wyżej - mogłyby
+// się nawarstwiać. Delegacja na kontenerze + flaga "już podpięte" usuwa
+// ten problem całkowicie.
+let dailyTooltipAttached = false;
+
+function attachDailyTooltips(container) {
+  let tooltipEl = document.getElementById('dailyTooltip');
+  if (!tooltipEl) {
+    tooltipEl = document.createElement('div');
+    tooltipEl.id = 'dailyTooltip';
+    tooltipEl.className = 'daily-tooltip';
+    document.body.appendChild(tooltipEl);
+  }
+
+  function showTooltip(groupEl) {
+    const { day, views, clicks } = groupEl.dataset;
+    tooltipEl.innerHTML = `<strong>${day}</strong><br>Views: ${views} · Clicks: ${clicks}`;
+    const rect = groupEl.getBoundingClientRect();
+    tooltipEl.style.display = 'block';
+    const tooltipRect = tooltipEl.getBoundingClientRect();
+    // tooltipEl ma position:fixed, więc left/top liczymy bezpośrednio
+    // względem viewportu (tak jak getBoundingClientRect() je zwraca) -
+    // bez żadnych korekcji o przewinięcie stronyalbo o position:relative
+    // na przodkach, bo fixed je ignoruje.
+    let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+    let top = rect.top - tooltipRect.height - 8;
+    // Nie pozwalamy tooltipowi wyjść za lewą/prawą krawędź ekranu
+    left = Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8));
+    // Jeśli nie ma miejsca powyżej słupka (np. słupek blisko górnej krawędzi
+    // ekranu po przewinięciu), pokazujemy tooltip pod nim
+    if (top < 8) top = rect.bottom + 8;
+    tooltipEl.style.left = left + 'px';
+    tooltipEl.style.top = top + 'px';
+    tooltipEl.dataset.activeDay = day;
+  }
+
+  function hideTooltip() {
+    tooltipEl.style.display = 'none';
+    delete tooltipEl.dataset.activeDay;
+  }
+
+  // Listener podpinamy tylko RAZ w całym cyklu życia strony (flaga globalna),
+  // niezależnie od tego, ile razy renderDailyChart() przebuduje zawartość
+  // kontenera - dzięki delegacji (closest()) działa to dla każdego nowego
+  // zestawu słupków bez potrzeby ponownego podpinania.
+  if (dailyTooltipAttached) return;
+  dailyTooltipAttached = true;
+
+  let recentTouchUntil = 0;
+
+  container.addEventListener('mouseover', (e) => {
+    if (Date.now() < recentTouchUntil) return; // ignorujemy syntetyczne mouseover po dotyku
+    const groupEl = e.target.closest('.daily-bar-group');
+    if (groupEl) showTooltip(groupEl);
+  });
+  container.addEventListener('mouseout', (e) => {
+    if (Date.now() < recentTouchUntil) return; // ignorujemy syntetyczne mouseout po dotyku
+    const groupEl = e.target.closest('.daily-bar-group');
+    if (groupEl) hideTooltip();
+  });
+
+  container.addEventListener('touchstart', (e) => {
+    const groupEl = e.target.closest('.daily-bar-group');
+    if (!groupEl) return;
+    e.stopPropagation();
+    // Niektóre przeglądarki/urządzenia emitują syntetyczne zdarzenia myszy
+    // (mouseover, mousedown, mouseup, click, mouseout) jako część tego samego
+    // gestu dotykowego, dla kompatybilności ze stronami bez obsługi touch.
+    // Blokujemy je na chwilę, żeby "mouseout" z tej samej sekwencji nie
+    // zamknął tooltipa od razu po jego otwarciu.
+    recentTouchUntil = Date.now() + 500;
+    showTooltip(groupEl);
+  });
+
+  // Tapnięcie gdziekolwiek poza wykresem chowa tooltip (mobile)
+  document.addEventListener('touchstart', (e) => {
+    if (!container.contains(e.target)) hideTooltip();
+  });
 }
 
 async function loadStats() {
