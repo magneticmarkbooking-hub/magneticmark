@@ -231,32 +231,33 @@ let lightboxImages = [];
 let lightboxIndex = 0;
 
 function openLightbox(src) {
-  const lb = document.getElementById('lightbox');
-  const img = document.getElementById('lightboxImg');
   lightboxImages = Array.from(document.querySelectorAll('.gallery-item img')).map(i => i.getAttribute('src'));
   lightboxIndex = lightboxImages.indexOf(src);
   if (lightboxIndex === -1) { lightboxImages = [src]; lightboxIndex = 0; }
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
   img.src = src;
-  updateLightboxCounter();
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
+  updateLightboxCounter();
 }
 
 function updateLightboxCounter() {
   const counter = document.getElementById('lightboxCounter');
-  if (counter && lightboxImages.length > 1) {
-    counter.textContent = `${lightboxIndex + 1} / ${lightboxImages.length}`;
-  } else if (counter) {
-    counter.textContent = '';
-  }
+  if (counter) counter.textContent = lightboxImages.length > 1 ? `${lightboxIndex + 1} / ${lightboxImages.length}` : '';
 }
 
 function lightboxNav(dir) {
   if (!lightboxImages.length) return;
   lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
   const img = document.getElementById('lightboxImg');
-  if (img) img.src = lightboxImages[lightboxIndex];
-  updateLightboxCounter();
+  img.style.opacity = '0';
+  img.style.transition = 'opacity 0.15s ease';
+  setTimeout(() => {
+    img.src = lightboxImages[lightboxIndex];
+    img.style.opacity = '1';
+    updateLightboxCounter();
+  }, 150);
 }
 
 function closeLightbox() {
@@ -265,6 +266,8 @@ function closeLightbox() {
 }
 
 document.addEventListener('keydown', e => {
+  const lb = document.getElementById('lightbox');
+  if (!lb || !lb.classList.contains('open')) return;
   if (e.key === 'Escape') closeLightbox();
   if (e.key === 'ArrowLeft') lightboxNav(-1);
   if (e.key === 'ArrowRight') lightboxNav(1);
@@ -295,7 +298,9 @@ async function loadTracks() {
       if (t.youtube) platforms.push(`<a href="${t.youtube}" data-app="vnd.youtube://${t.youtube.replace('https://','').replace('youtu.be/','youtube.com/watch?v=')}" target="_blank" rel="noopener" aria-label="YouTube" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>`);
       if (t.beatport) platforms.push(`<a href="${t.beatport}" target="_blank" rel="noopener" aria-label="Beatport" onclick="event.stopPropagation()"><svg viewBox="550 415 220 200" fill="white"><path d="M715.4,539.8c0,28.1-22.5,50.8-51.1,50.8c-28.5,0-50.8-22.2-50.8-50.8c0-13.5,5.1-25.4,13.3-34.4l-34.5,34.4l-18.1-18l38.9-38.4c5.3-5.3,8-12.1,8-19.6v-48.1h25.5v48.1c0,14.8-5.3,27.3-15.5,37.5l-1.1,1.1c9-8.2,21.3-13.2,34.4-13.2C693.3,489.3,715.4,512.1,715.4,539.8z M692.3,539.8c0-15.1-12.6-27.3-28-27.3c-15.4,0-27.7,12.8-27.7,27.3c0,14.5,12.3,27.6,27.7,27.6C679.8,567.4,692.3,554.4,692.3,539.8z"/></svg></a>`);
 
-      return `<div class="track-card" onclick="handleAppLink({currentTarget:{getAttribute:(a)=>a==='data-app'?'spotify:artist:7qnCu8Un2e3gvg1ELX3HNg':'${spotifyUrl}',href:'${spotifyUrl}'}, preventDefault:()=>{}})" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
+      const albumId = t.spotify ? t.spotify.split('/').pop().split('?')[0] : '';
+      const spotifyApp = albumId ? `spotify:album:${albumId}` : 'spotify:artist:7qnCu8Un2e3gvg1ELX3HNg';
+      return `<div class="track-card" onclick="trackCardClick(this)" data-web="${spotifyUrl}" data-app="${spotifyApp}" data-title="${t.title.replace(/"/g,'&quot;')}" style="cursor:pointer" role="button" tabindex="0" aria-label="${t.title} on Spotify">
           <img src="${t.cover || ''}" alt="${t.title}" loading="lazy" decoding="async">
           <div class="track-info-overlay"><div class="track-title">${t.title}</div><div class="track-date">${dateStr}</div></div>
           <div class="track-overlay"><div class="track-platforms">${platforms.join('')}</div></div>
@@ -483,47 +488,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== APP DEEP LINK FALLBACK =====
 // Próbuje otworzyć aplikację, jeśli nie ma - otwiera web
+function trackCardClick(el) {
+  const webUrl = el.dataset.web;
+  const appUrl = el.dataset.app;
+  const title  = el.dataset.title;
+  // Pixel
+  if (typeof fbq !== 'undefined') {
+    fbq('track', 'ViewContent', {
+      content_name: title,
+      content_category: 'Music Release',
+      content_type: 'music_release'
+    });
+  }
+  // Popup trigger
+  triggerPopupOnViewContent();
+  // Przekierowanie
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  if (isIOS || isAndroid) {
+    let fallbackTimer = setTimeout(() => { window.open(webUrl, '_blank'); }, 1200);
+    document.addEventListener('visibilitychange', function onHide() {
+      if (document.hidden) { clearTimeout(fallbackTimer); }
+      document.removeEventListener('visibilitychange', onHide);
+    }, { once: true });
+    window.location.href = appUrl;
+  } else {
+    window.open(webUrl, '_blank');
+  }
+}
+
 function handleAppLink(e) {
-  if (typeof triggerPopupOnViewContent === 'function') triggerPopupOnViewContent();
   const el = e.currentTarget;
   const appUrl = el.getAttribute('data-app');
-  const webUrl = el.getAttribute('href');
-  if (!appUrl) return; // brak data-app = normalny link
+  const webUrl = el.getAttribute('href') || webUrl;
+  if (!appUrl) return;
 
   e.preventDefault();
 
-  // Próbuj otworzyć aplikację
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  document.body.appendChild(iframe);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
 
-  let appOpened = false;
-  const timer = setTimeout(() => {
-    // Aplikacja nie otworzyła się - otwórz web
-    if (!appOpened) {
+  if (isIOS || isAndroid) {
+    // Mobile: próbuj app, fallback do web po 1.2s
+    let fallbackTimer = setTimeout(() => {
       window.open(webUrl, '_blank');
-    }
-    document.body.removeChild(iframe);
-  }, 1500);
+    }, 1200);
 
-  // Nasłuchuj czy strona się ukryła (app się otworzyła)
-  document.addEventListener('visibilitychange', function onVisibility() {
-    if (document.hidden) {
-      appOpened = true;
-      clearTimeout(timer);
-      document.body.removeChild(iframe);
-      document.removeEventListener('visibilitychange', onVisibility);
-    }
-  });
+    document.addEventListener('visibilitychange', function onHide() {
+      if (document.hidden) {
+        clearTimeout(fallbackTimer);
+        document.removeEventListener('visibilitychange', onHide);
+      }
+    }, { once: true });
 
-  // Spróbuj otworzyć przez iframe (działa na Android)
-  try {
-    iframe.src = appUrl;
-  } catch(e) {}
+    window.location.href = appUrl;
+  } else {
+    // Desktop: otwórz web link bezpośrednio
+    window.open(webUrl, '_blank');
+  }
 
-  // Na iOS użyj window.location
+  // Dummy - zachowaj zgodność ze starym kodem
   setTimeout(() => {
-    try { window.location.href = appUrl; } catch(e) {}
+    try { void(0); } catch(e) {}
   }, 100);
 }
 
@@ -543,11 +569,82 @@ const appLinkObserver = new MutationObserver(() => {
 });
 appLinkObserver.observe(document.body, { childList: true, subtree: true });
 
+// ===== META PIXEL EVENTS =====
+
+// ViewContent – wszystkie linki muzyczne i social media
+function setupPixelEvents() {
+
+  // Linki muzyczne i social (ViewContent)
+  const viewContentSelectors = [
+    'a.platform-link',        // Spotify, YouTube, SoundCloud, Beatport, Apple Music
+    'a.social-link',          // Instagram, TikTok, Facebook, YouTube, Spotify, Shazam, Beatport, Apple Music
+    // '.track-card' - obsługiwane inline w renderTrack()
+  ];
+
+  viewContentSelectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.addEventListener('click', function() {
+        if (typeof fbq !== 'undefined') {
+          fbq('track', 'ViewContent', {
+            content_name: 'MagneticMark Music & Social',
+            content_category: 'DJ Producer',
+            content_type: 'music_social'
+          });
+        }
+      });
+    });
+  });
+
+  // Contact – pobranie Press Pack
+  const pressPackBtn = document.querySelector('a[href*="dropbox"]');
+  if (pressPackBtn) {
+    pressPackBtn.addEventListener('click', function() {
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'Contact', {
+          content_name: 'Press Pack Download',
+          content_category: 'Booking'
+        });
+      }
+    });
+  }
+
+  // Lead – klik w mailto
+  const mailtoBtn = document.getElementById('mailtoBtn');
+  if (mailtoBtn) {
+    mailtoBtn.addEventListener('click', function(e) {
+      if (e.target.id === 'copyEmailBtn') return; // COPY obsługuje osobno
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'Lead', {
+          content_name: 'Email Click',
+          content_category: 'Booking'
+        });
+      }
+    });
+  }
+}
+
+// Lead + kopiowanie – przycisk COPY
+function copyEmail() {
+  const email = 'management@magneticmarkdj.com';
+  navigator.clipboard.writeText(email).then(() => {
+    const btn = document.getElementById('copyEmailBtn');
+    if (btn) {
+      btn.textContent = '✓ OK';
+      setTimeout(() => { btn.textContent = 'COPY'; }, 2000);
+    }
+    if (typeof fbq !== 'undefined') {
+      fbq('track', 'Lead', {
+        content_name: 'Email Copy',
+        content_category: 'Booking'
+      });
+    }
+  });
+}
+
+// Inicjalizacja po załadowaniu strony
+document.addEventListener('DOMContentLoaded', setupPixelEvents);
+
 // ===== EMAIL POPUP =====
-// Zapisuje adres email do Supabase (tabela email_signups), żeby był
-// widoczny i eksportowalny (CSV) z panelu All Stats. Maile wysyłasz
-// Ty sam, ręcznie, do zebranych adresów - to nie jest system mailingowy,
-// tylko zbieranie kontaktów.
 let popupShown = false;
 let popupTimer = null;
 
@@ -557,6 +654,7 @@ function showEmailPopup() {
   if (!popup) return;
   popup.classList.add('open');
   popupShown = true;
+  // Focus na input
   setTimeout(() => {
     const input = document.getElementById('popupEmail');
     if (input) input.focus();
@@ -569,9 +667,8 @@ function closeEmailPopup() {
   localStorage.setItem('mm_popup_closed', '1');
 }
 
-async function submitEmailPopup() {
-  const emailInput = document.getElementById('popupEmail');
-  const email = emailInput.value.trim();
+function submitEmailPopup() {
+  const email = document.getElementById('popupEmail').value.trim();
   const msg = document.getElementById('popupMsg');
 
   if (!email || !email.includes('@')) {
@@ -580,34 +677,29 @@ async function submitEmailPopup() {
     return;
   }
 
-  if (typeof SUPABASE_URL === 'undefined' || SUPABASE_URL.indexOf('PLACEHOLDER') === 0) {
-    msg.style.color = '#ff4466';
-    msg.textContent = 'Coś poszło nie tak. Spróbuj ponownie.';
-    return;
-  }
-
   msg.style.color = 'rgba(170,170,204,0.6)';
   msg.textContent = 'Zapisuję...';
 
-  try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/email_signups', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ email: email })
-    });
-
-    // 201 = zapisano. 409 = ten email już istnieje (unique index) -
-    // traktujemy to też jako sukces z punktu widzenia odwiedzającego,
-    // bo jego adres i tak już jest na liście.
-    if (res.ok || res.status === 201 || res.status === 409) {
+  // Brevo API - podmień YOUR_BREVO_API_KEY i LIST_ID
+  fetch('https://api.brevo.com/v3/contacts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': 'YOUR_BREVO_API_KEY'
+    },
+    body: JSON.stringify({
+      email: email,
+      listIds: [2], // ID listy w Brevo - podmień
+      updateEnabled: true
+    })
+  })
+  .then(res => {
+    if (res.ok || res.status === 204) {
       msg.style.color = '#44ff88';
       msg.textContent = '✓ Zapisano! Dzięki 🎺';
-      emailInput.value = '';
+      document.getElementById('popupEmail').value = '';
       setTimeout(closeEmailPopup, 2000);
+      // Pixel event
       if (typeof fbq !== 'undefined') {
         fbq('track', 'Lead', {
           content_name: 'Email Signup',
@@ -615,37 +707,36 @@ async function submitEmailPopup() {
         });
       }
     } else {
-      throw new Error('Supabase insert failed: ' + res.status);
+      throw new Error('API error');
     }
-  } catch (err) {
+  })
+  .catch(() => {
     msg.style.color = '#ff4466';
     msg.textContent = 'Coś poszło nie tak. Spróbuj ponownie.';
-  }
+  });
 }
 
-// Trigger 1: po 20 sekundach na stronie
+// Trigger 1: po 20 sekundach
 function initEmailPopup() {
   if (localStorage.getItem('mm_popup_closed')) return;
   popupTimer = setTimeout(showEmailPopup, 20000);
 }
 
-// Trigger 2: po kliknięciu w wydanie (ViewContent) - min. 3s na stronie,
-// żeby nie pokazywać popupu komuś kto kliknął niemal natychmiast po
-// wejściu (jeszcze nie zdążył się rozejrzeć).
-let timeOnPageSeconds = 0;
-setInterval(() => { timeOnPageSeconds++; }, 1000);
+// Trigger 2: po ViewContent (klik w wydanie) - min. 3s na stronie
+let timeOnPage = 0;
+setInterval(() => { timeOnPage++; }, 1000);
 
 function triggerPopupOnViewContent() {
-  if (timeOnPageSeconds >= 3 && !popupShown && !localStorage.getItem('mm_popup_closed')) {
+  if (timeOnPage >= 3 && !popupShown && !localStorage.getItem('mm_popup_closed')) {
     clearTimeout(popupTimer);
     setTimeout(showEmailPopup, 1500);
   }
 }
 
+// Init - używamy load zamiast DOMContentLoaded żeby mieć pewność że DOM jest gotowy
 window.addEventListener('load', initEmailPopup);
 
-// Debug helper - w konsoli przeglądarki: resetPopup() czyści localStorage,
-// żeby przetestować popup ponownie bez czekania/incognito.
+// Debug helper - wpisz w konsoli: resetPopup() żeby wyczyścić localStorage i przetestować
 window.resetPopup = function() {
   localStorage.removeItem('mm_popup_closed');
   popupShown = false;
