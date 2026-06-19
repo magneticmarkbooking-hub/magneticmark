@@ -1284,6 +1284,7 @@ img {
   position: relative;
   overflow: hidden;
   z-index: 1;
+  animation: enterGlow 2.4s ease-in-out infinite;
 }
 #enterBtn::before {
   content: '';
@@ -1294,13 +1295,48 @@ img {
   transition: opacity 0.3s ease;
   z-index: -1;
 }
+/* scan line */
+#enterBtn::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  background: linear-gradient(to bottom, transparent, rgba(180,100,255,0.18), transparent);
+  animation: enterScan 3.5s ease-in-out infinite 1.2s;
+  z-index: 2;
+  pointer-events: none;
+}
 #enterBtn:hover {
   border-color: transparent;
-  box-shadow: 0 0 40px rgba(102,0,255,0.5);
+  box-shadow: 0 0 60px rgba(102,0,255,0.7), 0 0 120px rgba(102,0,255,0.3);
   transform: translateY(-2px);
+  animation: none;
 }
 #enterBtn:hover::before {
   opacity: 1;
+}
+@keyframes enterGlow {
+  0%, 100% { box-shadow: 0 0 12px rgba(123,47,255,0.4), 0 0 24px rgba(123,47,255,0.15); }
+  50%       { box-shadow: 0 0 28px rgba(123,47,255,0.75), 0 0 55px rgba(102,0,255,0.3); }
+}
+@keyframes enterScan {
+  0%   { top: -40%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 140%; opacity: 0; }
+}
+/* canvas cząsteczek */
+#enterParticles {
+  position: absolute;
+  inset: -60px;
+  pointer-events: none;
+  z-index: 0;
+}
+.intro-enter-wrap {
+  position: relative;
+  display: inline-block;
 }
 .intro-sub {
   font-size: 12px;
@@ -1897,11 +1933,11 @@ body.menu-open {
 /* Overall dopisek pod statystykami */
 .stat-overall {
   display: block;
-  font-size: 8px;
-  letter-spacing: 0.08em;
+  font-size: 9px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(170,170,204,0.55);
-  margin-top: 1px;
+  color: rgba(255,255,255,0.28);
+  margin-top: 2px;
 }
 
 /* Lightbox strzałki hover */

@@ -614,7 +614,7 @@ function setupPixelEvents() {
     mailtoBtn.addEventListener('click', function(e) {
       if (e.target.id === 'copyEmailBtn') return; // COPY obsługuje osobno
       if (typeof fbq !== 'undefined') {
-        fbq('track', 'Lead', {
+        fbq('track', 'Contact', {
           content_name: 'Email Click',
           content_category: 'Booking'
         });
@@ -633,7 +633,7 @@ function copyEmail() {
       setTimeout(() => { btn.textContent = 'COPY'; }, 2000);
     }
     if (typeof fbq !== 'undefined') {
-      fbq('track', 'Lead', {
+      fbq('track', 'Contact', {
         content_name: 'Email Copy',
         content_category: 'Booking'
       });
@@ -680,26 +680,32 @@ function submitEmailPopup() {
   msg.style.color = 'rgba(170,170,204,0.6)';
   msg.textContent = 'Zapisuję...';
 
-  // Brevo API - podmień YOUR_BREVO_API_KEY i LIST_ID
-  fetch('https://api.brevo.com/v3/contacts', {
+  // Supabase — zapisz email
+  const supaUrl = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : '';
+  const supaKey = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : '';
+
+  if (!supaUrl || !supaKey) {
+    msg.style.color = '#ff4466';
+    msg.textContent = 'Błąd konfiguracji. Spróbuj ponownie.';
+    return;
+  }
+
+  fetch(supaUrl + '/rest/v1/email_signups', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'api-key': 'YOUR_BREVO_API_KEY'
+      'apikey': supaKey,
+      'Prefer': 'return=minimal'
     },
-    body: JSON.stringify({
-      email: email,
-      listIds: [2], // ID listy w Brevo - podmień
-      updateEnabled: true
-    })
+    body: JSON.stringify({ email: email })
   })
   .then(res => {
-    if (res.ok || res.status === 204) {
+    if (res.status === 201 || res.status === 409) {
+      // 201 = nowy zapis, 409 = email już istnieje — oba traktujemy jako sukces
       msg.style.color = '#44ff88';
       msg.textContent = '✓ Zapisano! Dzięki 🎺';
       document.getElementById('popupEmail').value = '';
       setTimeout(closeEmailPopup, 2000);
-      // Pixel event
       if (typeof fbq !== 'undefined') {
         fbq('track', 'Lead', {
           content_name: 'Email Signup',
@@ -707,7 +713,7 @@ function submitEmailPopup() {
         });
       }
     } else {
-      throw new Error('API error');
+      throw new Error('HTTP ' + res.status);
     }
   })
   .catch(() => {
@@ -742,3 +748,111 @@ window.resetPopup = function() {
   popupShown = false;
   console.log('Popup reset - pojawi się za 20s lub po kliknięciu w wydanie');
 };
+
+
+// ===== ENTER BUTTON PARTICLES =====
+(function() {
+  const canvas = document.getElementById('enterParticles');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], raf;
+
+  const COLORS = [
+    'rgba(180,80,255,',
+    'rgba(102,0,255,',
+    'rgba(220,160,255,',
+    'rgba(255,200,255,',
+    'rgba(140,60,220,'
+  ];
+
+  function resize() {
+    const btn = document.getElementById('enterBtn');
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    W = canvas.width  = r.width  + 120;
+    H = canvas.height = r.height + 120;
+  }
+
+  function spawn() {
+    const cx = W / 2;
+    const cy = H / 2;
+    // losowo wzdłuż krawędzi przycisku (±30px wokół centrum)
+    const edge = Math.floor(Math.random() * 4);
+    let x, y;
+    const bw = W - 120, bh = H - 120;
+    if (edge === 0) { x = 60 + Math.random() * bw; y = 60; }
+    else if (edge === 1) { x = 60 + Math.random() * bw; y = 60 + bh; }
+    else if (edge === 2) { x = 60; y = 60 + Math.random() * bh; }
+    else { x = 60 + bw; y = 60 + Math.random() * bh; }
+
+    const angle = Math.atan2(y - cy, x - cx) + (Math.random() - 0.5) * 1.2;
+    const speed = 0.4 + Math.random() * 1.2;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1,
+      decay: 0.012 + Math.random() * 0.018,
+      size: 1.2 + Math.random() * 2.2,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)]
+    });
+  }
+
+  let frameCount = 0;
+  function loop() {
+    // Zatrzymaj jeśli overlay już niewidoczny
+    const overlay = document.getElementById('introOverlay');
+    if (overlay && overlay.style.display === 'none') {
+      ctx.clearRect(0, 0, W, H);
+      cancelAnimationFrame(raf);
+      return;
+    }
+
+    raf = requestAnimationFrame(loop);
+    ctx.clearRect(0, 0, W, H);
+    frameCount++;
+
+    // Spawnuj 1-2 cząsteczki co klatkę
+    if (frameCount % 2 === 0) spawn();
+    if (frameCount % 5 === 0) spawn();
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.015; // delikatna grawitacja
+      p.life -= p.decay;
+
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + p.life.toFixed(2) + ')';
+      ctx.fill();
+    }
+  }
+
+  function init() {
+    const overlay = document.getElementById('introOverlay');
+    if (!overlay) return;
+    // Startuj tylko gdy overlay widoczny
+    const observer = new MutationObserver(() => {
+      if (overlay.style.display === 'none') {
+        cancelAnimationFrame(raf);
+        ctx.clearRect(0, 0, W, H);
+      }
+    });
+    observer.observe(overlay, { attributes: true, attributeFilter: ['style'] });
+
+    resize();
+    window.addEventListener('resize', resize);
+    loop();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
