@@ -704,6 +704,29 @@ section {
   border-color: var(--accent);
   color: #fff;
 }
+.event-tickets {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: var(--gradient);
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  transition: all var(--transition);
+  box-shadow: 0 0 20px rgba(102,0,255,0.3);
+}
+.event-tickets:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(102,0,255,0.55);
+  color: #fff;
+}
 .events-empty {
   text-align: center;
   padding: 4rem;

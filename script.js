@@ -330,6 +330,7 @@ async function loadEvents() {
       const d = new Date(e.date);
       const isPast = d < today;
       const linkHtml = e.link ? `<a href="${e.link}" target="_blank" rel="noopener" class="event-link" data-pl="Dołącz" data-en="Join">Dołącz</a>` : '';
+      const ticketsHtml = (!isPast && e.tickets) ? `<a href="${e.tickets}" target="_blank" rel="noopener" class="event-tickets" data-pl="BILETY" data-en="TICKETS">BILETY</a>` : '';
       return `<div class="event-item${isPast?' event-past':''}">
           <div class="event-date">
             <div class="event-day">${String(d.getDate()).padStart(2,'0')}</div>
@@ -337,7 +338,7 @@ async function loadEvents() {
             <div class="event-year">${d.getFullYear()}</div>
           </div>
           <div class="event-info"><h3>${e.name}</h3><div class="event-location">${e.location}</div>${e.stage?`<div class="event-stage">${e.stage}</div>`:''}</div>
-          ${linkHtml}
+          ${ticketsHtml || linkHtml}
         </div>`;
     }).join('');
     setLang(currentLang);
