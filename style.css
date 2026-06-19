@@ -1269,8 +1269,9 @@ img {
 #enterBtn {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 48px;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 32px 16px 42px;
   background: transparent;
   border: 2px solid rgba(123,47,255,0.8);
   border-radius: 4px;
@@ -1280,7 +1281,7 @@ img {
   font-weight: 700;
   letter-spacing: 0.3em;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -1319,7 +1320,6 @@ img {
   border-color: transparent;
   box-shadow: 0 0 60px rgba(102,0,255,0.7), 0 0 120px rgba(102,0,255,0.3);
   transform: translateY(-2px);
-  animation: none;
 }
 #enterBtn:hover::before {
   opacity: 1;
