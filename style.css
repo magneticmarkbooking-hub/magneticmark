@@ -1270,8 +1270,8 @@ img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 16px 32px 16px 42px;
+  gap: 12px;
+  padding: 16px 48px;
   background: transparent;
   border: 2px solid rgba(123,47,255,0.8);
   border-radius: 4px;
@@ -1325,8 +1325,6 @@ img {
   opacity: 1;
 }
 .enter-text {
-  flex: 1;
-  text-align: center;
 }
 @keyframes enterGlow {
   0%, 100% { box-shadow: 0 0 12px rgba(123,47,255,0.4), 0 0 24px rgba(123,47,255,0.15); }
