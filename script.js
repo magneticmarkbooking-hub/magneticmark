@@ -759,11 +759,11 @@ window.resetPopup = function() {
   let W, H, particles = [], raf;
 
   const COLORS = [
-    'rgba(255,215,80,',   // złoty
-    'rgba(255,190,30,',   // ciepły złoty
-    'rgba(200,150,255,',  // jasny fiolet
-    'rgba(255,255,255,',  // biały
-    'rgba(255,230,120,'   // złoto-kremowy
+    'rgba(102,0,255,',    // fiolet (--accent)
+    'rgba(123,47,255,',   // fiolet jasny
+    'rgba(0,100,255,',    // niebieski (--accent2)
+    'rgba(80,60,255,',    // fiolet-niebieski
+    'rgba(160,80,255,'    // środek gradientu
   ];
 
   function resize() {
