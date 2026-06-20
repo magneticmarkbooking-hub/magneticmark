@@ -317,3 +317,100 @@ body {
   flex-shrink: 0;
   font-size: 0.78rem;
 }
+
+
+/* ===== SITE EVENTS KAFELEK ===== */
+.site-events-section {
+  background: rgba(123,47,255,0.06);
+  border: 1px solid rgba(123,47,255,0.18);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+}
+.site-events-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.site-events-header h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+.site-events-filters {
+  display: flex;
+  gap: 8px;
+}
+.se-filter-btn {
+  padding: 5px 14px;
+  border: 1px solid rgba(123,47,255,0.4);
+  border-radius: 4px;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Barlow', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.se-filter-btn.active,
+.se-filter-btn:hover {
+  background: rgba(123,47,255,0.3);
+  border-color: rgba(123,47,255,0.7);
+  color: #fff;
+}
+.se-total {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  margin: 0 0 20px 0;
+}
+.se-rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.se-rank-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 48px;
+  align-items: center;
+  gap: 12px;
+}
+.se-rank-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.se-rank-bar-wrap {
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  height: 8px;
+  overflow: hidden;
+}
+.se-rank-bar {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #6600ff, #7b2fff);
+  transition: width 0.5s ease;
+  min-width: 4px;
+}
+.se-rank-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  text-align: right;
+}
+@media (max-width: 600px) {
+  .site-events-section { padding: 20px 16px; }
+  .se-rank-row { grid-template-columns: 1fr 60px 36px; gap: 8px; }
+  .se-rank-label { font-size: 12px; }
+}

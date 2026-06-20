@@ -330,3 +330,99 @@ function exportEmailsToCsv() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+
+/* ===========================================================
+   SITE EVENTS – aktywność na stronie głównej
+   Tabela: site_events (id, created_at, event_type, content_name)
+   =========================================================== */
+
+let siteEventsDays = 7; // aktywny filtr
+
+const SE_LABELS = {
+  'Booking Button':      '🎯 Klik Booking (hero)',
+  'Listen Button':       '🎵 Klik Słuchaj (hero)',
+  'Nav Contact':         '📌 Klik Kontakt (nav)',
+  'Press Pack Download': '📦 Pobranie Press Pack',
+  'Email Click':         '✉️ Klik Email (mailto)',
+  'Email Copy':          '📋 Kopiowanie emaila',
+};
+
+function seLabel(content_name) {
+  if (SE_LABELS[content_name]) return SE_LABELS[content_name];
+  // Wydania i platformy streamingowe
+  if (content_name && content_name.length > 0) return '▶️ ' + content_name;
+  return content_name || '—';
+}
+
+async function loadSiteEvents(days) {
+  siteEventsDays = days;
+  const totalEl  = document.getElementById('seTotalCount');
+  const listEl   = document.getElementById('seRankList');
+  if (!totalEl || !listEl) return;
+
+  totalEl.textContent = 'Ładowanie…';
+  listEl.innerHTML = '';
+
+  if (!isSupabaseConfigured()) {
+    totalEl.textContent = 'Supabase not configured.';
+    return;
+  }
+
+  try {
+    let url = SUPABASE_URL + '/rest/v1/site_events?select=event_type,content_name,created_at&order=created_at.desc&limit=2000';
+    if (days > 0) {
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+      url += '&created_at=gte.' + encodeURIComponent(since);
+    }
+
+    const res = await fetch(url, { headers: { 'apikey': SUPABASE_ANON_KEY } });
+    if (!res.ok) throw new Error('site_events fetch failed: ' + res.status);
+    const events = await res.json();
+
+    totalEl.textContent = events.length === 0
+      ? 'Brak danych dla wybranego okresu.'
+      : events.length + ' zdarzeń';
+
+    if (events.length === 0) return;
+
+    // Agregat — zlicz per content_name
+    const counts = {};
+    events.forEach(e => {
+      const key = e.content_name || '—';
+      counts[key] = (counts[key] || 0) + 1;
+    });
+
+    // Sortuj malejąco
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const max = sorted[0][1];
+
+    listEl.innerHTML = sorted.map(([name, count]) => {
+      const pct = Math.round((count / max) * 100);
+      return `
+        <div class="se-rank-row">
+          <span class="se-rank-label">${seLabel(name)}</span>
+          <div class="se-rank-bar-wrap">
+            <div class="se-rank-bar" style="width:${pct}%"></div>
+          </div>
+          <span class="se-rank-count">${count}</span>
+        </div>`;
+    }).join('');
+
+  } catch (err) {
+    console.error(err);
+    totalEl.textContent = 'Błąd ładowania danych.';
+  }
+}
+
+// Inicjalizacja filtrów
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.se-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.se-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadSiteEvents(parseInt(btn.dataset.days, 10));
+    });
+  });
+  loadSiteEvents(7);
+});
