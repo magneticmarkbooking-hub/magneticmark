@@ -14,6 +14,11 @@ function setLang(lang) {
     const val = el.getAttribute('data-' + lang) || el.getAttribute('data-en');
     if (val) el.innerHTML = val;
   });
+  // Placeholder inputów (np. popup email)
+  document.querySelectorAll('[data-pl-placeholder]').forEach(el => {
+    const val = el.getAttribute('data-' + lang + '-placeholder') || el.getAttribute('data-en-placeholder');
+    if (val) el.placeholder = val;
+  });
   document.documentElement.lang = lang;
   // Aktywna opcja w menu
   document.querySelectorAll('.lang-option').forEach(btn => {
@@ -740,6 +745,15 @@ function showEmailPopup() {
   if (popupShown || localStorage.getItem('mm_popup_closed')) return;
   const popup = document.getElementById('emailPopup');
   if (!popup) return;
+  // Zastosuj aktualny język do elementów popupu
+  popup.querySelectorAll('[data-pl]').forEach(el => {
+    const val = el.getAttribute('data-' + currentLang) || el.getAttribute('data-en');
+    if (val) el.innerHTML = val;
+  });
+  popup.querySelectorAll('[data-pl-placeholder]').forEach(el => {
+    const val = el.getAttribute('data-' + currentLang + '-placeholder') || el.getAttribute('data-en-placeholder');
+    if (val) el.placeholder = val;
+  });
   popup.classList.add('open');
   popupShown = true;
   // Focus na input
