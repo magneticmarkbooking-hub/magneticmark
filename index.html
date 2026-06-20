@@ -146,7 +146,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
   </div>
   <div class="intro-inner">
     <img src="images/logo-white.png" alt="MagneticMark" class="intro-logo">
-    <p class="intro-welcome" data-pl="WELCOME TO MY WORLD" data-en="WELCOME TO MY WORLD">WELCOME TO MY WORLD</p>
+    <p class="intro-welcome" data-pl="WELCOME TO MY WORLD" data-de="WELCOME TO MY WORLD" data-en="WELCOME TO MY WORLD">WELCOME TO MY WORLD</p>
     <div class="intro-rings">
       <div class="intro-ring ring-1"></div>
       <div class="intro-ring ring-2"></div>
@@ -155,7 +155,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     <div class="intro-enter-wrap">
       <canvas id="enterParticles"></canvas>
       <button id="enterBtn" onclick="enterSite()">
-        <span class="enter-text" data-pl="WEJDŹ" data-en="ENTER">WEJDŹ</span>
+        <span class="enter-text" data-pl="WEJDŹ" data-de="EINTRETEN" data-en="ENTER">WEJDŹ</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="20" height="20"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
@@ -170,13 +170,13 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
       <img src="images/logo-white.png" alt="MagneticMark Logo" class="logo-img">
     </a>
     <ul class="nav-links" id="navLinks">
-      <li><a href="#bio" data-pl="Bio" data-en="Bio">Bio</a></li>
-      <li><a href="#music" data-pl="Muzyka" data-en="Music">Muzyka</a></li>
-      <li><a href="#video" data-pl="Wideo" data-en="Video">Wideo</a></li>
-      <li><a href="#events" data-pl="Eventy" data-en="Events">Eventy</a></li>
-      <li><a href="#gallery" data-pl="Galeria" data-en="Gallery">Galeria</a></li>
-      <li><a href="#press" data-pl="Press" data-en="Press">Press</a></li>
-      <li><a href="#contact" data-pl="Kontakt" data-en="Contact">Kontakt</a></li>
+      <li><a href="#bio" data-pl="Bio" data-de="Bio" data-en="Bio">Bio</a></li>
+      <li><a href="#music" data-pl="Muzyka" data-de="Musik" data-en="Music">Muzyka</a></li>
+      <li><a href="#video" data-pl="Wideo" data-de="Video" data-en="Video">Wideo</a></li>
+      <li><a href="#events" data-pl="Eventy" data-de="Events" data-en="Events">Eventy</a></li>
+      <li><a href="#gallery" data-pl="Galeria" data-de="Galerie" data-en="Gallery">Galeria</a></li>
+      <li><a href="#press" data-pl="Press" data-de="Presse" data-en="Press">Press</a></li>
+      <li><a href="#contact" data-pl="Kontakt" data-de="Kontakt" data-en="Contact">Kontakt</a></li>
     </ul>
     <div class="nav-right">
       <div id="audioCtrl">
@@ -186,7 +186,14 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
         </button>
         <input type="range" id="volumeSlider" min="0" max="100" value="60" oninput="setVolume(this.value)" aria-label="Volume">
       </div>
-      <button class="lang-toggle" id="langToggle">EN</button>
+      <div class="lang-dropdown" id="langDropdown">
+        <button class="lang-toggle" id="langToggle">EN</button>
+        <div class="lang-menu" id="langMenu">
+          <button class="lang-option" data-lang="pl">PL</button>
+          <button class="lang-option" data-lang="en">EN</button>
+          <button class="lang-option" data-lang="de">DE</button>
+        </div>
+      </div>
       <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -201,33 +208,33 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     <div class="hero-overlay"></div>
   </div>
   <div class="hero-content">
-    <p class="hero-eyebrow" data-pl="DJ · Producent · Instrumentalista" data-en="DJ · Producer · Instrumentalist">DJ · Producent · Instrumentalista</p>
+    <p class="hero-eyebrow" data-pl="DJ · Producent · Instrumentalista" data-de="DJ · Produzent · Instrumentalist" data-en="DJ · Producer · Instrumentalist">DJ · Producent · Instrumentalista</p>
     <div class="hero-logo-wrap">
       <img src="images/logo-white.png" alt="MagneticMark" class="hero-logo-img">
     </div>
     <h1 class="sr-only">MagneticMark – polski DJ, producent muzyczny i trębacz z Opolszczyzny. Big Room, Hardstyle, Peak Time Techno.</h1>
-    <p class="hero-sub" data-pl="Big Room · Hardstyle · Peak Time Techno" data-en="Big Room · Hardstyle · Peak Time Techno">Big Room · Hardstyle · Peak Time Techno</p>
+    <p class="hero-sub" data-pl="Big Room · Hardstyle · Peak Time Techno" data-de="Big Room · Hardstyle · Peak Time Techno" data-en="Big Room · Hardstyle · Peak Time Techno">Big Room · Hardstyle · Peak Time Techno</p>
     <div class="hero-stats">
       <div class="stat">
         <span class="stat-num" data-target="500000" data-suffix="+" data-final="500K+">0+</span>
-        <span class="stat-label" data-pl="Słuchaczy miesięcznie" data-en="Monthly listeners">Słuchaczy miesięcznie</span>
+        <span class="stat-label" data-pl="Słuchaczy miesięcznie" data-de="Monatliche Hörer" data-en="Monthly listeners">Słuchaczy miesięcznie</span>
         <span class="stat-overall">overall</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
         <span class="stat-num" data-target="15000000" data-suffix="+" data-final="15M+">0+</span>
-        <span class="stat-label" data-pl="Odtworzeń" data-en="Total streams">Odtworzeń</span>
+        <span class="stat-label" data-pl="Odtworzeń" data-de="Streams gesamt" data-en="Total streams">Odtworzeń</span>
         <span class="stat-overall">overall</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
         <span class="stat-num">🎺</span>
-        <span class="stat-label" data-pl="Live trąbka" data-en="Live trumpet">Live trąbka</span>
+        <span class="stat-label" data-pl="Live trąbka" data-de="Live Trompete" data-en="Live trumpet">Live trąbka</span>
       </div>
     </div>
     <div class="hero-cta">
-      <a href="#contact" class="btn-primary" data-pl="Booking" data-en="Booking">Booking</a>
-      <a href="#music" class="btn-secondary" data-pl="Słuchaj" data-en="Listen">Słuchaj</a>
+      <a href="#contact" class="btn-primary" data-pl="Booking" data-de="Booking" data-en="Booking">Booking</a>
+      <a href="#music" class="btn-secondary" data-pl="Słuchaj" data-de="Anhören" data-en="Listen">Słuchaj</a>
     </div>
   </div>
   <a href="#bio" class="scroll-down" aria-label="Scroll down">
@@ -238,16 +245,16 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <!-- BIO -->
 <section id="bio" aria-labelledby="bio-heading">
   <div class="container">
-    <div class="section-label" data-pl="O Artyście" data-en="About the Artist" aria-hidden="true">O Artyście</div>
+    <div class="section-label" data-pl="O Artyście" data-de="Über den Künstler" data-en="About the Artist" aria-hidden="true">O Artyście</div>
     <div class="bio-grid">
       <div class="bio-image bio-image-bordered">
         <img src="images/bio.jpg" alt="MagneticMark – Marek Bodynek, polski DJ i producent muzyczny z Opolszczyzny" loading="lazy">
         <div class="bio-image-accent"></div>
       </div>
       <div class="bio-text">
-        <h2 id="bio-heading" data-pl="Trąbka + Techno =<br>MagneticMark" data-en="Trumpet + Techno =<br>MagneticMark">Trąbka + Techno =<br>MagneticMark</h2>
-        <p class="bio-long" data-pl="MagneticMark to polski DJ, producent muzyczny i instrumentalista, który wyznacza nowe standardy na polskiej scenie muzyki elektronicznej. Urodzony 30 kwietnia 1999 roku na Opolszczyźnie, swoją przygodę zaczął od produkcji elektronicznych brzmień – ale to trąbka stała się jego pasją i znakiem rozpoznawczym." data-en="MagneticMark is a Polish DJ, music producer and instrumentalist setting new standards on the Polish electronic music scene. Born on April 30, 1999 in the Opole region, he began his journey with electronic production – but the trumpet became his passion and ultimate trademark.">MagneticMark to polski DJ, producent muzyczny i instrumentalista, który wyznacza nowe standardy na polskiej scenie muzyki elektronicznej. Urodzony 30 kwietnia 1999 roku na Opolszczyźnie, swoją przygodę zaczął od produkcji elektronicznych brzmień – ale to trąbka stała się jego pasją i znakiem rozpoznawczym.</p>
-        <p class="bio-long" data-pl="Jego styl to wysokoenergetyczne połączenie Big Room, Hardstyle i Peak Time Techno, zawsze okraszone energią żywego występu. Czerpiąc inspirację od topowych artystów takich jak Hardwell, Timmy Trumpet, Blasterjaxx, W&W i Dimitri Vegas & Like Mike, dostarcza emocjonalnych, wybuchowych doświadczeń, które zapadają w pamięć." data-en="His style is a high-energy fusion of Big Room, Hardstyle and Peak Time Techno, always enriched by live trumpet performances. Drawing inspiration from Hardwell, Timmy Trumpet, Blasterjaxx, W&W and Dimitri Vegas & Like Mike, he delivers emotionally charged, explosive performances that leave lasting impressions.">Jego styl to wysokoenergetyczne połączenie Big Room, Hardstyle i Peak Time Techno, zawsze okraszone energią żywego występu. Czerpiąc inspirację od topowych artystów takich jak Hardwell, Timmy Trumpet, Blasterjaxx, W&amp;W i Dimitri Vegas &amp; Like Mike, dostarcza emocjonalnych, wybuchowych doświadczeń, które zapadają w pamięć.</p>
+        <h2 id="bio-heading" data-pl="Trąbka + Techno =<br>MagneticMark" data-de="Trompete + Techno =<br>MagneticMark" data-en="Trumpet + Techno =<br>MagneticMark">Trąbka + Techno =<br>MagneticMark</h2>
+        <p class="bio-long" data-pl="MagneticMark to polski DJ, producent muzyczny i instrumentalista, który wyznacza nowe standardy na polskiej scenie muzyki elektronicznej. Urodzony 30 kwietnia 1999 roku na Opolszczyźnie, swoją przygodę zaczął od produkcji elektronicznych brzmień – ale to trąbka stała się jego pasją i znakiem rozpoznawczym." data-de="MagneticMark ist ein polnischer DJ, Musikproduzent und Live-Instrumentalist, der neue Maßstäbe in der elektronischen Musikszene setzt. Geboren am 30. April 1999 in der Region Opole, begann er seine Reise mit elektronischer Produktion – doch die Trompete wurde zu seiner Leidenschaft und seinem unverwechselbaren Markenzeichen." data-en="MagneticMark is a Polish DJ, music producer and instrumentalist setting new standards on the Polish electronic music scene. Born on April 30, 1999 in the Opole region, he began his journey with electronic production – but the trumpet became his passion and ultimate trademark.">MagneticMark to polski DJ, producent muzyczny i instrumentalista, który wyznacza nowe standardy na polskiej scenie muzyki elektronicznej. Urodzony 30 kwietnia 1999 roku na Opolszczyźnie, swoją przygodę zaczął od produkcji elektronicznych brzmień – ale to trąbka stała się jego pasją i znakiem rozpoznawczym.</p>
+        <p class="bio-long" data-pl="Jego styl to wysokoenergetyczne połączenie Big Room, Hardstyle i Peak Time Techno, zawsze okraszone energią żywego występu. Czerpiąc inspirację od topowych artystów takich jak Hardwell, Timmy Trumpet, Blasterjaxx, W&W i Dimitri Vegas & Like Mike, dostarcza emocjonalnych, wybuchowych doświadczeń, które zapadają w pamięć." data-de="Sein Stil ist eine energiegeladene Fusion aus Big Room, Hardstyle und Peak Time Techno – stets bereichert durch die Energie eines Live-Auftritts. Inspiriert von Größen wie Hardwell, Timmy Trumpet, Blasterjaxx, W&amp;W und Dimitri Vegas &amp; Like Mike liefert er emotionale, explosive Erlebnisse, die im Gedächtnis bleiben." data-en="His style is a high-energy fusion of Big Room, Hardstyle and Peak Time Techno, always enriched by live trumpet performances. Drawing inspiration from Hardwell, Timmy Trumpet, Blasterjaxx, W&W and Dimitri Vegas & Like Mike, he delivers emotionally charged, explosive performances that leave lasting impressions.">Jego styl to wysokoenergetyczne połączenie Big Room, Hardstyle i Peak Time Techno, zawsze okraszone energią żywego występu. Czerpiąc inspirację od topowych artystów takich jak Hardwell, Timmy Trumpet, Blasterjaxx, W&amp;W i Dimitri Vegas &amp; Like Mike, dostarcza emocjonalnych, wybuchowych doświadczeń, które zapadają w pamięć.</p>
 
         <div class="bio-genres">
           <span class="genre-tag">Big Room</span>
@@ -264,13 +271,13 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <!-- MUSIC -->
 <section id="music" aria-labelledby="music-heading">
   <div class="container">
-    <div class="section-label" data-pl="Muzyka" data-en="Music" aria-hidden="true">Muzyka</div>
-    <h2 class="section-title" id="music-heading" data-pl="Najnowsze wydania" data-en="Latest releases">Najnowsze wydania</h2>
+    <div class="section-label" data-pl="Muzyka" data-de="Musik" data-en="Music" aria-hidden="true">Muzyka</div>
+    <h2 class="section-title" id="music-heading" data-pl="Najnowsze wydania" data-de="Neueste Releases" data-en="Latest releases">Najnowsze wydania</h2>
     <div class="tracks-grid" id="tracksGrid">
       <!-- Loaded by script.js from tracks.json -->
     </div>
     <div class="music-platforms">
-      <p data-pl="Słuchaj na" data-en="Listen on">Słuchaj na</p>
+      <p data-pl="Słuchaj na" data-de="Anhören auf" data-en="Listen on">Słuchaj na</p>
             <div class="platform-links">
         <a href="https://open.spotify.com/artist/7qnCu8Un2e3gvg1ELX3HNg" data-app="spotify:artist:7qnCu8Un2e3gvg1ELX3HNg" target="_blank" rel="noopener" class="platform-link spotify">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
@@ -301,25 +308,25 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <!-- VIDEO -->
 <section id="video" aria-labelledby="video-heading">
   <div class="container">
-    <div class="section-label" data-pl="Wideo" data-en="Video" aria-hidden="true">Wideo</div>
-    <h2 class="section-title" id="video-heading" data-pl="Najlepsze sety" data-en="Best sets">Najlepsze sety</h2>
+    <div class="section-label" data-pl="Wideo" data-de="Video" data-en="Video" aria-hidden="true">Wideo</div>
+    <h2 class="section-title" id="video-heading" data-pl="Najlepsze sety" data-de="Beste Sets" data-en="Best sets">Najlepsze sety</h2>
     <div class="video-grid">
       <div class="video-main">
         <div class="video-wrapper">
           <iframe src="https://www.youtube.com/embed/WhcxRo1mfCA" title="MagneticMark – YouTube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
         </div>
-        <p class="video-label" data-pl="MagneticMark MAINSTAGE 2026" data-en="MagneticMark MAINSTAGE 2026">MagneticMark MAINSTAGE 2026</p>
+        <p class="video-label" data-pl="MagneticMark MAINSTAGE 2026" data-de="MagneticMark MAINSTAGE 2026" data-en="MagneticMark MAINSTAGE 2026">MagneticMark MAINSTAGE 2026</p>
       </div>
       <div class="video-side">
         <div class="video-wrapper video-wrapper-sm">
           <iframe src="https://www.youtube.com/embed/uVsQ3G8vp2c" title="MagneticMark Set 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
         </div>
-        <p class="video-label" data-pl="MagneticMark Promo Set 2025" data-en="MagneticMark Promo Set 2025">MagneticMark Promo Set 2025</p>
+        <p class="video-label" data-pl="MagneticMark Promo Set 2025" data-de="MagneticMark Promo Set 2025" data-en="MagneticMark Promo Set 2025">MagneticMark Promo Set 2025</p>
         <div class="sc-embed-wrap">
           <iframe width="100%" height="120" scrolling="no" frameborder="no" allow="autoplay"
             src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F2303702336&color=%236600ff&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"
             loading="lazy"></iframe>
-          <p class="video-label" data-pl="Tomorrowland DJ Contest 2026" data-en="Tomorrowland DJ Contest 2026">Tomorrowland DJ Contest 2026</p>
+          <p class="video-label" data-pl="Tomorrowland DJ Contest 2026" data-de="Tomorrowland DJ Contest 2026" data-en="Tomorrowland DJ Contest 2026">Tomorrowland DJ Contest 2026</p>
         </div>
       </div>
     </div>
@@ -329,13 +336,13 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <!-- EVENTS -->
 <section id="events" aria-labelledby="events-heading">
   <div class="container">
-    <div class="section-label" data-pl="Kalendarz" data-en="Calendar" aria-hidden="true">Kalendarz</div>
-    <h2 class="section-title" id="events-heading" data-pl="Nadchodzące eventy" data-en="Upcoming events">Nadchodzące eventy</h2>
+    <div class="section-label" data-pl="Kalendarz" data-de="Kalender" data-en="Calendar" aria-hidden="true">Kalendarz</div>
+    <h2 class="section-title" id="events-heading" data-pl="Nadchodzące eventy" data-de="Bevorstehende Events" data-en="Upcoming events">Nadchodzące eventy</h2>
     <div class="events-list" id="eventsList">
       <!-- Loaded by script.js from events.json -->
     </div>
     <div class="events-empty" id="eventsEmpty" style="display:none;">
-      <p data-pl="Brak nadchodzących eventów. Obserwuj social media po nowe daty!" data-en="No upcoming events. Follow on social media for new dates!">Brak nadchodzących eventów. Obserwuj social media po nowe daty!</p>
+      <p data-pl="Brak nadchodzących eventów. Obserwuj social media po nowe daty!" data-de="Keine bevorstehenden Events. Folge den sozialen Medien für neue Termine!" data-en="No upcoming events. Follow on social media for new dates!">Brak nadchodzących eventów. Obserwuj social media po nowe daty!</p>
     </div>
   </div>
 </section>
@@ -343,7 +350,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <!-- GALLERY -->
 <section id="gallery" aria-labelledby="gallery-heading">
   <div class="container">
-    <div class="section-label" data-pl="Galeria" data-en="Gallery" aria-hidden="true">Galeria</div>
+    <div class="section-label" data-pl="Galeria" data-de="Galerie" data-en="Gallery" aria-hidden="true">Galeria</div>
     <h2 class="sr-only" id="gallery-heading">Galeria – zdjęcia MagneticMark live na scenie</h2>
     <div class="gallery-grid">
       <div class="gallery-item" onclick="openLightbox('images/15.jpg')" role="button" tabindex="0"><img src="images/15.jpg" alt="MagneticMark DJ set na żywo z trąbką – mainstage" loading="eager"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
@@ -361,8 +368,8 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <!-- PRESS -->
 <section id="press" aria-labelledby="press-heading">
   <div class="container">
-    <div class="section-label" data-pl="Media" data-en="Media" aria-hidden="true">Media</div>
-    <h2 class="section-title" id="press-heading" data-pl="Press & Media" data-en="Press & Media">Press & Media</h2>
+    <div class="section-label" data-pl="Media" data-de="Medien" data-en="Media" aria-hidden="true">Media</div>
+    <h2 class="section-title" id="press-heading" data-pl="Press & Media" data-de="Presse &amp; Medien" data-en="Press & Media">Press & Media</h2>
     <div class="press-grid" id="pressGrid">
       <!-- Loaded by script.js from press.json -->
     </div>
@@ -372,12 +379,12 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <!-- CONTACT -->
 <section id="contact" aria-labelledby="contact-heading">
   <div class="container">
-    <div class="section-label" data-pl="Kontakt" data-en="Contact" aria-hidden="true">Kontakt</div>
-    <h2 class="section-title" id="contact-heading" data-pl="Booking & Kontakt" data-en="Booking & Contact">Booking & Kontakt</h2>
+    <div class="section-label" data-pl="Kontakt" data-de="Kontakt" data-en="Contact" aria-hidden="true">Kontakt</div>
+    <h2 class="section-title" id="contact-heading" data-pl="Booking & Kontakt" data-de="Booking &amp; Kontakt" data-en="Booking & Contact">Booking & Kontakt</h2>
     <div class="contact-grid">
       <div class="contact-info">
-        <p class="contact-intro" data-pl="Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu." data-en="Available for events, festivals and collaborations. Get in touch for booking enquiries.">Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu.</p>
-        <a href="https://www.dropbox.com/scl/fi/roytkq5979ehv1ue2cp44/PressPack-MagneticMark.zip?rlkey=5es5myo85g9mo1gp8wdnufhpm&st=j2knst9q&dl=1" class="contact-email-btn" target="_self" data-pl="Pobierz Press Pack" data-en="Download Press Pack">
+        <p class="contact-intro" data-pl="Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu." data-de="Verfügbar für Events, Festivals und Kooperationen. Kontakt für Booking-Anfragen." data-en="Available for events, festivals and collaborations. Get in touch for booking enquiries.">Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu.</p>
+        <a href="https://www.dropbox.com/scl/fi/roytkq5979ehv1ue2cp44/PressPack-MagneticMark.zip?rlkey=5es5myo85g9mo1gp8wdnufhpm&st=j2knst9q&dl=1" class="contact-email-btn" target="_self" data-pl="Pobierz Press Pack" data-de="Press Pack herunterladen" data-en="Download Press Pack">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Pobierz Press Pack
         </a>

@@ -8,16 +8,39 @@ let currentLang = localStorage.getItem('mm-lang') || 'pl';
 function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('mm-lang', lang);
-  document.getElementById('langToggle').textContent = lang === 'pl' ? 'EN' : 'PL';
+  const labels = { pl: 'PL', en: 'EN', de: 'DE' };
+  document.getElementById('langToggle').textContent = labels[lang] || 'PL';
   document.querySelectorAll('[data-pl]').forEach(el => {
-    const val = el.getAttribute('data-' + lang);
+    const val = el.getAttribute('data-' + lang) || el.getAttribute('data-en');
     if (val) el.innerHTML = val;
   });
   document.documentElement.lang = lang;
+  // Aktywna opcja w menu
+  document.querySelectorAll('.lang-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
 }
 
-document.getElementById('langToggle').addEventListener('click', () => {
-  setLang(currentLang === 'pl' ? 'en' : 'pl');
+// Rozwijane menu języka
+const langDropdown = document.getElementById('langDropdown');
+const langMenu = document.getElementById('langMenu');
+const langToggle = document.getElementById('langToggle');
+
+langToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  langMenu.classList.toggle('open');
+});
+
+document.querySelectorAll('.lang-option').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setLang(btn.dataset.lang);
+    langMenu.classList.remove('open');
+  });
+});
+
+document.addEventListener('click', () => {
+  langMenu.classList.remove('open');
 });
 
 // ===== NAVBAR =====
@@ -325,16 +348,17 @@ async function loadEvents() {
 
     const mPl=['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
     const mEn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const mDe=['JAN','FEB','MÄR','APR','MAI','JUN','JUL','AUG','SEP','OKT','NOV','DEZ'];
 
     list.innerHTML = sorted.map(e => {
       const d = new Date(e.date);
       const isPast = d < today;
-      const linkHtml = e.link ? `<a href="${e.link}" target="_blank" rel="noopener" class="event-link" data-pl="Dołącz" data-en="Join">Dołącz</a>` : '';
-      const ticketsHtml = (!isPast && e.tickets) ? `<a href="${e.tickets}" target="_blank" rel="noopener" class="event-tickets" data-pl="BILETY" data-en="TICKETS">BILETY</a>` : '';
+      const linkHtml = e.link ? `<a href="${e.link}" target="_blank" rel="noopener" class="event-link" data-pl="Dołącz" data-en="Join" data-de="Beitreten">Dołącz</a>` : '';
+      const ticketsHtml = (!isPast && e.tickets) ? `<a href="${e.tickets}" target="_blank" rel="noopener" class="event-tickets" data-pl="BILETY" data-en="TICKETS" data-de="TICKETS">BILETY</a>` : '';
       return `<div class="event-item${isPast?' event-past':''}">
           <div class="event-date">
             <div class="event-day">${String(d.getDate()).padStart(2,'0')}</div>
-            <div class="event-month" data-pl="${mPl[d.getMonth()]}" data-en="${mEn[d.getMonth()]}">${currentLang==='pl'?mPl[d.getMonth()]:mEn[d.getMonth()]}</div>
+            <div class="event-month" data-pl="${mPl[d.getMonth()]}" data-en="${mEn[d.getMonth()]}" data-de="${mDe[d.getMonth()]}">${currentLang==='pl'?mPl[d.getMonth()]:currentLang==='de'?mDe[d.getMonth()]:mEn[d.getMonth()]}</div>
             <div class="event-year">${d.getFullYear()}</div>
           </div>
           <div class="event-info"><h3>${e.name}</h3><div class="event-location">${e.location}</div>${e.stage?`<div class="event-stage">${e.stage}</div>`:''}</div>
@@ -431,7 +455,7 @@ async function loadPress() {
             <h3 class="press-title">${a.title}</h3>
             <p class="press-excerpt">${excerpt}</p>
           </div>
-          <a href="${a.url}" target="_blank" rel="noopener" class="press-link" data-pl="Czytaj artykuł" data-en="Read article">
+          <a href="${a.url}" target="_blank" rel="noopener" class="press-link" data-pl="Czytaj artykuł" data-en="Read article" data-de="Artikel lesen">
             Czytaj artykuł
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -501,6 +525,7 @@ function trackCardClick(el) {
       content_type: 'music_release'
     });
   }
+  trackSiteEvent('ViewContent', title || 'Track Card');
   // Popup trigger
   triggerPopupOnViewContent();
   // Przekierowanie
@@ -591,8 +616,51 @@ function setupPixelEvents() {
             content_category: 'DJ Producer',
             content_type: 'music_social'
           });
+          trackSiteEvent('ViewContent', el.getAttribute('aria-label') || el.href || 'Social Link');
         }
       });
+    });
+  });
+
+  // Booking – przycisk hero
+  const bookingBtn = document.querySelector('a.btn-primary');
+  if (bookingBtn) {
+    bookingBtn.addEventListener('click', function() {
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'Contact', {
+          content_name: 'Booking Button',
+          content_category: 'Booking'
+        });
+        trackSiteEvent('Contact', 'Booking Button');
+      }
+    });
+  }
+
+  // Słuchaj – przycisk hero
+  const listenBtn = document.querySelector('a.btn-secondary');
+  if (listenBtn) {
+    listenBtn.addEventListener('click', function() {
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'ViewContent', {
+          content_name: 'Listen Button',
+          content_category: 'Music',
+          content_type: 'music_social'
+        });
+        trackSiteEvent('ViewContent', 'Listen Button');
+      }
+    });
+  }
+
+  // Kontakt – link w nawigacji
+  document.querySelectorAll('nav a[href="#contact"]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'Contact', {
+          content_name: 'Nav Contact',
+          content_category: 'Booking'
+        });
+        trackSiteEvent('Contact', 'Nav Contact');
+      }
     });
   });
 
@@ -605,6 +673,7 @@ function setupPixelEvents() {
           content_name: 'Press Pack Download',
           content_category: 'Booking'
         });
+        trackSiteEvent('Contact', 'Press Pack Download');
       }
     });
   }
@@ -619,9 +688,26 @@ function setupPixelEvents() {
           content_name: 'Email Click',
           content_category: 'Booking'
         });
+        trackSiteEvent('Contact', 'Email Click');
       }
     });
   }
+}
+
+// ===== SITE EVENT TRACKING (Supabase) =====
+function trackSiteEvent(event_type, content_name) {
+  const url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : '';
+  const key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : '';
+  if (!url || !key) return;
+  fetch(url + '/rest/v1/site_events', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': key,
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({ event_type, content_name })
+  }).catch(() => {}); // cicho ignoruj błędy sieciowe
 }
 
 // Lead + kopiowanie – przycisk COPY
@@ -638,6 +724,7 @@ function copyEmail() {
         content_name: 'Email Copy',
         content_category: 'Booking'
       });
+      trackSiteEvent('Contact', 'Email Copy');
     }
   });
 }

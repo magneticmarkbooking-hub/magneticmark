@@ -111,6 +111,9 @@ a { text-decoration: none; color: inherit; }
 .nav-links a:hover { color: #fff; }
 .nav-links a:hover::after { transform: scaleX(1); }
 .nav-right { display: flex; align-items: center; gap: 1rem; }
+.lang-dropdown {
+  position: relative;
+}
 .lang-toggle {
   background: none;
   border: 1px solid rgba(123,47,255,0.5);
@@ -127,6 +130,44 @@ a { text-decoration: none; color: inherit; }
 .lang-toggle:hover {
   background: var(--accent);
   border-color: var(--accent);
+}
+.lang-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #0e0520;
+  border: 1px solid rgba(123,47,255,0.35);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 1000;
+  min-width: 60px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.lang-menu.open {
+  display: block;
+}
+.lang-option {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.lang-option:hover {
+  background: rgba(123,47,255,0.2);
+  color: #fff;
+}
+.lang-option.active {
+  color: var(--accent);
 }
 .hamburger {
   display: none;
