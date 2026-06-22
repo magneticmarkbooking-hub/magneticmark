@@ -22,42 +22,6 @@
   if (ogImage) ogImage.setAttribute('content', RELEASE.coverRaw || RELEASE.cover);
 })();
 
-// Klik na przycisk: odpalamy nasze Meta Piksele (główny 27127010080316320
-// i Tonden/fanlink 8169582049794791 - oba zainicjowane w <head>) z eventem
-// ViewContent, JEDNYM wywołaniem fbq (bez podania ID, fbq wysyła event do
-// wszystkich zainicjowanych Pixeli na raz). Potem przechodzimy WPROST na
-// link docelowy (np. Spotify) - bez przystanku na fanlink.tv. Oba Piksele
-// łapią dane (IP, User Agent, fbp, fbc) bezpośrednio tutaj, na tej stronie.
-//
-// Parametry zdarzenia (content_type/content_name/content_category) są
-// ustawione tak, żeby jak najbardziej odpowiadały temu, co wcześniej
-// wysyłał Tonden/fanlink dla tego samego kliknięcia:
-//   content_type: "product"  (Tonden też używał "product")
-//   content_name: nazwa platformy, np. "spotify" (Tonden: content_name=spotify)
-//   content_category: "stream"  (Tonden też używał "stream")
-//
-// Dodatkowo wysyłamy jako custom_data parametry kampanii (utm_*, fbclid,
-// gclid) i lekki session_id - przydatne gdybyś kiedyś chciał rozbić raporty
-// w Meta po konkretnej kampanii/źródle ruchu, nie tylko po samym kliknięciu.
-//
-// CZEGO NIE wysyłamy i czemu:
-// - event_time, page URL, referrer - Pixel zbiera to sam automatycznie przy
-//   każdym evencie, ręczne dorzucanie tego przez fbq() nic by nie zmieniło
-//   (to nie są parametry, które standardowy klientowy Pixel akceptuje).
-// - user_id - ta strona nie ma logowania, nie ma czego wysłać; dodanie pola
-//   "na zapas" tylko zaśmieciłoby dane fałszywymi/pustymi wartościami.
-//
-// Dla bezpieczeństwa dodajemy unikalny eventID - gdybyś kiedyś wrócił do
-// wysyłania ruchu przez fanlink.tv i tam też skonfigurował ten sam eventID
-// dla ViewContent, Meta automatycznie wykryje duplikat i zliczy zdarzenie
-// tylko raz (deduplikacja po stronie Meta).
-//
-// WAŻNE dla jakości dopasowania zdarzeń (Event Match Quality): jeśli ktoś
-// trafia tutaj z reklamy Meta, w URL tej strony jest parametr "fbclid" -
-// to on pozwala Facebookowi dopasować kliknięcie do konkretnej osoby.
-// Doklejamy go (i ewentualne parametry utm_*) do linku docelowego - nie
-// szkodzi nawet jeśli link prowadzi na Spotify, a daje elastyczność, gdyby
-// kiedyś docelowa strona też miała własny tracking.
 function buildForwardedUrl(baseUrl) {
   const incoming = new URLSearchParams(window.location.search);
   const keysToForward = ['fbclid', 'gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
@@ -70,9 +34,6 @@ function buildForwardedUrl(baseUrl) {
   return baseUrl + (baseUrl.includes('?') ? '&' : '?') + query;
 }
 
-// Zbiera parametry kampanii z URL tej strony, do wysłania jako custom_data
-// w evencie Pixela (osobno od buildForwardedUrl, które robi to samo dla
-// linku wyjściowego - tu zostają jako dane analityczne w samym evencie).
 function getCampaignParams() {
   const incoming = new URLSearchParams(window.location.search);
   const keys = ['fbclid', 'gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
@@ -83,11 +44,6 @@ function getCampaignParams() {
   return params;
 }
 
-// Lekki identyfikator sesji - losowy, trzymany w sessionStorage (czyli żyje
-// tylko do zamknięcia karty/przeglądarki). Nie jest to "session_id" w sensie
-// systemu logowania - to tylko sposób na odróżnienie "ta sama osoba kliknęła
-// dwa razy w tej samej wizycie" od dwóch różnych wizyt, gdyby kiedyś to było
-// przydatne w analizie.
 function getSessionId() {
   const key = 'mm_session_id';
   let id = sessionStorage.getItem(key);
@@ -98,13 +54,51 @@ function getSessionId() {
   return id;
 }
 
+// ===== CONVERSIONS API (CAPI) =====
+// Wysyła do obu Pixeli (27127010080316320 i 8169582049794791) przez Edge Function
+const CAPI_ENDPOINT = 'https://igtyglcyithqpvgimgif.supabase.co/functions/v1/meta-capi';
+const CAPI_PIXEL_IDS = ['27127010080316320', '8169582049794791'];
+
+function getFbp() {
+  const m = document.cookie.match(/_fbp=([^;]+)/);
+  return m ? m[1] : '';
+}
+
+function getFbc() {
+  const c = document.cookie.match(/_fbc=([^;]+)/);
+  if (c) return c[1];
+  const fbclid = new URLSearchParams(window.location.search).get('fbclid');
+  if (fbclid) return 'fb.1.' + Date.now() + '.' + fbclid;
+  return '';
+}
+
+function sendCAPI(eventName, eventId) {
+  try {
+    fetch(CAPI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_name:       eventName,
+        event_id:         eventId,
+        event_source_url: window.location.href,
+        fbp:              getFbp(),
+        fbc:              getFbc(),
+        pixel_ids:        CAPI_PIXEL_IDS,
+      }),
+    }).catch(function() {});
+  } catch(e) {}
+}
+// ===== END CAPI =====
+
 function handleLinkClick(e) {
   e.preventDefault();
   const el = e.currentTarget;
   const url = buildForwardedUrl(el.dataset.link);
 
+  // Generuj eventId PRZED blokiem fbq, żeby użyć go też w CAPI
+  const eventId = 'release_' + RELEASE.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_' + Date.now();
+
   if (typeof fbq !== 'undefined') {
-    const eventId = 'release_' + RELEASE.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_' + Date.now();
     const eventData = Object.assign(
       {
         content_type: 'product',
@@ -117,16 +111,17 @@ function handleLinkClick(e) {
     fbq('track', 'ViewContent', eventData, { eventID: eventId });
   }
 
+  // CAPI — ten sam eventId, oba Pixele
+  sendCAPI('ViewContent', eventId);
+
   // Mobile → otwórz aplikację Spotify; desktop → nowa karta + popup
   const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
   if (isMobile) {
-    // Konwertuj https://open.spotify.com/artist/ID → spotify:artist:ID
     const spotifyUri = url.split('?')[0]
       .replace('https://open.spotify.com/', 'spotify:')
       .replace(/\//g, ':');
     window.location.href = spotifyUri;
-    // Fallback jeśli aplikacja nie zainstalowana
     setTimeout(function() {
       if (!document.hidden) window.location.href = url;
     }, 2000);
@@ -145,8 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function initBgOrbs() {
   const colors = ['rgba(123,47,255,0.5)', 'rgba(0,136,255,0.45)', 'rgba(255,215,0,0.3)'];
   const container = document.body;
-  // Pozycje w narożnikach/bokach ekranu - centralny pas (gdzie jest karta)
-  // zostaje wolny, żeby kuleczki nie nakładały się na tekst i przycisk.
   const zones = [
     { left: [2, 18],  top: [4, 26] },
     { left: [78, 96], top: [4, 26] },
@@ -169,28 +162,22 @@ function initBgOrbs() {
   });
 }
 
-// ===== PARALLAX GLOW - delikatna reakcja na ruch myszy (tylko desktop fine pointer) =====
 function initParallaxGlow() {
   const glow = document.querySelector('.ambient-glow');
   if (!glow) return;
   if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
   document.addEventListener('mousemove', (e) => {
     const xPercent = (e.clientX / window.innerWidth - 0.5) * 2;
     const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
-    const moveX = xPercent * 30;
-    const moveY = yPercent * 30;
-    glow.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+    glow.style.transform = `translate(calc(-50% + ${xPercent * 30}px), calc(-50% + ${yPercent * 30}px))`;
   });
 }
 
-// ===== CARD TILT - delikatny 3D tilt na cover, tylko desktop =====
 function initCoverTilt() {
   const frame = document.querySelector('.cover-frame');
   const wrap = document.querySelector('.cover-wrap');
   if (!frame || !wrap) return;
   if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
   wrap.addEventListener('mousemove', (e) => {
     const rect = wrap.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
@@ -203,30 +190,20 @@ function initCoverTilt() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    initBgOrbs();
-    initParallaxGlow();
-    initCoverTilt();
-  });
+  document.addEventListener('DOMContentLoaded', () => { initBgOrbs(); initParallaxGlow(); initCoverTilt(); });
 } else {
-  initBgOrbs();
-  initParallaxGlow();
-  initCoverTilt();
+  initBgOrbs(); initParallaxGlow(); initCoverTilt();
 }
 
-// ===== CUSTOM CURSOR - identyczny mechanizm jak na magneticmarkdj.com =====
+// ===== CUSTOM CURSOR =====
 function initCustomCursor() {
   const canvas = document.getElementById('cursorTrailCanvas');
   const core = document.getElementById('customCursorCore');
   if (!canvas || !core) return;
-
   if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
   canvas.style.display = 'block';
-
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-
   function resizeCanvas() {
     canvas.width = window.innerWidth * dpr;
     canvas.height = window.innerHeight * dpr;
@@ -237,89 +214,47 @@ function initCustomCursor() {
   }
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
-
-  const TIP_OFFSET_X = 4;
-  const TIP_OFFSET_Y = 2;
-
-  let mouseX = -100, mouseY = -100;
-  let lastX = -100, lastY = -100;
-  let points = [];
-  let cursorVisible = false;
-
+  const TIP_OFFSET_X = 4, TIP_OFFSET_Y = 2;
+  let mouseX = -100, mouseY = -100, lastX = -100, lastY = -100, points = [], cursorVisible = false;
   document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    core.style.left = mouseX + 'px';
-    core.style.top = mouseY + 'px';
-
-    if (!cursorVisible) {
-      core.style.display = 'block';
-      cursorVisible = true;
-      document.body.classList.add('has-custom-cursor');
-    }
-
-    const tipX = mouseX + TIP_OFFSET_X;
-    const tipY = mouseY + TIP_OFFSET_Y;
-
+    mouseX = e.clientX; mouseY = e.clientY;
+    core.style.left = mouseX + 'px'; core.style.top = mouseY + 'px';
+    if (!cursorVisible) { core.style.display = 'block'; cursorVisible = true; document.body.classList.add('has-custom-cursor'); }
+    const tipX = mouseX + TIP_OFFSET_X, tipY = mouseY + TIP_OFFSET_Y;
     const dist = Math.hypot(tipX - lastX, tipY - lastY);
     const steps = Math.min(Math.max(Math.floor(dist / 4), 1), 12);
     for (let s = 0; s < steps; s++) {
       const t = s / steps;
-      points.push({
-        x: lastX + (tipX - lastX) * t,
-        y: lastY + (tipY - lastY) * t,
-        life: 1
-      });
+      points.push({ x: lastX + (tipX - lastX) * t, y: lastY + (tipY - lastY) * t, life: 1 });
     }
     if (points.length > 60) points.splice(0, points.length - 60);
-    lastX = tipX;
-    lastY = tipY;
+    lastX = tipX; lastY = tipY;
   });
-
-  function hideCursor() {
-    core.style.display = 'none';
-    cursorVisible = false;
-    points = [];
-  }
-  function showCursor() {
-    core.style.display = 'block';
-    cursorVisible = true;
-    document.body.classList.add('has-custom-cursor');
-  }
-
+  function hideCursor() { core.style.display = 'none'; cursorVisible = false; points = []; }
+  function showCursor() { core.style.display = 'block'; cursorVisible = true; document.body.classList.add('has-custom-cursor'); }
   document.documentElement.addEventListener('mouseleave', hideCursor);
   document.documentElement.addEventListener('mouseenter', showCursor);
   window.addEventListener('blur', hideCursor);
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) hideCursor();
-  });
-
+  document.addEventListener('visibilitychange', () => { if (document.hidden) hideCursor(); });
   function drawTrail() {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     for (let i = 0; i < points.length; i++) {
-      const p = points[i];
-      p.life -= 0.05;
-      if (p.life <= 0) continue;
+      const p = points[i]; p.life -= 0.05; if (p.life <= 0) continue;
       const radius = 4 * p.life + 1;
       const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius * 2.2);
       grad.addColorStop(0, 'rgba(170,100,255,' + (p.life * 0.55) + ')');
       grad.addColorStop(1, 'rgba(123,47,255,0)');
       ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, radius * 2.2, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x, p.y, radius * 2.2, 0, Math.PI * 2); ctx.fill();
     }
     points = points.filter(p => p.life > 0);
     requestAnimationFrame(drawTrail);
   }
   drawTrail();
 }
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initCustomCursor);
-} else {
-  initCustomCursor();
-}
+} else { initCustomCursor(); }
 
 // ===== EMAIL POPUP =====
 let emailPopupShown = false;
@@ -367,7 +302,10 @@ function submitEmailPopup() {
       msg.style.color = '#44ff88';
       msg.textContent = "\u2713 You're in! Thanks \uD83C\uDFBA";
       localStorage.setItem('mm_popup_subscribed', '1');
-      if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: 'Email Signup', content_category: 'Newsletter' });
+      // Lead — browser pixel + CAPI do obu Pixeli
+      const leadEventId = 'lead_popup_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: 'Email Signup', content_category: 'Newsletter' }, { eventID: leadEventId });
+      sendCAPI('Lead', leadEventId);
       setTimeout(() => { window.location.href = 'https://magneticmarkdj.com'; }, 1800);
     } else { throw new Error(); }
   })
@@ -380,7 +318,6 @@ window.addEventListener('load', function() {
   emailPopupTimer = setTimeout(showEmailPopup, 10000);
 });
 
-// Debug
 window.resetPopup = function() {
   localStorage.removeItem('mm_popup_subscribed');
   emailPopupShown = false;
