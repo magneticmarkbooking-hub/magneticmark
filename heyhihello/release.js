@@ -117,10 +117,24 @@ function handleLinkClick(e) {
     fbq('track', 'ViewContent', eventData, { eventID: eventId });
   }
 
-  // Otwórz Spotify w nowej karcie – strona zostaje, pojawia się popup
-  window.open(url, '_blank', 'noopener');
-  clearTimeout(emailPopupTimer);
-  setTimeout(showEmailPopup, 350);
+  // Mobile → otwórz aplikację Spotify; desktop → nowa karta + popup
+  const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+  if (isMobile) {
+    // Konwertuj https://open.spotify.com/artist/ID → spotify:artist:ID
+    const spotifyUri = url.split('?')[0]
+      .replace('https://open.spotify.com/', 'spotify:')
+      .replace(/\//g, ':');
+    window.location.href = spotifyUri;
+    // Fallback jeśli aplikacja nie zainstalowana
+    setTimeout(function() {
+      if (!document.hidden) window.location.href = url;
+    }, 2000);
+  } else {
+    window.open(url, '_blank', 'noopener');
+    clearTimeout(emailPopupTimer);
+    setTimeout(showEmailPopup, 350);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
