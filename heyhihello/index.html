@@ -87,6 +87,25 @@ src="https://www.facebook.com/tr?id=8169582049794791&ev=PageView&noscript=1"
   </svg>
 </div>
 
+
+<!-- EMAIL POPUP -->
+<div id="emailPopup" class="email-popup" onclick="closeEmailPopup()">
+  <div class="email-popup-inner" onclick="event.stopPropagation()">
+    <button class="email-popup-close" onclick="closeEmailPopup()">×</button>
+    <p class="popup-eyebrow">STAY IN THE LOOP</p>
+    <h2 class="popup-title">Hey, hi, hello!</h2>
+    <p class="popup-desc">While you're listening — drop your email for new tracks &amp; events.</p>
+    <div class="popup-row">
+      <input id="popupEmail" class="popup-input" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')submitEmailPopup()">
+    </div>
+    <button class="popup-btn" onclick="submitEmailPopup()">
+      <span>Let's go!</span>
+    </button>
+    <p id="popupMsg" class="popup-msg"></p>
+    <p class="popup-fine">No spam. Unsubscribe anytime.</p>
+  </div>
+</div>
+
 <script src="LINK_DO_WKLEJENIA.js"></script>
 <script src="SUPABASE_DANE.js"></script>
 <script>const RELEASE_SLUG = "heyhihello";</script>

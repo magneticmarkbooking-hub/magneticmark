@@ -117,12 +117,10 @@ function handleLinkClick(e) {
     fbq('track', 'ViewContent', eventData, { eventID: eventId });
   }
 
-  // Małe opóźnienie, żeby zdarzenie Pixela zdążyło wysłać się do Meta
-  // zanim przeglądarka przejdzie na inną stronę (nawigacja przerywa
-  // trwające żądania sieciowe).
-  setTimeout(() => {
-    window.location.href = url;
-  }, 100);
+  // Otwórz Spotify w nowej karcie – strona zostaje, pojawia się popup
+  window.open(url, '_blank', 'noopener');
+  clearTimeout(emailPopupTimer);
+  setTimeout(showEmailPopup, 350);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -308,3 +306,68 @@ if (document.readyState === 'loading') {
 } else {
   initCustomCursor();
 }
+
+// ===== EMAIL POPUP =====
+let emailPopupShown = false;
+let emailPopupTimer = null;
+
+function showEmailPopup() {
+  if (emailPopupShown || localStorage.getItem('mm_popup_subscribed')) return;
+  const popup = document.getElementById('emailPopup');
+  if (!popup) return;
+  popup.classList.add('open');
+  emailPopupShown = true;
+  setTimeout(() => { const inp = document.getElementById('popupEmail'); if (inp) inp.focus(); }, 150);
+}
+
+function closeEmailPopup() {
+  const popup = document.getElementById('emailPopup');
+  if (popup) popup.classList.remove('open');
+  window.location.href = 'https://magneticmarkdj.com';
+}
+
+function submitEmailPopup() {
+  const email = document.getElementById('popupEmail').value.trim();
+  const msg   = document.getElementById('popupMsg');
+
+  if (!email || !email.includes('@')) {
+    msg.style.color = '#ff4466';
+    msg.textContent = 'Enter a valid email address.';
+    return;
+  }
+
+  msg.style.color = 'rgba(170,170,204,0.6)';
+  msg.textContent = 'Saving...';
+
+  const supaUrl = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : '';
+  const supaKey = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : '';
+  if (!supaUrl || !supaKey) { msg.style.color = '#ff4466'; msg.textContent = 'Configuration error.'; return; }
+
+  fetch(supaUrl + '/rest/v1/email_signups', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': supaKey, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ email: email })
+  })
+  .then(res => {
+    if (res.status === 201 || res.status === 409) {
+      msg.style.color = '#44ff88';
+      msg.textContent = "\u2713 You're in! Thanks \uD83C\uDFBA";
+      localStorage.setItem('mm_popup_subscribed', '1');
+      if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: 'Email Signup', content_category: 'Newsletter' });
+      setTimeout(() => { window.location.href = 'https://magneticmarkdj.com'; }, 1800);
+    } else { throw new Error(); }
+  })
+  .catch(() => { msg.style.color = '#ff4466'; msg.textContent = 'Something went wrong. Please try again.'; });
+}
+
+// Trigger: 10 sekund na stronie
+window.addEventListener('load', function() {
+  if (localStorage.getItem('mm_popup_subscribed')) return;
+  emailPopupTimer = setTimeout(showEmailPopup, 10000);
+});
+
+// Debug
+window.resetPopup = function() {
+  localStorage.removeItem('mm_popup_subscribed');
+  emailPopupShown = false;
+};
