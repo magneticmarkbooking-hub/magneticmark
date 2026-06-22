@@ -496,6 +496,44 @@ const bioSection = document.querySelector('#bio');
 if (bioSection) bioObserver.observe(bioSection);
 
 // ===== INIT =====
+
+// ===== CONVERSIONS API (CAPI) =====
+const CAPI_ENDPOINT = 'https://igtyglcyithqpvgimgif.supabase.co/functions/v1/meta-capi';
+
+function generateEventId(prefix) {
+  return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+}
+
+function getFbp() {
+  const m = document.cookie.match(/_fbp=([^;]+)/);
+  return m ? m[1] : '';
+}
+
+function getFbc() {
+  const c = document.cookie.match(/_fbc=([^;]+)/);
+  if (c) return c[1];
+  const fbclid = new URLSearchParams(window.location.search).get('fbclid');
+  if (fbclid) return 'fb.1.' + Date.now() + '.' + fbclid;
+  return '';
+}
+
+function sendCAPI(eventName, eventId) {
+  try {
+    fetch(CAPI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_name:       eventName,
+        event_id:         eventId,
+        event_source_url: window.location.href,
+        fbp:              getFbp(),
+        fbc:              getFbc(),
+      }),
+    }).catch(function() {});
+  } catch(e) {}
+}
+// ===== END CAPI =====
+
 document.addEventListener('DOMContentLoaded', () => {
   setLang(currentLang);
   document.body.classList.add('locked');
@@ -524,11 +562,13 @@ function trackCardClick(el) {
   const title  = el.dataset.title;
   // Pixel
   if (typeof fbq !== 'undefined') {
+    const evId1 = generateEventId('vc_track');
     fbq('track', 'ViewContent', {
       content_name: title,
       content_category: 'Music Release',
       content_type: 'music_release'
-    });
+    }, { eventID: evId1 });
+    sendCAPI('ViewContent', evId1);
   }
   trackSiteEvent('ViewContent', title || 'Track Card');
   // Popup trigger
@@ -616,11 +656,13 @@ function setupPixelEvents() {
     document.querySelectorAll(sel).forEach(el => {
       el.addEventListener('click', function() {
         if (typeof fbq !== 'undefined') {
+          const evId2 = generateEventId('vc_social');
           fbq('track', 'ViewContent', {
             content_name: 'MagneticMark Music & Social',
             content_category: 'DJ Producer',
             content_type: 'music_social'
-          });
+          }, { eventID: evId2 });
+          sendCAPI('ViewContent', evId2);
           trackSiteEvent('ViewContent', el.getAttribute('aria-label') || el.href || 'Social Link');
         }
       });
@@ -632,10 +674,12 @@ function setupPixelEvents() {
   if (bookingBtn) {
     bookingBtn.addEventListener('click', function() {
       if (typeof fbq !== 'undefined') {
+        const evId3 = generateEventId('contact_booking');
         fbq('track', 'Contact', {
           content_name: 'Booking Button',
           content_category: 'Booking'
-        });
+        }, { eventID: evId3 });
+        sendCAPI('Contact', evId3);
         trackSiteEvent('Contact', 'Booking Button');
       }
     });
@@ -646,11 +690,13 @@ function setupPixelEvents() {
   if (listenBtn) {
     listenBtn.addEventListener('click', function() {
       if (typeof fbq !== 'undefined') {
+        const evId4 = generateEventId('vc_listen');
         fbq('track', 'ViewContent', {
           content_name: 'Listen Button',
           content_category: 'Music',
           content_type: 'music_social'
-        });
+        }, { eventID: evId4 });
+        sendCAPI('ViewContent', evId4);
         trackSiteEvent('ViewContent', 'Listen Button');
       }
     });
@@ -660,10 +706,12 @@ function setupPixelEvents() {
   document.querySelectorAll('nav a[href="#contact"]').forEach(function(el) {
     el.addEventListener('click', function() {
       if (typeof fbq !== 'undefined') {
+        const evId5 = generateEventId('contact_nav');
         fbq('track', 'Contact', {
           content_name: 'Nav Contact',
           content_category: 'Booking'
-        });
+        }, { eventID: evId5 });
+        sendCAPI('Contact', evId5);
         trackSiteEvent('Contact', 'Nav Contact');
       }
     });
@@ -674,10 +722,12 @@ function setupPixelEvents() {
   if (pressPackBtn) {
     pressPackBtn.addEventListener('click', function() {
       if (typeof fbq !== 'undefined') {
+        const evId6 = generateEventId('contact_presspack');
         fbq('track', 'Contact', {
           content_name: 'Press Pack Download',
           content_category: 'Booking'
-        });
+        }, { eventID: evId6 });
+        sendCAPI('Contact', evId6);
         trackSiteEvent('Contact', 'Press Pack Download');
       }
     });
@@ -689,10 +739,12 @@ function setupPixelEvents() {
     mailtoBtn.addEventListener('click', function(e) {
       if (e.target.id === 'copyEmailBtn') return; // COPY obsługuje osobno
       if (typeof fbq !== 'undefined') {
+        const evId7 = generateEventId('contact_email_click');
         fbq('track', 'Contact', {
           content_name: 'Email Click',
           content_category: 'Booking'
-        });
+        }, { eventID: evId7 });
+        sendCAPI('Contact', evId7);
         trackSiteEvent('Contact', 'Email Click');
       }
     });
@@ -725,10 +777,12 @@ function copyEmail() {
       setTimeout(() => { btn.textContent = 'COPY'; }, 2000);
     }
     if (typeof fbq !== 'undefined') {
+      const evId8 = generateEventId('contact_email_copy');
       fbq('track', 'Contact', {
         content_name: 'Email Copy',
         content_category: 'Booking'
-      });
+      }, { eventID: evId8 });
+      sendCAPI('Contact', evId8);
       trackSiteEvent('Contact', 'Email Copy');
     }
   });
