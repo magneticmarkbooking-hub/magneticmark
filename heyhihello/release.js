@@ -72,19 +72,33 @@ function getFbc() {
   return '';
 }
 
-function sendCAPI(eventName, eventId) {
+// ===== PERSISTENT ANON ID =====
+function getAnonId() {
+  if (window.__mm_anon_id) return window.__mm_anon_id;
+  const KEY = 'mm_uid';
+  const m = document.cookie.match(new RegExp('(?:^|; )' + KEY + '=([^;]*)'));
+  if (m) return (window.__mm_anon_id = decodeURIComponent(m[1]));
+  const id = 'mm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+  const exp = new Date(); exp.setFullYear(exp.getFullYear() + 1);
+  document.cookie = KEY + '=' + encodeURIComponent(id) + '; expires=' + exp.toUTCString() + '; path=/; SameSite=Lax';
+  return (window.__mm_anon_id = id);
+}
+// ===== END PERSISTENT ANON ID =====
+
+function sendCAPI(eventName, eventId, extra) {
   try {
     fetch(CAPI_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      body: JSON.stringify(Object.assign({
         event_name:       eventName,
         event_id:         eventId,
         event_source_url: window.location.href,
         fbp:              getFbp(),
         fbc:              getFbc(),
+        external_id:      getAnonId(),
         pixel_ids:        CAPI_PIXEL_IDS,
-      }),
+      }, extra || {})),
     }).catch(function() {});
   } catch(e) {}
 }
@@ -305,15 +319,30 @@ function submitEmailPopup() {
       // Lead — browser pixel + CAPI do obu Pixeli
       const leadEventId = 'lead_popup_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
       if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: 'Email Signup', content_category: 'Newsletter' }, { eventID: leadEventId });
-      sendCAPI('Lead', leadEventId);
+      // Hashed email w CAPI Lead
+      const normalizedEmail = email.toLowerCase().trim();
+      if (typeof crypto !== 'undefined' && crypto.subtle) {
+        crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalizedEmail))
+          .then(function(buf) {
+            const em = Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+            sendCAPI('Lead', leadEventId, { em: em });
+          })
+          .catch(function() { sendCAPI('Lead', leadEventId); });
+      } else {
+        sendCAPI('Lead', leadEventId);
+      }
       setTimeout(() => { window.location.href = 'https://magneticmarkdj.com'; }, 1800);
     } else { throw new Error(); }
   })
   .catch(() => { msg.style.color = '#ff4466'; msg.textContent = 'Something went wrong. Please try again.'; });
 }
 
-// Trigger: 10 sekund na stronie
+// Trigger: 10 sekund na stronie + CAPI PageView
 window.addEventListener('load', function() {
+  // CAPI PageView — ten sam eventID co browser pixel (deduplication)
+  var pvEventId = window.__mm_pv_id || ('pv_fallback_' + Date.now());
+  sendCAPI('PageView', pvEventId);
+
   if (localStorage.getItem('mm_popup_subscribed')) return;
   emailPopupTimer = setTimeout(showEmailPopup, 10000);
 });

@@ -25,6 +25,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="release.css">
 
+<!-- Anon ID init — MUSI być przed fbq('init') -->
+<script>
+(function() {
+  var KEY = 'mm_uid';
+  var m = document.cookie.match(new RegExp('(?:^|; )' + KEY + '=([^;]*)'));
+  var id;
+  if (m) {
+    id = decodeURIComponent(m[1]);
+  } else {
+    id = 'mm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+    var exp = new Date(); exp.setFullYear(exp.getFullYear() + 1);
+    document.cookie = KEY + '=' + encodeURIComponent(id) + '; expires=' + exp.toUTCString() + '; path=/; SameSite=Lax';
+  }
+  window.__mm_anon_id = id;
+  window.__mm_pv_id = 'pv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+})();
+</script>
+
 <!-- Meta Pixel -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -35,9 +53,9 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '27127010080316320');
-fbq('init', '8169582049794791');
-fbq('track', 'PageView');
+fbq('init', '27127010080316320', { external_id: window.__mm_anon_id || '' });
+fbq('init', '8169582049794791',  { external_id: window.__mm_anon_id || '' });
+fbq('track', 'PageView', {}, { eventID: window.__mm_pv_id });
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
