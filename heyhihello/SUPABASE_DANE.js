@@ -1,11 +1,14 @@
 /* ===========================================================
-   TUTAJ WKLEJ LINK, JAK BĘDZIESZ GO MIAŁ
+   TUTAJ WKLEJ DANE Z SUPABASE, JAK BĘDZIESZ JE MIAŁ
    ===========================================================
-   Wklej dokładny URL utworu "Hey Hi Hello" na Spotify pomiędzy
-   cudzysłowami poniżej (zastąp PLACEHOLDER), zapisz plik i wgraj
-   go razem z resztą na GitHub - strona automatycznie go odczyta.
+   W panelu Supabase: Settings -> API
+   - "Project URL" wklej jako SUPABASE_URL
+   - "anon public" key wklej jako SUPABASE_ANON_KEY
 
-   Przykład poprawnego linku:
-   "https://open.spotify.com/track/XXXXXXXXXXXXXXXXXXXXXX"
+   Ten sam plik (te same dane) używany jest i na landing page
+   (do zapisywania wyświetleń/kliknięć), i na stronie statystyk
+   (do ich odczytu) - wystarczy ustawić raz, działa dla wszystkich
+   wydań.
    =========================================================== */
-const RELEASE_LINK = "https://open.spotify.com/artist/7qnCu8Un2e3gvg1ELX3HNg";
+const SUPABASE_URL = "https://igtyglcyithqpvgimgif.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_kdbRe7c0iA9c6TivESgQvA_IKvg-UUA";
