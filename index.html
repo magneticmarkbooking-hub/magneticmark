@@ -394,6 +394,49 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     <div class="contact-grid">
       <div class="contact-info">
         <p class="contact-intro" data-pl="Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu." data-de="Verfügbar für Events, Festivals und Kooperationen. Kontakt für Booking-Anfragen." data-en="Available for events, festivals and collaborations. Get in touch for booking enquiries.">Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu.</p>
+
+        <!-- FORMULARZ BOOKINGOWY -->
+        <form id="bookingForm" class="booking-form" onsubmit="submitBooking(event)" novalidate>
+          <input
+            type="email"
+            id="bookingEmail"
+            name="email"
+            class="booking-input"
+            required
+            data-pl-placeholder="Twój email"
+            data-en-placeholder="Your email"
+            data-de-placeholder="Deine E-Mail"
+            placeholder="Twój email"
+          >
+          <input
+            type="text"
+            id="bookingSubject"
+            name="subject"
+            class="booking-input"
+            required
+            data-pl-placeholder="Tytuł / nazwa eventu"
+            data-en-placeholder="Subject / event name"
+            data-de-placeholder="Betreff / Event-Name"
+            placeholder="Tytuł / nazwa eventu"
+          >
+          <textarea
+            id="bookingMessage"
+            name="message"
+            class="booking-input booking-textarea"
+            rows="4"
+            required
+            data-pl-placeholder="Wiadomość..."
+            data-en-placeholder="Message..."
+            data-de-placeholder="Nachricht..."
+            placeholder="Wiadomość..."
+          ></textarea>
+          <button type="submit" class="booking-submit">
+            <span id="bookingBtnText" data-pl="Wyślij wiadomość" data-en="Send message" data-de="Nachricht senden">Wyślij wiadomość</span>
+          </button>
+          <p id="bookingMsg" class="booking-msg"></p>
+        </form>
+        <!-- END FORMULARZ -->
+
         <a href="https://www.dropbox.com/scl/fi/roytkq5979ehv1ue2cp44/PressPack-MagneticMark.zip?rlkey=5es5myo85g9mo1gp8wdnufhpm&st=j2knst9q&dl=1" class="contact-email-btn" target="_self" data-pl="Pobierz Press Pack" data-de="Press Pack herunterladen" data-en="Download Press Pack">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Pobierz Press Pack

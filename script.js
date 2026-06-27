@@ -534,6 +534,60 @@ function sendCAPI(eventName, eventId) {
 }
 // ===== END CAPI =====
 
+// ===== BOOKING FORM =====
+async function submitBooking(e) {
+  e.preventDefault();
+  const btn  = document.getElementById('bookingBtnText');
+  const msg  = document.getElementById('bookingMsg');
+  const form = document.getElementById('bookingForm');
+
+  const email   = document.getElementById('bookingEmail').value.trim();
+  const subject = document.getElementById('bookingSubject').value.trim();
+  const message = document.getElementById('bookingMessage').value.trim();
+
+  const labels = {
+    pl: { sending: 'Wysyłanie...', ok: 'Wiadomość wysłana! Odezwę się wkrótce 🎺', err: 'Błąd wysyłania. Napisz bezpośrednio na management@magneticmarkdj.com', send: 'Wyślij wiadomość' },
+    en: { sending: 'Sending...', ok: 'Message sent! I\'ll get back to you soon 🎺', err: 'Send error. Write directly to management@magneticmarkdj.com', send: 'Send message' },
+    de: { sending: 'Senden...', ok: 'Nachricht gesendet! Ich melde mich bald 🎺', err: 'Fehler. Schreib direkt an management@magneticmarkdj.com', send: 'Nachricht senden' },
+  };
+  const t = labels[currentLang] || labels.pl;
+
+  btn.textContent = t.sending;
+  msg.textContent = '';
+  msg.className   = 'booking-msg';
+
+  try {
+    const res = await fetch('https://formspree.io/f/xlgybyaj', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email, subject, message }),
+    });
+
+    if (res.ok) {
+      // Pixel + CAPI Contact event
+      if (typeof fbq !== 'undefined') {
+        const evId = generateEventId('contact_form');
+        fbq('track', 'Contact', {
+          content_name: 'booking_form',
+          content_category: 'booking',
+        }, { eventID: evId });
+        sendCAPI('Contact', evId);
+      }
+      msg.textContent = t.ok;
+      msg.classList.add('success');
+      form.reset();
+      btn.textContent = t.send;
+    } else {
+      throw new Error('server');
+    }
+  } catch {
+    msg.textContent = t.err;
+    msg.classList.add('error');
+    btn.textContent = t.send;
+  }
+}
+// ===== END BOOKING FORM =====
+
 document.addEventListener('DOMContentLoaded', () => {
   setLang(currentLang);
   document.body.classList.add('locked');
@@ -550,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Muzyka – uruchom przy pierwszej interakcji (iOS wymaga touchend, nie scroll)
   const resumeAudio = () => {
     const audio = document.getElementById('bgAudio');
-    if (!audio) return;
+    if (!audio || !audio.paused) return;
     audio.volume = 0;
     audio.play().then(() => {
       let vol = 0;
