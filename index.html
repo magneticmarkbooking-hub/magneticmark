@@ -391,9 +391,92 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
   <div class="container">
     <div class="section-label" data-pl="Kontakt" data-de="Kontakt" data-en="Contact" aria-hidden="true">Kontakt</div>
     <h2 class="section-title" id="contact-heading" data-pl="Booking & Kontakt" data-de="Booking &amp; Kontakt" data-en="Booking & Contact">Booking & Kontakt</h2>
+    <p class="contact-intro" data-pl="Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu." data-de="Verfügbar für Events, Festivals und Kooperationen. Kontakt für Booking-Anfragen." data-en="Available for events, festivals and collaborations. Get in touch for booking enquiries.">Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu.</p>
     <div class="contact-grid">
-      <div class="contact-info">
-        <p class="contact-intro" data-pl="Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu." data-de="Verfügbar für Events, Festivals und Kooperationen. Kontakt für Booking-Anfragen." data-en="Available for events, festivals and collaborations. Get in touch for booking enquiries.">Dostępny na eventy, festiwale i współprace. Skontaktuj się w sprawie bookingu.</p>
+      <div class="contact-buttons">
+        <!-- FORMULARZ BOOKINGOWY -->
+        <form id="bookingForm" class="booking-form" onsubmit="submitBooking(event)" novalidate>
+          <input
+            type="email"
+            id="bookingEmail"
+            name="email"
+            class="booking-input"
+            required
+            data-pl-placeholder="Twój email"
+            data-en-placeholder="Your email"
+            data-de-placeholder="Deine E-Mail"
+            placeholder="Twój email"
+          >
+          <input
+            type="text"
+            id="bookingSubject"
+            name="subject"
+            class="booking-input"
+            required
+            data-pl-placeholder="Tytuł / nazwa eventu"
+            data-en-placeholder="Subject / event name"
+            data-de-placeholder="Betreff / Event-Name"
+            placeholder="Tytuł / nazwa eventu"
+          >
+          <textarea
+            id="bookingMessage"
+            name="message"
+            class="booking-input booking-textarea"
+            rows="4"
+            required
+            data-pl-placeholder="Wiadomość..."
+            data-en-placeholder="Message..."
+            data-de-placeholder="Nachricht..."
+            placeholder="Wiadomość..."
+          ></textarea>
+          <button type="submit" class="booking-submit">
+            <span id="bookingBtnText" data-pl="Wyślij wiadomość" data-en="Send message" data-de="Nachricht senden">Wyślij wiadomość</span>
+          </button>
+          <p id="bookingMsg" class="booking-msg"></p>
+        </form>
+        <!-- END FORMULARZ -->
+        <a href="https://www.dropbox.com/scl/fi/roytkq5979ehv1ue2cp44/PressPack-MagneticMark.zip?rlkey=5es5myo85g9mo1gp8wdnufhpm&st=j2knst9q&dl=1" class="contact-email-btn" target="_self" data-pl="Pobierz Press Pack" data-de="Press Pack herunterladen" data-en="Download Press Pack">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Pobierz Press Pack
+        </a>
+        <a href="mailto:management@magneticmarkdj.com" class="contact-email-btn" id="mailtoBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          management@magneticmarkdj.com
+          <span id="copyEmailBtn" onclick="event.preventDefault();event.stopPropagation();copyEmail()" style="margin-left:auto;padding:4px 10px;background:rgba(255,255,255,0.15);border-radius:3px;font-size:11px;letter-spacing:0.08em;font-family:var(--font-display);font-weight:700;color:#fff;cursor:pointer;transition:background 0.2s;flex-shrink:0;" onmouseenter="this.style.background='rgba(255,255,255,0.28)'" onmouseleave="this.style.background='rgba(255,255,255,0.15)'">COPY</span>
+        </a>
+      </div>
+      <div class="contact-image">
+        <img src="images/bio.jpg" alt="MagneticMark – DJ i producent dostępny na booking" loading="lazy">
+      </div>
+    </div>
+    <div class="social-links">
+      <a href="https://www.instagram.com/magneticmarkmusic" data-app="instagram://user?username=magneticmarkmusic" target="_blank" rel="noopener" class="social-link" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+      </a>
+      <a href="https://www.tiktok.com/@magneticmarkmusic" data-app="snssdk1128://user/profile/@magneticmarkmusic" target="_blank" rel="noopener" class="social-link" aria-label="TikTok">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.72a4.85 4.85 0 0 1-1.01-.03z"/></svg>
+      </a>
+      <a href="https://www.facebook.com/MagneticMarkk" data-app="fb://page/MagneticMarkk" target="_blank" rel="noopener" class="social-link" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </a>
+      <a href="https://www.youtube.com/@magneticmarkmusic" data-app="vnd.youtube://www.youtube.com/channel/UC0kx96uOivlejOzg4E8nJow" target="_blank" rel="noopener" class="social-link" aria-label="YouTube">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      </a>
+      <a href="https://open.spotify.com/artist/7qnCu8Un2e3gvg1ELX3HNg" data-app="spotify:artist:7qnCu8Un2e3gvg1ELX3HNg" target="_blank" rel="noopener" class="social-link" aria-label="Spotify">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+      </a>
+      <a href="https://www.shazam.com/artist/magneticmark/1710355117" data-app="shazam://music/search/MagneticMark" target="_blank" rel="noopener" class="social-link" aria-label="Shazam">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M18.55,6a3.84,3.84,0,0,1,2,7.18l-4.35,2.51a6.12,6.12,0,1,0,6.13,10.6l4.34-2.51a3.84,3.84,0,0,1,3.84,6.65l-4.35,2.51A13.79,13.79,0,1,1,12.38,9l4.35-2.51A3.75,3.75,0,0,1,18.55,6Zm9.79,7.26A13.78,13.78,0,0,1,35.62,39l-4.35,2.51a3.84,3.84,0,1,1-4-6.56l.15-.08,4.35-2.51a6.13,6.13,0,1,0-6.13-10.61l-4.35,2.51a3.83,3.83,0,0,1-3.83-6.64l4.35-2.51a13.73,13.73,0,0,1,6.51-1.83Z"/></svg>
+      </a>
+      <a href="https://www.beatport.com/artist/magneticmark/1158861" target="_blank" rel="noopener" class="social-link" aria-label="Beatport">
+        <svg viewBox="550 415 220 200" fill="currentColor"><path d="M715.4,539.8c0,28.1-22.5,50.8-51.1,50.8c-28.5,0-50.8-22.2-50.8-50.8c0-13.5,5.1-25.4,13.3-34.4l-34.5,34.4l-18.1-18l38.9-38.4c5.3-5.3,8-12.1,8-19.6v-48.1h25.5v48.1c0,14.8-5.3,27.3-15.5,37.5l-1.1,1.1c9-8.2,21.3-13.2,34.4-13.2C693.3,489.3,715.4,512.1,715.4,539.8z M692.3,539.8c0-15.1-12.6-27.3-28-27.3c-15.4,0-27.7,12.8-27.7,27.3c0,14.5,12.3,27.6,27.7,27.6C679.8,567.4,692.3,554.4,692.3,539.8z"/></svg>
+      </a>
+      <a href="https://music.apple.com/us/artist/magneticmark/1710355117" data-app="music://music.apple.com/us/artist/magneticmark/1710355117" target="_blank" rel="noopener" class="social-link" aria-label="Apple Music">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
 
         <!-- FORMULARZ BOOKINGOWY -->
         <form id="bookingForm" class="booking-form" onsubmit="submitBooking(event)" novalidate>

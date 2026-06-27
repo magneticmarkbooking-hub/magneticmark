@@ -98,8 +98,9 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     e.preventDefault();
     const target = document.querySelector(a.getAttribute('href'));
     if (target) {
-      const offset = navbar.offsetHeight;
-      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+      const heading = target.querySelector('.section-title, .section-label, h2') || target;
+      const offset  = navbar.offsetHeight + 24;
+      const top     = heading.getBoundingClientRect().top + window.scrollY - offset;
       window.scrollTo({ top, behavior: 'smooth' });
     }
   });
