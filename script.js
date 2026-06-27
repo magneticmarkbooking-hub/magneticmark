@@ -547,26 +547,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auto-skip intro – overlay ukryty od razu, kod overlay pozostaje niezmieniony
   enterSite();
 
-  // Muzyka – uruchom przy pierwszej interakcji jeśli autoplay zablokowany przez przeglądarkę
+  // Muzyka – uruchom przy pierwszej interakcji (iOS wymaga touchend, nie scroll)
   const resumeAudio = () => {
     const audio = document.getElementById('bgAudio');
-    if (audio && audio.paused) {
-      audio.volume = 0;
-      audio.play().then(() => {
-        let vol = 0;
-        const fadeIn = setInterval(() => {
-          vol = Math.min(vol + 0.02, 0.6);
-          audio.volume = vol;
-          const slider = document.getElementById('volumeSlider');
-          if (slider) slider.value = Math.round(vol * 100);
-          if (vol >= 0.6) clearInterval(fadeIn);
-        }, 80);
-      }).catch(() => {});
-    }
+    if (!audio) return;
+    audio.volume = 0;
+    audio.play().then(() => {
+      let vol = 0;
+      const fadeIn = setInterval(() => {
+        vol = Math.min(vol + 0.02, 0.6);
+        audio.volume = vol;
+        const slider = document.getElementById('volumeSlider');
+        if (slider) slider.value = Math.round(vol * 100);
+        if (vol >= 0.6) clearInterval(fadeIn);
+      }, 80);
+      // Usuń listenery po udanym starcie
+      document.removeEventListener('click',    resumeAudio);
+      document.removeEventListener('touchend', resumeAudio);
+    }).catch(() => {});
   };
-  document.addEventListener('click',      resumeAudio, { once: true });
-  document.addEventListener('touchstart', resumeAudio, { once: true });
-  document.addEventListener('scroll',     resumeAudio, { once: true });
+  document.addEventListener('click',    resumeAudio);
+  document.addEventListener('touchend', resumeAudio);
 
   // Klawiatura na overlay (zachowane na wypadek ręcznego przywrócenia intro)
   document.addEventListener('keydown', e => {
