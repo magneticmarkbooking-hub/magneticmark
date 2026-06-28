@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Email — Magnetic Mark</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --c1: #0a0015;
+      --c2: #1a0035;
+      --c4: #6600ff;
+      --c5: #0055ff;
+      --accent: #7b2fff;
+      --gold: #ffd700;
+      --white: #ffffff;
+      --gray: #aaaacc;
+      --text: #e0d8ff;
+      --gradient: linear-gradient(135deg, var(--c4), var(--c5));
+      --gradient-bg: linear-gradient(180deg, var(--c1) 0%, var(--c2) 50%, #000820 100%);
+      --font-display: 'Barlow Condensed', sans-serif;
+      --font-body: 'Barlow', sans-serif;
+      --transition: 0.3s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--gradient-bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(123,47,255,0.3);
+      border-radius: 8px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 8px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(123,47,255,0.4);
+      border-radius: 4px;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: border-color var(--transition), background var(--transition);
+      outline: none;
+    }
+
+    input:focus, textarea:focus {
+      border-color: rgba(123,47,255,0.8);
+      background: rgba(255,255,255,0.10);
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 14px 40px;
+      background: var(--gradient);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(102,0,255,0.4);
+      transition: transform var(--transition), box-shadow var(--transition);
+      margin-top: 8px;
+    }
+
+    button[type="submit"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(102,0,255,0.6);
+    }
+
+    #status {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      min-height: 1.4em;
+      color: var(--gray);
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid rgba(123,47,255,0.25);
+      margin: 36px 0 24px;
+    }
+
+    .footer-contact {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--gray);
+      line-height: 1.9;
+    }
+
+    .footer-contact strong {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--white);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .footer-contact a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    .footer-contact a:hover {
+      color: var(--gold);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Send Email</h1>
+    <form id="form">
+      <div class="field">
+        <label>To</label>
+        <input type="email" name="to" required placeholder="recipient@example.com">
+      </div>
+      <div class="field">
+        <label>Subject</label>
+        <input type="text" name="subject" required placeholder="Subject">
+      </div>
+      <div class="field">
+        <label>Body</label>
+        <textarea name="body" required placeholder="Your message..."></textarea>
+      </div>
+      <button type="submit">Send</button>
+      <p id="status"></p>
+    </form>
+
+    <hr>
+    <div id="pagefooter"></div>
+  </div>
+
+  <script>
+    const WORKER_URL = "https://email-sender-magneticmark.boddaw.workers.dev";
+
+    const footerHTML = `
+      <div class="footer-contact">
+        <strong>Marek Bodynek</strong>
+        Artist Manager<br>
+        📱 <a href="tel:+48531862680">+48 531 862 680</a><br>
+        ✉️ <a href="mailto:management@magneticmarkdj.com">management@magneticmarkdj.com</a><br>
+        🌐 <a href="https://magneticmarkdj.com">magneticmarkdj.com</a>
+      </div>`;
+
+    document.getElementById("pagefooter").innerHTML = footerHTML;
+
+    document.getElementById("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const status = document.getElementById("status");
+      status.textContent = "Sending...";
+
+      const fd = new FormData(e.target);
+      const data = Object.fromEntries(fd);
+
+      const footer = `
+        <div style="font-family: Arial, sans-serif;">
+          <p>${data.body.replace(/\n/g, "<br>")}</p>
+          <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
+          <p style="color: #555; font-size: 15px;">
+            <strong>Marek Bodynek</strong><br><br>
+            Artist Manager<br><br>
+            📱 <a href="tel:+48531862680">+48 531862680</a><br>
+            ✉️ <a href="mailto:management@magneticmarkdj.com">management@magneticmarkdj.com</a><br>
+            🌐 <a href="https://magneticmarkdj.com">magneticmarkdj.com</a>
+          </p>
+        </div>`;
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...data, footer }),
+        });
+        const json = await res.json();
+        status.textContent = json.success ? "✅ Sent!" : "❌ Error: " + json.error;
+      } catch (err) {
+        status.textContent = "❌ " + err.message;
+      }
+    });
+  </script>
+</body>
+
+</html>
