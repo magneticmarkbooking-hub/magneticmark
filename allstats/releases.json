@@ -1,5 +1,13 @@
 [
   {
+    "title": "Teckno Lady",
+    "slug": "tecknolady",
+    "cover": "../tecknolady/cover.jpg",
+    "date": "2026-06",
+    "release_date": "2026-06-29",
+    "platform": "Spotify"
+  },
+  {
     "title": "Hey Hi Hello",
     "slug": "heyhihello",
     "cover": "../heyhihello/cover.png",
