@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hey Hi Hello | MagneticMark</title>
+<meta name="description" content="Listen to Hey Hi Hello, the new single from MagneticMark.">
+<meta name="robots" content="noindex, nofollow">
+
+<meta property="og:type" content="music.song">
+<meta property="og:title" content="Hey Hi Hello | MagneticMark">
+<meta property="og:description" content="Listen to Hey Hi Hello, the new single from MagneticMark.">
+<meta property="og:image" content="https://magneticmarkdj.com/heyhihello/cover.png">
+<meta property="og:site_name" content="MagneticMark">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../appletouchicon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --c1: #0a0015;
+  --c2: #1a0035;
+  --c4: #6600ff;
+  --c5: #0055ff;
+  --accent: #7b2fff;
+  --gold: #ffd700;
+  --white: #ffffff;
+  --gray: #aaaacc;
+  --text: #e0d8ff;
+  --gradient: linear-gradient(135deg, var(--c4), var(--c5));
+  --gradient-bg: linear-gradient(180deg, var(--c1) 0%, var(--c2) 50%, #000820 100%);
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body: 'Barlow', sans-serif;
+  --transition: 0.3s ease;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--gradient-bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* ===== TŁO ===== */
+.bg-rings {
+  position: fixed;
+  top: 50%; left: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(123,47,255,0.22);
+  transform: translate(-50%, -50%);
+  top: 0; left: 0;
+  animation: ringPulse 3.6s ease-out infinite;
+}
+.bg-ring--1 { width: 380px; height: 380px; animation-delay: 0s; }
+.bg-ring--2 { width: 600px; height: 600px; animation-delay: 1.2s; }
+.bg-ring--3 { width: 820px; height: 820px; animation-delay: 2.4s; }
+@keyframes ringPulse {
+  0%   { transform: translate(-50%,-50%) scale(0.85); opacity: 0.5; }
+  100% { transform: translate(-50%,-50%) scale(1.2); opacity: 0; }
+}
+
+.ambient-glow {
+  position: fixed;
+  top: 50%; left: 50%;
+  width: 120vmax; height: 120vmax;
+  transform: translate(-50%,-50%);
+  background: radial-gradient(circle, rgba(123,47,255,0.14) 0%, rgba(0,136,255,0.06) 35%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== LAYOUT ===== */
+.page-wrap {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 44px 20px 60px;
+}
+
+/* ===== COVER + TEKST (jak w heyhihello) ===== */
+.release-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 32px;
+  animation: fadeInUp 0.8s ease both;
+}
+
+.cover-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-bottom: 24px;
+  perspective: 800px;
+}
+
+.cover-glow {
+  position: absolute;
+  inset: -24px;
+  border-radius: 4px;
+  background: var(--gradient);
+  filter: blur(32px);
+  opacity: 0.45;
+  animation: pulseGlow 3s ease-in-out infinite;
+  z-index: 0;
+}
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.06); }
+}
+
+.cover-frame {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(102,0,255,0.3), 0 16px 40px rgba(0,0,0,0.5);
+}
+
+.cover-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+  animation: fadeInUp 0.8s ease 0.15s both;
+}
+
+.release-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.9rem, 7vw, 2.6rem);
+  text-transform: uppercase;
+  color: var(--white);
+  line-height: 1.05;
+  margin-bottom: 6px;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.release-artist {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--gray);
+  letter-spacing: 0.04em;
+  animation: fadeInUp 0.8s ease 0.25s both;
+}
+
+/* ===== IFRAME TONEDEN ===== */
+.player-wrap {
+  width: 100%;
+  max-width: 480px;
+  animation: fadeInUp 0.8s ease 0.3s both;
+}
+
+.player-frame {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(123,47,255,0.35),
+    0 0 40px rgba(102,0,255,0.25),
+    0 24px 60px rgba(0,0,0,0.55);
+  animation: frameGlow 3s ease-in-out infinite;
+}
+@keyframes frameGlow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(123,47,255,0.35), 0 0 40px rgba(102,0,255,0.25), 0 24px 60px rgba(0,0,0,0.55); }
+  50%       { box-shadow: 0 0 0 1px rgba(123,47,255,0.55), 0 0 60px rgba(102,0,255,0.4), 0 24px 60px rgba(0,0,0,0.55); }
+}
+
+/* Narożniki złote */
+.corner {
+  position: absolute;
+  width: 16px; height: 16px;
+  pointer-events: none;
+  z-index: 2;
+}
+.corner--tl { top: -1px; left: -1px; border-top: 2px solid var(--gold); border-left: 2px solid var(--gold); border-radius: 4px 0 0 0; }
+.corner--tr { top: -1px; right: -1px; border-top: 2px solid var(--gold); border-right: 2px solid var(--gold); border-radius: 0 4px 0 0; }
+.corner--bl { bottom: -1px; left: -1px; border-bottom: 2px solid var(--gold); border-left: 2px solid var(--gold); border-radius: 0 0 0 4px; }
+.corner--br { bottom: -1px; right: -1px; border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold); border-radius: 0 0 4px 0; }
+
+.player-frame iframe {
+  display: block;
+  width: 480px;
+  max-width: 100%;
+  height: 900px;
+  border: none;
+  border-radius: 8px;
+}
+
+/* ===== FOOTER ===== */
+.brand-footer {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: fadeInUp 0.8s ease 0.45s both;
+}
+
+.social-links {
+  display: flex;
+  gap: 20px;
+}
+
+.social-link {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gray);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.social-link:hover { color: var(--white); }
+
+.brand-copyright {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(170,170,204,0.28);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 520px) {
+  .player-frame iframe { height: 820px; }
+  .cover-wrap { width: 160px; height: 160px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="ambient-glow"></div>
+<div class="bg-rings">
+  <div class="bg-ring bg-ring--1"></div>
+  <div class="bg-ring bg-ring--2"></div>
+  <div class="bg-ring bg-ring--3"></div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- COVER + TYTUŁ -->
+  <div class="release-header">
+    <div class="cover-wrap">
+      <div class="cover-glow"></div>
+      <div class="cover-frame">
+        <img class="cover-img" src="../heyhihello/cover.png" alt="Hey Hi Hello - cover">
+      </div>
+    </div>
+    <p class="eyebrow">New Single</p>
+    <h1 class="release-title">Hey Hi Hello</h1>
+    <p class="release-artist">MagneticMark</p>
+  </div>
+
+  <!-- IFRAME TONEDEN -->
+  <!-- ⚠️ PODMIEŃ TUTAJ SLUG FANLINK DLA "HEY HI HELLO" -->
+  <div class="player-wrap">
+    <div class="player-frame">
+      <div class="corner corner--tl"></div>
+      <div class="corner corner--tr"></div>
+      <div class="corner corner--bl"></div>
+      <div class="corner corner--br"></div>
+      <iframe
+        src="https://fanlink.tv/WKLEJ_SLUG_TUTAJ?embed=true"
+        allowfullscreen
+        frameborder="0">
+      </iframe>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="brand-footer">
+    <div class="social-links">
+      <a class="social-link" href="https://www.instagram.com/magneticmarkmusic" target="_blank" rel="noopener">Instagram</a>
+      <a class="social-link" href="https://open.spotify.com/artist/7qnCu8Un2e3gvg1ELX3HNg" target="_blank" rel="noopener">Spotify</a>
+      <a class="social-link" href="https://www.tiktok.com/@magneticmarkmusic" target="_blank" rel="noopener">TikTok</a>
+    </div>
+    <p class="brand-copyright">© 2026 MagneticMark. All rights reserved.</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
