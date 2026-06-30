@@ -22,6 +22,14 @@
   if (ogImage) ogImage.setAttribute('content', RELEASE.coverRaw || RELEASE.cover);
 })();
 
+/* ===========================================================
+   WŁASNE IDENTYFIKATORY (odpowiednik link_id / owner z Toneden)
+   - OWNER_ID: stałe, to samo na KAŻDYM wydaniu/stronie MagneticMark
+   - LINK_ID: unikalne dla tego konkretnego wydania
+   =========================================================== */
+const OWNER_ID = 69827222;
+const LINK_ID  = 3507254;
+
 function buildForwardedUrl(baseUrl) {
   const incoming = new URLSearchParams(window.location.search);
   const keysToForward = ['fbclid', 'gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
@@ -117,7 +125,9 @@ function handleLinkClick(e) {
       {
         content_type: 'product',
         content_name: RELEASE.platform || 'spotify',
-        content_category: 'stream'
+        content_category: 'stream',
+        link_id: LINK_ID,
+        owner: OWNER_ID
       },
       getCampaignParams(),
       { session_id: getSessionId() }
@@ -126,7 +136,7 @@ function handleLinkClick(e) {
   }
 
   // CAPI — ten sam eventId, oba Pixele
-  sendCAPI('ViewContent', eventId);
+  sendCAPI('ViewContent', eventId, { link_id: LINK_ID, owner: OWNER_ID });
 
   // Mobile → otwórz aplikację Spotify; desktop → nowa karta + popup
   const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
@@ -318,18 +328,18 @@ function submitEmailPopup() {
       localStorage.setItem('mm_popup_subscribed', '1');
       // Lead — browser pixel + CAPI do obu Pixeli
       const leadEventId = 'lead_popup_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-      if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: 'Email Signup', content_category: 'Newsletter' }, { eventID: leadEventId });
+      if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: 'Email Signup', content_category: 'Newsletter', link_id: LINK_ID, owner: OWNER_ID }, { eventID: leadEventId });
       // Hashed email w CAPI Lead
       const normalizedEmail = email.toLowerCase().trim();
       if (typeof crypto !== 'undefined' && crypto.subtle) {
         crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalizedEmail))
           .then(function(buf) {
             const em = Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-            sendCAPI('Lead', leadEventId, { em: em });
+            sendCAPI('Lead', leadEventId, { em: em, link_id: LINK_ID, owner: OWNER_ID });
           })
-          .catch(function() { sendCAPI('Lead', leadEventId); });
+          .catch(function() { sendCAPI('Lead', leadEventId, { link_id: LINK_ID, owner: OWNER_ID }); });
       } else {
-        sendCAPI('Lead', leadEventId);
+        sendCAPI('Lead', leadEventId, { link_id: LINK_ID, owner: OWNER_ID });
       }
       setTimeout(() => { window.location.href = 'https://magneticmarkdj.com'; }, 1800);
     } else { throw new Error(); }
@@ -341,7 +351,7 @@ function submitEmailPopup() {
 window.addEventListener('load', function() {
   // CAPI PageView — ten sam eventID co browser pixel (deduplication)
   var pvEventId = window.__mm_pv_id || ('pv_fallback_' + Date.now());
-  sendCAPI('PageView', pvEventId);
+  sendCAPI('PageView', pvEventId, { link_id: LINK_ID, owner: OWNER_ID });
 
   if (localStorage.getItem('mm_popup_subscribed')) return;
   emailPopupTimer = setTimeout(showEmailPopup, 10000);
