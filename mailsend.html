@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pl">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,7 +35,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       padding: 40px 20px;
     }
 
@@ -46,7 +45,7 @@
       border-radius: 8px;
       padding: 48px 40px;
       width: 100%;
-      max-width: 520px;
+      max-width: 560px;
     }
 
     h1 {
@@ -60,9 +59,7 @@
       text-align: center;
     }
 
-    .field {
-      margin-bottom: 20px;
-    }
+    .field { margin-bottom: 20px; }
 
     label {
       display: block;
@@ -92,10 +89,7 @@
       background: rgba(255,255,255,0.10);
     }
 
-    textarea {
-      min-height: 140px;
-      resize: vertical;
-    }
+    textarea { min-height: 140px; resize: vertical; }
 
     button[type="submit"] {
       width: 100%;
@@ -128,37 +122,38 @@
       color: var(--gray);
     }
 
-    hr {
-      border: none;
-      border-top: 1px solid rgba(123,47,255,0.25);
-      margin: 36px 0 24px;
-    }
-
-    .footer-contact {
-      text-align: center;
-      font-size: 0.9rem;
+    /* ── Stopka preview ── */
+    .sig-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       color: var(--gray);
-      line-height: 1.9;
+      margin: 32px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sig-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(123,47,255,0.25);
     }
 
-    .footer-contact strong {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      color: var(--white);
+    .sig-preview-wrap {
+      border: 1px solid rgba(123,47,255,0.3);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #0a0015;
+    }
+
+    #sig-iframe {
+      width: 100%;
+      border: none;
       display: block;
-      margin-bottom: 8px;
-    }
-
-    .footer-contact a {
-      color: var(--text);
-      text-decoration: none;
-      transition: color var(--transition);
-    }
-
-    .footer-contact a:hover {
-      color: var(--gold);
+      /* height ustawiane przez JS po załadowaniu */
+      min-height: 300px;
     }
   </style>
 </head>
@@ -183,24 +178,132 @@
       <p id="status"></p>
     </form>
 
-    <hr>
-    <div id="pagefooter"></div>
+    <div class="sig-label">Stopka emaila</div>
+    <div class="sig-preview-wrap">
+      <iframe id="sig-iframe" scrolling="no" title="Podgląd stopki"></iframe>
+    </div>
   </div>
 
   <script>
     const WORKER_URL = "https://email-sender-magneticmark.boddaw.workers.dev";
 
-    const footerHTML = `
-      <div class="footer-contact">
-        <strong>Marek Bodynek</strong>
-        Artist Manager<br>
-        📱 <a href="tel:+48531862680">+48 531 862 680</a><br>
-        ✉️ <a href="mailto:management@magneticmarkdj.com">management@magneticmarkdj.com</a><br>
-        🌐 <a href="https://magneticmarkdj.com">magneticmarkdj.com</a>
-      </div>`;
+    /* ════════════════════════════════════════════════════════════════
+       STOPKA — dokładna kopia z booking_email_v10.html
+       (wizytówka + social + footer bez unsubscribe)
+    ════════════════════════════════════════════════════════════════ */
+    const SIGNATURE_HTML = `
+      <!-- DIVIDER -->
+      <tr>
+        <td bgcolor="#0a0015" style="background-color:#0a0015;padding:0;">
+          <div style="height:1px;background:linear-gradient(to right,#0a0015,#2e0073,#0a0015);margin:0 36px;"></div>
+        </td>
+      </tr>
 
-    document.getElementById("pagefooter").innerHTML = footerHTML;
+      <!-- WIZYTÓWKA -->
+      <tr>
+        <td bgcolor="#0a0015" style="padding:20px 40px;background-color:#0a0015;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%"
+                 bgcolor="#11001f"
+                 style="background-color:#11001f;border:1px solid #280066;border-radius:10px;overflow:hidden;">
+            <tr>
+              <td width="125" style="width:125px;padding:0;vertical-align:top;background-color:#11001f;">
+                <img src="https://storage.mlcdn.com/account_image/2459852/NhbiaJfaCdtJFKKi6CfrovE29QAAcgE1hoaqhpXv.jpg"
+                     width="125" alt="Marek Bodynek"
+                     style="width:125px;height:190px;object-fit:cover;object-position:center 28%;display:block;" />
+              </td>
+              <td bgcolor="#11001f" style="padding:16px 20px;vertical-align:middle;background-color:#11001f;">
+                <p style="color:#ffffff;font-size:15px;font-weight:900;margin:0 0 3px;font-family:Arial,sans-serif;">Marek Bodynek</p>
+                <p style="color:#7b2fff;font-size:10px;text-transform:uppercase;letter-spacing:2px;margin:0 0 14px;font-family:Arial,sans-serif;">Artist Manager</p>
+                <table cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td width="22" valign="middle" style="padding:0 8px 9px 0;">
+                      <img src="https://storage.mlcdn.com/account_image/2459852/RfurenHA6qGU1A1fv5k65cuYoYBD7JxgjjnTGQpG.png" width="15" height="15" alt="" style="display:block;" />
+                    </td>
+                    <td valign="middle" style="padding:0 0 9px 0;">
+                      <a href="tel:+48531862680" style="color:#555577;font-size:13px;font-family:Arial,sans-serif;text-decoration:none;">+48 531 862 680</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="22" valign="middle" style="padding:0 8px 9px 0;">
+                      <img src="https://storage.mlcdn.com/account_image/2459852/oFMeZ6Ij7O5yTwwbp0DF6dpDGZzbHEtoZo4S38K2.png" width="15" height="15" alt="" style="display:block;" />
+                    </td>
+                    <td valign="middle" style="padding:0 0 9px 0;">
+                      <span style="color:#555577;font-size:12px;font-family:Arial,sans-serif;">management@magneticmarkdj.com</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="22" valign="middle" style="padding:0 8px 0 0;">
+                      <img src="https://storage.mlcdn.com/account_image/2459852/gDNHAorYTJu83z8NTOvHedkU57sxy3XV2Jv4tRtC.png" width="15" height="15" alt="" style="display:block;" />
+                    </td>
+                    <td valign="middle">
+                      <span style="color:#555577;font-size:13px;font-family:Arial,sans-serif;">magneticmarkdj.com</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
+      <!-- SOCIAL ICONS -->
+      <tr>
+        <td bgcolor="#0a0015" style="background-color:#0a0015;border-top:1px solid #150030;padding:16px 12px 18px;text-align:center;">
+          <p style="color:#252540;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin:0 0 12px;font-family:Arial,sans-serif;">Znajd&#378; MagneticMarka</p>
+          <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+            <tr>
+              <td style="padding:0 3px;"><a href="https://www.instagram.com/magneticmarkmusic" target="_blank" style="text-decoration:none;display:inline-block;line-height:0;font-size:0;"><span style="display:inline-block;width:38px;height:38px;background-color:#130025;border:1px solid #330088;border-radius:19px;padding:10px;box-sizing:border-box;line-height:0;font-size:0;"><img src="https://storage.mlcdn.com/account_image/2459852/OcIaoW9hSVYf3agZdQgZfqGhiWVOW4RTTQqlKg35.png" width="18" height="18" alt="IG" style="display:block;width:18px;height:18px;" /></span></a></td>
+              <td style="padding:0 3px;"><a href="https://www.tiktok.com/@magneticmarkdj" target="_blank" style="text-decoration:none;display:inline-block;line-height:0;font-size:0;"><span style="display:inline-block;width:38px;height:38px;background-color:#130025;border:1px solid #330088;border-radius:19px;padding:10px;box-sizing:border-box;line-height:0;font-size:0;"><img src="https://storage.mlcdn.com/account_image/2459852/k3BlDj6i6huuOMp6WfoR8R1dIhofNqrzDm1yRMYY.png" width="18" height="18" alt="TT" style="display:block;width:18px;height:18px;" /></span></a></td>
+              <td style="padding:0 3px;"><a href="https://www.facebook.com/MagneticMarkk" target="_blank" style="text-decoration:none;display:inline-block;line-height:0;font-size:0;"><span style="display:inline-block;width:38px;height:38px;background-color:#130025;border:1px solid #330088;border-radius:19px;padding:10px;box-sizing:border-box;line-height:0;font-size:0;"><img src="https://storage.mlcdn.com/account_image/2459852/NkSi7N5opDZYU80L4BBRc7JpAOW0D1GmYuTvBmXG.png" width="18" height="18" alt="FB" style="display:block;width:18px;height:18px;" /></span></a></td>
+              <td style="padding:0 3px;"><a href="https://www.youtube.com/@magneticmarkmusic" target="_blank" style="text-decoration:none;display:inline-block;line-height:0;font-size:0;"><span style="display:inline-block;width:38px;height:38px;background-color:#130025;border:1px solid #330088;border-radius:19px;padding:10px;box-sizing:border-box;line-height:0;font-size:0;"><img src="https://storage.mlcdn.com/account_image/2459852/CjBSVBff71Uj6oPUwiSagEAglcP92fmYKVLWWMmT.png" width="18" height="18" alt="YT" style="display:block;width:18px;height:18px;" /></span></a></td>
+              <td style="padding:0 3px;"><a href="https://open.spotify.com/artist/7qnCu8Un2e3gvg1ELX3HNg" target="_blank" style="text-decoration:none;display:inline-block;line-height:0;font-size:0;"><span style="display:inline-block;width:38px;height:38px;background-color:#130025;border:1px solid #330088;border-radius:19px;padding:10px;box-sizing:border-box;line-height:0;font-size:0;"><img src="https://storage.mlcdn.com/account_image/2459852/Tb9MQbZOsmBu2AZsPoFhZ0NWdKibY52VG6KYMJan.png" width="18" height="18" alt="SP" style="display:block;width:18px;height:18px;" /></span></a></td>
+              <td style="padding:0 3px;"><a href="https://www.shazam.com/artist/magneticmark/1710355117" target="_blank" style="text-decoration:none;display:inline-block;line-height:0;font-size:0;"><span style="display:inline-block;width:38px;height:38px;background-color:#130025;border:1px solid #330088;border-radius:19px;padding:10px;box-sizing:border-box;line-height:0;font-size:0;"><img src="https://storage.mlcdn.com/account_image/2459852/fNcQEeX0APqIr6IvqrVVvyHl0N9aEjYJVhTn27dk.png" width="18" height="18" alt="SH" style="display:block;width:18px;height:18px;" /></span></a></td>
+              <td style="padding:0 3px;"><a href="https://www.beatport.com/artist/magneticmark/1158861" target="_blank" style="text-decoration:none;display:inline-block;line-height:0;font-size:0;"><span style="display:inline-block;width:38px;height:38px;background-color:#130025;border:1px solid #330088;border-radius:19px;padding:10px;box-sizing:border-box;line-height:0;font-size:0;"><img src="https://storage.mlcdn.com/account_image/2459852/VavYgSaP2BJWvtFVpAYZGi6DPvArhN50T7QejH6W.png" width="18" height="18" alt="BP" style="display:block;width:18px;height:18px;" /></span></a></td>
+              <td style="padding:0 3px;"><a href="https://music.apple.com/us/artist/magneticmark/1710355117" target="_blank" style="text-decoration:none;display:inline-block;line-height:0;font-size:0;"><span style="display:inline-block;width:38px;height:38px;background-color:#130025;border:1px solid #330088;border-radius:19px;padding:10px;box-sizing:border-box;line-height:0;font-size:0;"><img src="https://storage.mlcdn.com/account_image/2459852/SGPe9QtWKLrc3vnAwnQMYGJNXcepapVFNFmQBwak.png" width="18" height="18" alt="AM" style="display:block;width:18px;height:18px;" /></span></a></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- FOOTER -->
+      <tr>
+        <td bgcolor="#050010" style="background-color:#050010;padding:13px 40px 10px;text-align:center;border-top:1px solid #150030;">
+          <p style="color:#222240;font-size:11px;margin:0;font-family:Arial,sans-serif;">
+            Marek Bodynek &middot; Artist Manager &middot; magneticmarkdj.com
+          </p>
+        </td>
+      </tr>
+    `;
+
+    /* ── Podgląd: wstrzyknij stopkę do iframe ── */
+    const iframe = document.getElementById('sig-iframe');
+    const iframeDoc = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0a0015; }
+</style>
+</head>
+<body>
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#0a0015;">
+  ${SIGNATURE_HTML}
+</table>
+</body>
+</html>`;
+
+    iframe.srcdoc = iframeDoc;
+
+    /* Auto-wysokość iframe po załadowaniu */
+    iframe.addEventListener('load', () => {
+      try {
+        const h = iframe.contentDocument.body.scrollHeight;
+        iframe.style.height = h + 'px';
+      } catch(e) {}
+    });
+
+    /* ── Send ── */
     document.getElementById("form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const status = document.getElementById("status");
@@ -209,17 +312,20 @@
       const fd = new FormData(e.target);
       const data = Object.fromEntries(fd);
 
+      /* Pełne HTML emaila: treść + stopka z v10 */
       const footer = `
-        <div style="font-family: Arial, sans-serif;">
-          <p>${data.body.replace(/\n/g, "<br>")}</p>
-          <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;">
-          <p style="color: #555; font-size: 15px;">
-            <strong>Marek Bodynek</strong><br><br>
-            Artist Manager<br><br>
-            📱 <a href="tel:+48531862680">+48 531862680</a><br>
-            ✉️ <a href="mailto:management@magneticmarkdj.com">management@magneticmarkdj.com</a><br>
-            🌐 <a href="https://magneticmarkdj.com">magneticmarkdj.com</a>
-          </p>
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <!-- TREŚĆ -->
+            <tr>
+              <td bgcolor="#0a0015" style="background-color:#0a0015;padding:30px 40px 24px;">
+                <p style="color:#9999bb;font-size:15px;line-height:1.75;margin:0;font-family:Arial,sans-serif;">
+                  ${data.body.replace(/\n\n/g, '</p><p style="color:#9999bb;font-size:15px;line-height:1.75;margin:16px 0 0;font-family:Arial,sans-serif;">').replace(/\n/g, '<br>')}
+                </p>
+              </td>
+            </tr>
+            ${SIGNATURE_HTML}
+          </table>
         </div>`;
 
       try {
@@ -236,5 +342,4 @@
     });
   </script>
 </body>
-
 </html>
