@@ -8,4 +8,4 @@
    Przykład poprawnego linku:
    "https://open.spotify.com/track/XXXXXXXXXXXXXXXXXXXXXX"
    =========================================================== */
-const RELEASE_LINK = "https://open.spotify.com/track/4xnGFkMnXWMy5EpuZI0bOw?si=19hTEBduTYqQEL03_Yab5A";
+const RELEASE_LINK = "https://open.spotify.com/album/5qOhXz0BDMh2yaSNMCC1qd";
