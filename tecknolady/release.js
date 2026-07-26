@@ -142,9 +142,15 @@ function handleLinkClick(e) {
   const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
   if (isMobile) {
-    const spotifyUri = url.split('?')[0]
+    // Zachowaj deep-link context (?context=spotify:artist:...) także przy otwieraniu apki.
+    // Wcześniej url.split('?')[0] wywalał kontekst na telefonie — teraz go przenosimy,
+    // a pełny link https (z kontekstem) zostaje jako fallback.
+    const qIndex = url.indexOf('?');
+    const base   = qIndex === -1 ? url : url.slice(0, qIndex);
+    const query  = qIndex === -1 ? '' : url.slice(qIndex); // zawiera wiodące "?"
+    const spotifyUri = base
       .replace('https://open.spotify.com/', 'spotify:')
-      .replace(/\//g, ':');
+      .replace(/\//g, ':') + query;
     window.location.href = spotifyUri;
     setTimeout(function() {
       if (!document.hidden) window.location.href = url;
@@ -324,7 +330,7 @@ function submitEmailPopup() {
   .then(res => {
     if (res.status === 201 || res.status === 409) {
       msg.style.color = '#44ff88';
-      msg.textContent = "\u2713 You're in! Thanks \uD83C\uDFBA";
+      msg.textContent = "✓ You're in! Thanks 🎺";
       localStorage.setItem('mm_popup_subscribed', '1');
       // Lead — browser pixel + CAPI do obu Pixeli
       const leadEventId = 'lead_popup_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
