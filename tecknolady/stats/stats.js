@@ -191,6 +191,42 @@ function attachDailyTooltips(container) {
   });
 }
 
+// Supabase/PostgREST zwraca maksymalnie 1000 wierszy na jedno zapytanie.
+// Bez paginacji świeże (dzisiejsze) zdarzenia wypadają poza to okno, gdy
+// wydanie ma już ponad 1000 zdarzeń. Dlatego pobieramy je stronami po 1000
+// (nagłówek Range), aż dostaniemy niepełną stronę = koniec danych.
+const PAGE_SIZE = 1000;
+
+async function fetchAllEvents() {
+  const all = [];
+  let from = 0;
+
+  for (;;) {
+    const to = from + PAGE_SIZE - 1;
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/release_events?release_slug=eq.${encodeURIComponent(RELEASE_SLUG)}&select=*&order=created_at.desc`,
+      {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Range-Unit': 'items',
+          'Range': `${from}-${to}`
+        }
+      }
+    );
+    if (!res.ok) throw new Error('Supabase request failed: ' + res.status);
+
+    const page = await res.json();
+    all.push(...page);
+
+    if (page.length < PAGE_SIZE) break; // ostatnia (niepełna) strona
+    from += PAGE_SIZE;
+
+    if (from > 500000) break; // bezpiecznik przeciw nieskończonej pętli
+  }
+
+  return all;
+}
+
 async function loadStats() {
   const noteEl = document.getElementById('statsNote');
 
@@ -201,16 +237,7 @@ async function loadStats() {
 
   let events;
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/release_events?release_slug=eq.${encodeURIComponent(RELEASE_SLUG)}&select=*`,
-      {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY
-        }
-      }
-    );
-    if (!res.ok) throw new Error('Supabase request failed: ' + res.status);
-    events = await res.json();
+    events = await fetchAllEvents();
   } catch (err) {
     noteEl.textContent = 'Could not load stats right now. Try refreshing the page.';
     return;
