@@ -22,6 +22,39 @@ const BENCHMARK_STREAMS_28D = 155000;
 const BENCHMARK_SAVES_28D = 5500;
 const WINDOW_DAYS = 28;
 
+// Supabase/PostgREST zwraca maksymalnie 1000 wierszy na jedno zapytanie.
+// Bez paginacji świeże (dzisiejsze) zdarzenia wypadają poza to okno, gdy
+// wydanie ma już ponad 1000 zdarzeń. Pobieramy więc stronami po 1000
+// (nagłówek Range), aż dostaniemy niepełną stronę = koniec danych.
+const PAGE_SIZE = 1000;
+
+async function fetchAllRows(baseUrl) {
+  const all = [];
+  let from = 0;
+
+  for (;;) {
+    const to = from + PAGE_SIZE - 1;
+    const res = await fetch(baseUrl, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Range-Unit': 'items',
+        'Range': `${from}-${to}`
+      }
+    });
+    if (!res.ok) throw new Error('Supabase fetch failed: ' + res.status);
+
+    const page = await res.json();
+    all.push(...page);
+
+    if (page.length < PAGE_SIZE) break; // ostatnia (niepełna) strona
+    from += PAGE_SIZE;
+
+    if (from > 500000) break; // bezpiecznik przeciw nieskończonej pętli
+  }
+
+  return all;
+}
+
 async function loadReleases() {
   const grid = document.getElementById('releaseGrid');
 
@@ -102,12 +135,9 @@ function isSupabaseConfigured() {
 // releaseDate jest pusty/niepoprawny, liczy z WSZYSTKICH zdarzeń (lepiej
 // pokazać coś niż nic, gdy ktoś nie wypełnił jeszcze release_date).
 async function fetchCtr28d(slug, releaseDateStr) {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/release_events?release_slug=eq.${encodeURIComponent(slug)}&select=event_type,created_at`,
-    { headers: { 'apikey': SUPABASE_ANON_KEY } }
+  const events = await fetchAllRows(
+    `${SUPABASE_URL}/rest/v1/release_events?release_slug=eq.${encodeURIComponent(slug)}&select=event_type,created_at&order=created_at.desc`
   );
-  if (!res.ok) throw new Error('release_events fetch failed: ' + res.status);
-  const events = await res.json();
 
   let filtered = events;
   const releaseDate = releaseDateStr ? new Date(releaseDateStr + 'T00:00:00Z') : null;
@@ -370,15 +400,13 @@ async function loadSiteEvents(days) {
   }
 
   try {
-    let url = SUPABASE_URL + '/rest/v1/site_events?select=event_type,content_name,created_at&order=created_at.desc&limit=2000';
+    let url = SUPABASE_URL + '/rest/v1/site_events?select=event_type,content_name,created_at&order=created_at.desc';
     if (days > 0) {
       const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
       url += '&created_at=gte.' + encodeURIComponent(since);
     }
 
-    const res = await fetch(url, { headers: { 'apikey': SUPABASE_ANON_KEY } });
-    if (!res.ok) throw new Error('site_events fetch failed: ' + res.status);
-    const events = await res.json();
+    const events = await fetchAllRows(url);
 
     totalEl.textContent = events.length === 0
       ? 'Brak danych dla wybranego okresu.'
