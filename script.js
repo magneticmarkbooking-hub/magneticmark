@@ -202,9 +202,9 @@ function animateTrumpet() {
 function preloadAllImages() {
   // Zdjęcia galerii
   const gallerySrcs = [
-    'images/15.jpg','images/11.jpg','images/7.jpg','images/6.jpg',
-    'images/13.jpg','images/14.jpg','images/5.jpg','images/12.jpg',
-    'images/hero.png','images/bio.jpg','images/contact.jpg'
+    'images/15-thumb.webp','images/11-thumb.webp','images/7-thumb.webp','images/6-thumb.webp',
+    'images/13-thumb.webp','images/14-thumb.webp','images/5-thumb.webp','images/12-thumb.webp',
+    'images/bio.webp'
   ];
   gallerySrcs.forEach(src => {
     const img = new Image();
@@ -260,7 +260,7 @@ let lightboxImages = [];
 let lightboxIndex = 0;
 
 function openLightbox(src) {
-  lightboxImages = Array.from(document.querySelectorAll('.gallery-item img')).map(i => i.getAttribute('src'));
+  lightboxImages = Array.from(document.querySelectorAll('.gallery-item img')).map(i => i.dataset.full || i.getAttribute('src'));
   lightboxIndex = lightboxImages.indexOf(src);
   if (lightboxIndex === -1) { lightboxImages = [src]; lightboxIndex = 0; }
   const lb = document.getElementById('lightbox');
@@ -306,7 +306,7 @@ function setupGalleryClicks() {
   document.querySelectorAll('.gallery-item').forEach(item => {
     const img = item.querySelector('img');
     if (!img) return;
-    item.onclick = () => openLightbox(img.getAttribute('src'));
+    item.onclick = () => openLightbox(img.dataset.full || img.getAttribute('src'));
   });
 }
 

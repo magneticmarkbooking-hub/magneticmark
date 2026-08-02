@@ -23,7 +23,7 @@
 <meta property="og:description" content="Polski DJ, producent muzyczny i instrumentalista. Big Room, Hardstyle, Peak Time Techno. 500K+ monthly listeners on Spotify.">
 <meta property="og:type" content="profile">
 <meta property="og:url" content="https://magneticmarkdj.com">
-<meta property="og:image" content="https://magneticmarkdj.com/images/hero.png">
+<meta property="og:image" content="https://magneticmarkdj.com/images/og.jpg">
 <meta property="og:locale" content="pl_PL">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:site_name" content="MagneticMark">
@@ -32,7 +32,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="MagneticMark – DJ & Producer">
 <meta name="twitter:description" content="Polish DJ & trumpet player. Big Room, Hardstyle, Techno. 500K+ monthly listeners on Spotify.">
-<meta name="twitter:image" content="https://magneticmarkdj.com/images/hero.png">
+<meta name="twitter:image" content="https://magneticmarkdj.com/images/og.jpg">
 
 <!-- Schema.org – WebSite (site name in Google) -->
 <script type="application/ld+json">
@@ -53,8 +53,8 @@
   "alternateName": ["Marek Bodynek", "Magnetic Mark", "DJ MagneticMark"],
   "description": "MagneticMark – polski DJ, producent muzyczny i instrumentalista. Big Room, Hardstyle i Peak Time Techno. 500K+ słuchaczy miesięcznie na Spotify, 15M+ odtworzeń. Znak rozpoznawczy: live trąbka.",
   "url": "https://magneticmarkdj.com",
-  "image": "https://magneticmarkdj.com/images/hero.png",
-  "logo": "https://magneticmarkdj.com/images/logo-white.png",
+  "image": "https://magneticmarkdj.com/images/og.jpg",
+  "logo": "https://magneticmarkdj.com/images/logo-white.webp",
   "genre": ["Big Room", "Hardstyle", "Peak Time Techno", "Hard Dance", "Electronic Music"],
   "foundingDate": "2020",
   "foundingLocation": {
@@ -118,22 +118,15 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
 
-<!-- PRELOAD GALLERY IMAGES -->
-<link rel="preload" href="images/15.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="images/11.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="images/7.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="images/6.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="images/13.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="images/14.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="images/5.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="images/12.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="images/hero.png" as="image">
-<link rel="preload" href="images/bio.jpg" as="image">
+<!-- PRELOAD -->
+<link rel="preload" href="images/hero-1920.webp" as="image" fetchpriority="high" media="(min-width:769px)">
+<link rel="preload" href="images/hero-1080.webp" as="image" fetchpriority="high" media="(max-width:768px)">
+<link rel="preload" href="images/logo-white.webp" as="image">
 </head>
 <body>
 
 <!-- AUDIO -->
-<audio id="bgAudio" loop preload="auto">
+<audio id="bgAudio" loop preload="none">
   <source src="sounds/intro.mp3" type="audio/mpeg">
 </audio>
 
@@ -155,7 +148,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     <div class="iball iball-12"></div>
   </div>
   <div class="intro-inner">
-    <img src="images/logo-white.png" alt="MagneticMark" class="intro-logo">
+    <img src="images/logo-white.webp" width="500" height="281" alt="MagneticMark" class="intro-logo">
     <p class="intro-welcome" data-pl="WELCOME TO MY WORLD" data-de="WELCOME TO MY WORLD" data-en="WELCOME TO MY WORLD">WELCOME TO MY WORLD</p>
     <div class="intro-rings">
       <div class="intro-ring ring-1"></div>
@@ -177,7 +170,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <nav id="navbar">
   <div class="nav-container">
     <a href="#hero" class="nav-logo">
-      <img src="images/logo-white.png" alt="MagneticMark Logo" class="logo-img">
+      <img src="images/logo-white.webp" width="500" height="281" alt="MagneticMark Logo" class="logo-img">
     </a>
     <ul class="nav-links" id="navLinks">
       <li><a href="#bio" data-pl="Bio" data-de="Bio" data-en="Bio">Bio</a></li>
@@ -214,13 +207,13 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <!-- HERO -->
 <section id="hero">
   <div class="hero-bg">
-    <img src="images/hero.png" alt="MagneticMark live performance" class="hero-img">
+    <img src="images/hero-1920.webp" srcset="images/hero-1080.webp 1080w, images/hero-1920.webp 1920w" sizes="100vw" width="1920" height="864" alt="MagneticMark live performance" class="hero-img" fetchpriority="high" decoding="async">
     <div class="hero-overlay"></div>
   </div>
   <div class="hero-content">
     <p class="hero-eyebrow" data-pl="DJ · Producent · Instrumentalista" data-de="DJ · Produzent · Instrumentalist" data-en="DJ · Producer · Instrumentalist">DJ · Producent · Instrumentalista</p>
     <div class="hero-logo-wrap">
-      <img src="images/logo-white.png" alt="MagneticMark" class="hero-logo-img">
+      <img src="images/logo-white.webp" width="500" height="281" alt="MagneticMark" class="hero-logo-img">
     </div>
     <h1 class="sr-only">MagneticMark – polski DJ, producent muzyczny i trębacz z Opolszczyzny. Big Room, Hardstyle, Peak Time Techno.</h1>
     <p class="hero-sub" data-pl="Big Room · Hardstyle · Peak Time Techno" data-de="Big Room · Hardstyle · Peak Time Techno" data-en="Big Room · Hardstyle · Peak Time Techno">Big Room · Hardstyle · Peak Time Techno</p>
@@ -258,7 +251,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     <div class="section-label" data-pl="O Artyście" data-de="Über den Künstler" data-en="About the Artist" aria-hidden="true">O Artyście</div>
     <div class="bio-grid">
       <div class="bio-image bio-image-bordered">
-        <img src="images/bio.jpg" alt="MagneticMark – Marek Bodynek, polski DJ i producent muzyczny z Opolszczyzny" loading="lazy">
+        <img src="images/bio.webp" width="900" height="1353" alt="MagneticMark – Marek Bodynek, polski DJ i producent muzyczny z Opolszczyzny" loading="lazy" decoding="async">
         <div class="bio-image-accent"></div>
       </div>
       <div class="bio-text">
@@ -363,14 +356,14 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     <div class="section-label" data-pl="Galeria" data-de="Galerie" data-en="Gallery" aria-hidden="true">Galeria</div>
     <h2 class="section-title fade-in" id="gallery-heading" data-pl="Galeria" data-en="Gallery" data-de="Galerie">Galeria</h2>
     <div class="gallery-grid">
-      <div class="gallery-item" onclick="openLightbox('images/15.jpg')" role="button" tabindex="0"><img src="images/15.jpg" alt="MagneticMark DJ set na żywo z trąbką – mainstage" loading="eager"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
-      <div class="gallery-item" onclick="openLightbox('images/11.jpg')" role="button" tabindex="0"><img src="images/11.jpg" alt="MagneticMark przy konsolecie podczas występu – widok z boku" loading="eager"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
-      <div class="gallery-item" onclick="openLightbox('images/7.jpg')" role="button" tabindex="0"><img src="images/7.jpg" alt="MagneticMark gra na trąbce podczas setu – zbliżenie" loading="eager"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
-      <div class="gallery-item" onclick="openLightbox('images/6.jpg')" role="button" tabindex="0"><img src="images/6.jpg" alt="MagneticMark na scenie w świetle reflektorów – festiwal" loading="eager"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
-      <div class="gallery-item" onclick="openLightbox('images/13.jpg')" role="button" tabindex="0"><img src="images/13.jpg" alt="MagneticMark za gramofonami – nocny koncert elektroniczny" loading="eager"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
-      <div class="gallery-item" onclick="openLightbox('images/14.jpg')" role="button" tabindex="0"><img src="images/14.jpg" alt="MagneticMark live – tłum i efekty świetlne na scenie" loading="eager"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
-      <div class="gallery-item" onclick="openLightbox('images/5.jpg')" role="button" tabindex="0"><img src="images/5.jpg" alt="MagneticMark DJ set – energetyczny występ na mainstage" loading="eager"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
-      <div class="gallery-item" onclick="openLightbox('images/12.jpg')" role="button" tabindex="0"><img src="images/12.jpg" alt="MagneticMark portret artystyczny – DJ i producent muzyczny" loading="eager"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
+      <div class="gallery-item" onclick="openLightbox('images/15-full.webp')" role="button" tabindex="0"><img src="images/15-thumb.webp" data-full="images/15-full.webp" width="700" height="1052" alt="MagneticMark DJ set na żywo z trąbką – mainstage" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
+      <div class="gallery-item" onclick="openLightbox('images/11-full.webp')" role="button" tabindex="0"><img src="images/11-thumb.webp" data-full="images/11-full.webp" width="700" height="1052" alt="MagneticMark przy konsolecie podczas występu – widok z boku" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
+      <div class="gallery-item" onclick="openLightbox('images/7-full.webp')" role="button" tabindex="0"><img src="images/7-thumb.webp" data-full="images/7-full.webp" width="700" height="1052" alt="MagneticMark gra na trąbce podczas setu – zbliżenie" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
+      <div class="gallery-item" onclick="openLightbox('images/6-full.webp')" role="button" tabindex="0"><img src="images/6-thumb.webp" data-full="images/6-full.webp" width="700" height="1052" alt="MagneticMark na scenie w świetle reflektorów – festiwal" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
+      <div class="gallery-item" onclick="openLightbox('images/13-full.webp')" role="button" tabindex="0"><img src="images/13-thumb.webp" data-full="images/13-full.webp" width="700" height="466" alt="MagneticMark za gramofonami – nocny koncert elektroniczny" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
+      <div class="gallery-item" onclick="openLightbox('images/14-full.webp')" role="button" tabindex="0"><img src="images/14-thumb.webp" data-full="images/14-full.webp" width="700" height="1052" alt="MagneticMark live – tłum i efekty świetlne na scenie" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
+      <div class="gallery-item" onclick="openLightbox('images/5-full.webp')" role="button" tabindex="0"><img src="images/5-thumb.webp" data-full="images/5-full.webp" width="700" height="1052" alt="MagneticMark DJ set – energetyczny występ na mainstage" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
+      <div class="gallery-item" onclick="openLightbox('images/12-full.webp')" role="button" tabindex="0"><img src="images/12-thumb.webp" data-full="images/12-full.webp" width="700" height="1052" alt="MagneticMark portret artystyczny – DJ i producent muzyczny" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-overlay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg></div></div></div>
     </div>
 </section>
 
@@ -472,7 +465,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
         </div>
       </div>
       <div class="contact-image">
-        <img src="images/bio.jpg" alt="MagneticMark – DJ i producent dostępny na booking" loading="lazy">
+        <img src="images/bio.webp" width="900" height="1353" alt="MagneticMark – DJ i producent dostępny na booking" loading="lazy" decoding="async">
       </div>
     </div>
   </div>
@@ -496,7 +489,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <!-- FOOTER -->
 <footer>
   <div class="footer-container">
-    <img src="images/logo-white.png" alt="MagneticMark" class="footer-logo">
+    <img src="images/logo-white.webp" width="500" height="281" alt="MagneticMark" class="footer-logo" loading="lazy">
     <p class="footer-copy">© <span id="year"></span> MagneticMark. All rights reserved.</p>
   </div>
 </footer>
