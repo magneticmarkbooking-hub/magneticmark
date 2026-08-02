@@ -1,5 +1,13 @@
 [
   {
+    "title": "Rave For Me",
+    "slug": "raveforme",
+    "cover": "../raveforme/cover.jpg",
+    "date": "2026-08",
+    "release_date": "2026-08-31",
+    "platform": "Spotify"
+  },
+  {
     "title": "Teckno Lady",
     "slug": "tecknolady",
     "cover": "../tecknolady/cover.jpg",
