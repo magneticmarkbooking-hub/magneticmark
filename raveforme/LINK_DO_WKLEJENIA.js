@@ -16,4 +16,4 @@
    11Dse1nbPerwED98N9W3D3
    (fragment ?si=... pomijasz, jest niepotrzebny)
    =========================================================== */
-const RELEASE_LINK = "https://open.spotify.com/track/WKLEJ_TU_ID_UTWORU?context=spotify%3Aartist%3A7qnCu8Un2e3gvg1ELX3HNg";
+const RELEASE_LINK = "https://open.spotify.com/track/11Dse1nbPerwED98N9W3D3?context=spotify%3Aartist%3A7qnCu8Un2e3gvg1ELX3HNg";
