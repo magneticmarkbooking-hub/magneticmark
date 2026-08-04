@@ -81,6 +81,15 @@ li{margin-bottom:.4rem}
 .btn:hover,.btn:focus-visible{transform:translateY(-2px);text-decoration:none;
   box-shadow:0 8px 28px rgba(123,47,255,.45)}
 .places{color:var(--gray);font-size:.95rem}
+.bio-split{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);
+  gap:1.75rem;align-items:start;margin-top:1rem}
+.bio-split figure{margin:0}
+.bio-split img{width:100%;height:auto;display:block;border-radius:6px;
+  border:1px solid rgba(123,47,255,.3);box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.bio-split figcaption{margin-top:.55rem;font-size:.82rem;color:var(--gray);line-height:1.45}
+.bio-split .bio-copy p:last-child{margin-bottom:0}
+@media (max-width:700px){.bio-split{grid-template-columns:1fr;gap:1.25rem}
+  .bio-split figure{max-width:320px;margin:0 auto}}
 footer{border-top:1px solid rgba(123,47,255,.25);padding:2rem 0;
   color:var(--gray);font-size:.88rem;text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -115,8 +124,17 @@ footer{border-top:1px solid rgba(123,47,255,.25);padding:2rem 0;
   </div>
 
   <h2>Kim jest MagneticMark</h2>
+  <div class="bio-split">
+    <figure>
+      <img src="../images/bio.webp" width="900" height="1352" loading="lazy" decoding="async"
+           alt="MagneticMark, Marek Bodynek, DJ i producent muzyczny z Opolszczyzny">
+      <figcaption>MagneticMark, DJ, producent i trębacz z Opolszczyzny</figcaption>
+    </figure>
+    <div class="bio-copy">
   <p>Za projektem stoi Marek Bodynek, urodzony 30 kwietnia 1999 roku na Opolszczyźnie. Zaczynał od produkcji elektronicznych brzmień, ale to trąbka stała się jego pasją i znakiem rozpoznawczym. Dziś łączy jedno z drugim: klasyczny DJ set uzupełnia partiami granymi na żywo, co odróżnia jego występ od standardowego setu odtwarzanego z kontrolera.</p>
   <p>Inspiracje czerpie od artystów pokroju Hardwella, Timmy'ego Trumpeta, Blasterjaxx, W&amp;W oraz Dimitri Vegas &amp; Like Mike. Jest zwycięzcą Red One DJ Contest i finalistą ING Silesia Beats 2025, gdzie znalazł się w piątce najlepszych spośród ponad 200 uczestników.</p>
+    </div>
+  </div>
 
   <h2>Gdzie grał</h2>
   <p class="places">Red One Festival w Kotulinie, ING Silesia Beats w Chorzowie, Projekt L 808 w Leśnicy, DJ's Night w Lubieszowie koło Bierawy, Sunset Vibes w Mango Club w Opolu.</p>
