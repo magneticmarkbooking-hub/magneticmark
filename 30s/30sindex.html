@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>MagneticMark — 30 sekund</title>
+<meta name="theme-color" content="#0a0015">
+<meta name="robots" content="noindex,nofollow">
+
+<!-- Podgląd przy wysyłaniu linku (Messenger, WhatsApp, Slack) -->
+<meta property="og:type" content="video.other">
+<meta property="og:title" content="MagneticMark — 30 sekund ze sceny">
+<meta property="og:description" content="Red One Festival 2026. DJ, producent i instrumentalista — trąbka na żywo w trakcie setu.">
+<meta property="og:url" content="https://magneticmarkdj.com/30s/">
+<meta property="og:image" content="https://magneticmarkdj.com/video/mm-30s-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --c1:#0a0015; --c2:#1a0035; --accent:#7b2fff;
+    --white:#fff; --gray:#8f8fb5; --text:#ded6ff;
+    --font-display:'Barlow Condensed',sans-serif; --font-body:'Barlow',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--font-body);
+    background:linear-gradient(180deg,var(--c1) 0%,var(--c2) 60%,#000820 100%);
+    background-attachment:fixed;
+    color:var(--text);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px 16px calc(24px + env(safe-area-inset-bottom));
+    gap:20px;
+  }
+
+  .logo{width:170px;max-width:55vw;height:auto;display:block;
+        filter:drop-shadow(0 0 30px rgba(123,47,255,.55))}
+
+  /* 9:16 — nigdy nie wychodzi poza ekran */
+  .stage{
+    position:relative;
+    width:min(340px, 88vw, calc((100vh - 230px) * 0.5625));
+    aspect-ratio:9/16;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid #2e0073;
+    background:#11001f;
+    box-shadow:0 0 60px rgba(102,0,255,.28);
+  }
+  .stage video{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    object-fit:cover;display:block;background:#11001f;
+  }
+
+  .hint{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gray);text-align:center}
+
+  .back{
+    font-family:var(--font-display);
+    font-size:.95rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--white);text-decoration:none;
+    padding:12px 30px;border-radius:4px;
+    border:1px solid rgba(123,47,255,.5);
+    background:rgba(123,47,255,.1);
+    transition:background .25s ease,border-color .25s ease;
+  }
+  .back:hover,.back:focus-visible{background:rgba(123,47,255,.24);border-color:var(--accent);outline:none}
+
+  @media (max-height:640px){
+    body{gap:14px}
+    .logo{width:130px}
+    .hint{display:none}
+  }
+</style>
+</head>
+<body>
+
+  <img class="logo" src="/images/logo-white.png" alt="MagneticMark">
+
+  <div class="stage">
+    <video
+      src="/video/mm-30s.mp4"
+      poster="/video/mm-30s-poster.jpg"
+      autoplay muted loop playsinline controls preload="metadata">
+      Twoja przeglądarka nie odtwarza wideo —
+      <a href="/video/mm-30s.mp4" style="color:#a97bff">pobierz plik</a>.
+    </video>
+  </div>
+
+  <p class="hint">Red One Festival 2026 &middot; kliknij, by włączyć dźwięk</p>
+
+  <a class="back" href="/">Strona główna</a>
+
+</body>
+</html>
