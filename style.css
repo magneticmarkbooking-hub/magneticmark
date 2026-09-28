@@ -898,6 +898,25 @@ footer {
 }
 .footer-logo { height: 36px; width: auto; opacity: 0.8; }
 .footer-copy { font-size: 12px; color: var(--gray); }
+.footer-legal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+}
+.footer-legal a {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.footer-legal a:hover,
+.footer-legal a:focus-visible { color: var(--accent); }
+.footer-legal-sep { color: rgba(123,47,255,0.45); font-size: 12px; }
 .footer-booking a { font-size: 12px; color: rgba(123,47,255,0.7); transition: color var(--transition); }
 .footer-booking a:hover { color: var(--accent); }
 

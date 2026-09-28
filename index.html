@@ -143,27 +143,13 @@
 </script>
 
 
-<!-- Meta Pixel -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '27127010080316320');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel -->
+<!-- Meta Pixel: ladowany dopiero po zgodzie, przez cookies.js.
+     Snippet i znacznik <noscript> celowo usuniete z <head> -
+     odpalaly sie natychmiast, przed jakakolwiek zgoda.
+     ID Pixela siedzi teraz w cookies.js (stala PIXEL_ID). -->
 <link rel="stylesheet" href="style.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cookies.css">
+<link rel="stylesheet" href="/fonts.css">
 
 <!-- PRELOAD -->
 <link rel="preload" href="images/hero-1920.webp" as="image" fetchpriority="high" media="(min-width:769px)">
@@ -363,13 +349,13 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
     <div class="video-grid">
       <div class="video-main">
         <div class="video-wrapper">
-          <iframe src="https://www.youtube.com/embed/WhcxRo1mfCA" title="MagneticMark – YouTube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          <iframe src="https://www.youtube-nocookie.com/embed/WhcxRo1mfCA" title="MagneticMark – YouTube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
         </div>
         <p class="video-label" data-pl="MagneticMark MAINSTAGE 2026" data-de="MagneticMark MAINSTAGE 2026" data-en="MagneticMark MAINSTAGE 2026">MagneticMark MAINSTAGE 2026</p>
       </div>
       <div class="video-side">
         <div class="video-wrapper video-wrapper-sm">
-          <iframe src="https://www.youtube.com/embed/uVsQ3G8vp2c" title="MagneticMark Set 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          <iframe src="https://www.youtube-nocookie.com/embed/uVsQ3G8vp2c" title="MagneticMark Set 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
         </div>
         <p class="video-label" data-pl="MagneticMark Promo Set 2025" data-de="MagneticMark Promo Set 2025" data-en="MagneticMark Promo Set 2025">MagneticMark Promo Set 2025</p>
         <div class="sc-embed-wrap">
@@ -537,6 +523,11 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 <footer>
   <div class="footer-container">
     <img src="images/logo-white.webp" width="500" height="281" alt="MagneticMark" class="footer-logo" loading="lazy">
+    <nav class="footer-legal" aria-label="Dokumenty prawne">
+      <a href="/polityka-prywatnosci.html" data-pl="Polityka prywatności" data-en="Privacy Policy" data-de="Datenschutz">Polityka prywatności</a>
+      <span class="footer-legal-sep" aria-hidden="true">&middot;</span>
+      <a href="/regulamin.html" data-pl="Regulamin" data-en="Terms" data-de="AGB">Regulamin</a>
+    </nav>
     <p class="footer-copy">© <span id="year"></span> MagneticMark. All rights reserved.</p>
   </div>
 </footer>
@@ -558,6 +549,7 @@ src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"
 </button>
 
 <script src="SUPABASE_DANE.js"></script>
+<script src="cookies.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

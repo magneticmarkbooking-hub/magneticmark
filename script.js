@@ -519,6 +519,9 @@ function getFbc() {
 }
 
 function sendCAPI(eventName, eventId) {
+  // Bez zgody marketingowej nie wysylamy nic do Meta.
+  // Stan ustawia cookies.js; brak obiektu = brak zgody.
+  if (!window.mmConsent || !window.mmConsent.marketing) return;
   try {
     fetch(CAPI_ENDPOINT, {
       method: 'POST',
