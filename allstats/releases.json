@@ -1,5 +1,13 @@
 [
   {
+    "title": "A Love That Save Me",
+    "slug": "alovethatsaveme",
+    "cover": "../alovethatsaveme/cover.jpg",
+    "date": "2026-10",
+    "release_date": "2026-10-26",
+    "platform": "Spotify"
+  },
+  {
     "title": "Fish Bang",
     "slug": "fishbang",
     "cover": "../fishbang/cover.jpg",
