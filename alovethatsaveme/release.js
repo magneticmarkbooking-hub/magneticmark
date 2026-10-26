@@ -167,7 +167,23 @@ function handleLinkClick(e) {
       u.searchParams.delete('context');
       mobileUrl = u.toString();
     }
-    window.location.href = mobileUrl;
+    // Sam link https zostawał w przeglądarce (szczególnie w przeglądarce Instagrama), więc
+    // aplikację otwieramy wprost: Android przez intent:// (z powrotem do https, gdy brak apki),
+    // iPhone przez spotify:track:ID, a https po 2 s, jeśli strona dalej jest na wierzchu.
+    const mu = new URL(mobileUrl);
+    const parts = mu.pathname.split('/').filter(Boolean);           // ['track', 'ID']
+    const ctx = mu.searchParams.get('context');                      // tylko z RELEASE_LINK_MOBILE
+    if (/android/i.test(navigator.userAgent)) {
+      // ten sam link https, ale wymuszony w pakiecie Spotify
+      window.location.href = 'intent://' + mobileUrl.replace(/^https:\/\//, '') +
+        '#Intent;scheme=https;package=com.spotify.music;S.browser_fallback_url=' +
+        encodeURIComponent(mobileUrl) + ';end';
+    } else {
+      window.location.href = 'spotify:' + parts.join(':') + (ctx ? '?context=' + encodeURIComponent(ctx) : '');
+      setTimeout(function() {
+        if (!document.hidden) window.location.href = mobileUrl;
+      }, 2000);
+    }
   } else {
     window.open(url, '_blank', 'noopener');
     clearTimeout(emailPopupTimer);
