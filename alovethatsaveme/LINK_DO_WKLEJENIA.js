@@ -17,3 +17,17 @@
    (fragment ?si=... pomijasz, jest niepotrzebny)
    =========================================================== */
 const RELEASE_LINK = "https://open.spotify.com/track/4pP3D8jIVGJHv19SBEHr4Y?context=spotify%3Aartist%3A7qnCu8Un2e3gvg1ELX3HNg";
+
+/* ===========================================================
+   LINK NA TELEFON (opcjonalny)
+   ===========================================================
+   Spotify na telefonie przy linku z kontekstem artysty puszcza pierwszy
+   utwór z profilu zamiast tego singla (od jesieni 2026, na PC działa).
+   Zostaw puste "", a telefon dostanie sam utwór (gra dobry singiel).
+
+   Lepiej: link do utworu w kontekście Twojej playlisty, na której jest ten
+   singiel. Wtedy po singlu lecą Twoje kolejne kawałki. Format:
+
+     https://open.spotify.com/track/ID_UTWORU?context=spotify%3Aplaylist%3AID_PLAYLISTY
+   =========================================================== */
+const RELEASE_LINK_MOBILE = "";

@@ -155,19 +155,19 @@ function handleLinkClick(e) {
   const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
   if (isMobile) {
-    // Zachowaj deep-link context (?context=spotify:artist:...) także przy otwieraniu apki.
-    // Wcześniej url.split('?')[0] wywalał kontekst na telefonie — teraz go przenosimy,
-    // a pełny link https (z kontekstem) zostaje jako fallback.
-    const qIndex = url.indexOf('?');
-    const base   = qIndex === -1 ? url : url.slice(0, qIndex);
-    const query  = qIndex === -1 ? '' : url.slice(qIndex); // zawiera wiodące "?"
-    const spotifyUri = base
-      .replace('https://open.spotify.com/', 'spotify:')
-      .replace(/\//g, ':') + query;
-    window.location.href = spotifyUri;
-    setTimeout(function() {
-      if (!document.hidden) window.location.href = url;
-    }, 2000);
+    // Telefon (2026-10-26): aplikacja Spotify na telefonie ignoruje utwór, gdy link ma kontekst
+    // artysty (?context=spotify:artist:...), i gra pierwszy utwór z profilu. Na PC działa.
+    // Dlatego na telefonie: link z LINK_DO_WKLEJENIA.js (RELEASE_LINK_MOBILE, np. utwór
+    // w kontekście playlisty), a bez niego sam utwór bez parametru context.
+    let mobileUrl;
+    if (RELEASE.mobileLinkUrl) {
+      mobileUrl = buildForwardedUrl(RELEASE.mobileLinkUrl);
+    } else {
+      const u = new URL(url);
+      u.searchParams.delete('context');
+      mobileUrl = u.toString();
+    }
+    window.location.href = mobileUrl;
   } else {
     window.open(url, '_blank', 'noopener');
     clearTimeout(emailPopupTimer);
