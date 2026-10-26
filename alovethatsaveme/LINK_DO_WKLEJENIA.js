@@ -16,4 +16,4 @@
    11Dse1nbPerwED98N9W3D3
    (fragment ?si=... pomijasz, jest niepotrzebny)
    =========================================================== */
-const RELEASE_LINK = "https://open.spotify.com/track/4XT97zxyCkPKHUEtnG7CWv?context=spotify%3Aartist%3A7qnCu8Un2e3gvg1ELX3HNg";
+const RELEASE_LINK = "https://open.spotify.com/track/4pP3D8jIVGJHv19SBEHr4Y?context=spotify%3Aartist%3A7qnCu8Un2e3gvg1ELX3HNg";
