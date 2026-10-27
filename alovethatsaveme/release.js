@@ -142,6 +142,8 @@ function sendCAPI(eventName, eventId, extra) {
 //                    w tle, iPhone usypia stronę i wysyła przy powrocie (bez powrotu przepada).
 const QUALIFIED_LISTEN_SECONDS = 30;
 const FREEZE_GAP_MS = 4000;                 // przerwa w liczniku = strona zamrożona w tle
+const RAF_STALL_MS = 1500;                  // tyle bez rysowania = strona w tle
+const NAVIGATION_GRACE_MS = 500;            // przeładowanie w tym czasie = brak apki
 const FREEZE_WATCH_MS = 10 * 60 * 1000;     // jak długo po kliknięciu pilnujemy powrotu
 function sendMetaAppEvent(name, params) {
   const evId = name.toLowerCase() + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
@@ -190,12 +192,12 @@ function trackAppOpen(mobileUrl) {
       if (decided || Date.now() - started > windowMs) return;
       hiddenAt = Date.now();
       setTimeout(function() {                 // pagehide w tym czasie = przeładowanie, nie apka
-        if (!navigated) decide('open');
+        if (!navigated) decide('open', { detail: 'visibility' });
       }, 400);
-    } else if (decided === 'open' && !returned) {
+    } else if (decided === 'open' && !returned && hiddenAt) {
       returned = true;
       const secs = Math.round((Date.now() - hiddenAt) / 1000);
-      stat('app_return', { seconds: secs }, true);
+      stat('app_return', { seconds: secs, detail: 'visibility' }, true);
       clearTimeout(listenTimer);
       if (secs >= QUALIFIED_LISTEN_SECONDS) sendListen(secs);
     }
@@ -210,28 +212,63 @@ function trackAppOpen(mobileUrl) {
   }, windowMs);
   window.mmAppDecide = decide;
 
-  // iPhone w Instagramie nie zgłasza zejścia w tło, ale po kilku sekundach w tle zamraża stronę.
-  // Licznik co 1 s: przerwa dłuższa niż FREEZE_GAP_MS = ktoś był poza stroną (w Spotify),
-  // a długość przerwy to przybliżony czas w Spotify (bez kilku sekund przed zamrożeniem).
-  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+  // Wyjście do Spotify wykrywamy trzema sygnałami i zapisujemy, który zadziałał (detail):
+  //   visibility  strona zgłosiła zejście w tło (Android, Safari; iPhone w Instagramie tego nie robi)
+  //   raf     strona przestała się rysować (requestAnimationFrame stoi dłużej niż RAF_STALL_MS);
+  //           iPhone przestaje rysować od razu po wyjściu z Instagrama, kod jeszcze chwilę działa
+  //   freeze  licznik co 0,5 s miał przerwę dłuższą niż FREEZE_GAP_MS (strona zamrożona)
+  // Czas w Spotify liczymy od ostatniej narysowanej klatki do ponownego rysowania.
+  // Android bez apki przeładowuje stronę do przeglądarki: sygnał liczy się dopiero, gdy przez
+  // NAVIGATION_GRACE_MS nie było przeładowania (pagehide), tak jak przy visibility.
+  {
+    let lastFrame = Date.now();
     let lastTick = Date.now();
-    const freezeWatch = setInterval(function() {
+    let awayAt = 0;
+    let awaySignal = null;
+    let rafId = 0;
+    const frame = function() { lastFrame = Date.now(); rafId = requestAnimationFrame(frame); };
+    rafId = requestAnimationFrame(frame);
+
+    const stop = function() { clearInterval(watch); cancelAnimationFrame(rafId); };
+    const goneAway = function(at, signal) {
+      awayAt = at;
+      awaySignal = signal;
+      setTimeout(function() {
+        if (navigated) return;                 // przeładowanie do przeglądarki, nie apka
+        window.mmAppSeen = true;               // bez okienka wyboru, jest w Spotify
+        decide('open', { detail: signal });
+      }, NAVIGATION_GRACE_MS);
+    };
+    const watch = setInterval(function() {
       const now = Date.now();
-      const gap = now - lastTick;
+      const tickGap = now - lastTick;
       lastTick = now;
-      if (gap <= FREEZE_GAP_MS || returned) return;
-      clearInterval(freezeWatch);
-      window.mmAppSeen = true;                // bez okienka wyboru, był w Spotify
-      const secs = Math.round(gap / 1000);
-      decide('open');
+      if (!awayAt) {
+        if (tickGap > FREEZE_GAP_MS) goneAway(now - tickGap, 'freeze');
+        else if (now - lastFrame > RAF_STALL_MS) goneAway(lastFrame, 'raf');
+        else return;
+      }
+      if (navigated) { stop(); return; }
+      // jeszcze w Spotify, a kod działa: 30 s mija bez powrotu
+      if (now - lastFrame > RAF_STALL_MS && tickGap <= FREEZE_GAP_MS) {
+        if (decided === 'open' && now - awayAt >= QUALIFIED_LISTEN_SECONDS * 1000) {
+          sendListen(QUALIFIED_LISTEN_SECONDS);
+        }
+        return;
+      }
+      // znowu rysuje (albo właśnie odmrożona): powrót na stronę
+      if (returned || (now - lastFrame > RAF_STALL_MS && tickGap <= FREEZE_GAP_MS)) return;
+      if (decided !== 'open') return;
       returned = true;
+      stop();
+      const secs = Math.round((now - awayAt) / 1000);
       clearTimeout(listenTimer);
-      stat('app_return', { seconds: secs }, true);
+      stat('app_return', { seconds: secs, detail: awaySignal }, true);
       if (secs >= QUALIFIED_LISTEN_SECONDS) sendListen(secs);
       const choice = document.getElementById('appChoice');
       if (choice) choice.remove();
-    }, 1000);
-    setTimeout(function() { clearInterval(freezeWatch); }, FREEZE_WATCH_MS);
+    }, 500);
+    setTimeout(stop, FREEZE_WATCH_MS);
   }
 }
 

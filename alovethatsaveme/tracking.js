@@ -115,12 +115,18 @@ async function sendStatEvent(eventType, extra, now) {
   const country = now ? knownCountry() : await detectCountry();
   const payload = buildStatPayload(eventType, extra, country);
   try {
-    const res = await postStat(payload);
+    let res = await postStat(payload);
+    // Baza bez kolumny detail (SQL jeszcze nieuruchomiony): to samo zdarzenie bez niej.
+    if (res.status === 400 && 'detail' in payload) {
+      const noDetail = Object.assign({}, payload);
+      delete noDetail.detail;
+      res = await postStat(noDetail);
+    }
     // Baza bez nowych kolumn (SQL jeszcze nieuruchomiony): view i click idą
     // jeszcze raz w starym formacie, żeby nie zgubić podstawowych statystyk.
     if (res.status === 400 && (eventType === 'view' || eventType === 'click')) {
       const legacy = Object.assign({}, payload);
-      ['os', 'utm_content', 'utm_term', 'seconds'].forEach((k) => delete legacy[k]);
+      ['os', 'utm_content', 'utm_term', 'seconds', 'detail'].forEach((k) => delete legacy[k]);
       await postStat(legacy);
     }
   } catch (err) {
