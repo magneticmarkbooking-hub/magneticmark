@@ -128,19 +128,21 @@ function sendCAPI(eventName, eventId, extra) {
 
 // ===== Pomiar: czy otworzyła się aplikacja Spotify (tylko statystyki, Meta bez zmian) =====
 // app_open: strona schowała się w tło bez przeładowania (aplikacja na wierzchu)
-// app_none: przejście na wersję w przeglądarce (Android: browser_fallback_url, iPhone: https
-//           po 2 s w handleLinkClick) albo link "Open in browser"
+// app_none: przejście na wersję w przeglądarce (Android: browser_fallback_url) albo link
+//           "Open in browser" (iPhone nie przechodzi sam do przeglądarki)
 // app_unknown: w przeglądarce Instagrama/Facebooka nic się nie stało przez 30 s
 //           (okienko "Otworzyć w Spotify?" i Anuluj)
 // Pomiar tylko obserwuje: otwieranie aplikacji i powrót do przeglądarki działają bez niego.
 // Do Meta (pixel + CAPI, do grup odbiorców i optymalizacji) idą tylko pewne przypadki:
 //   SpotifyAppOpen   aplikacja się otworzyła
 //   NoSpotifyApp     tylko Android: telefon sam przeszedł na wersję w przeglądarce, czyli
-//                    nie ma apki (na iPhonie przejście po 2 s bywa też po Anuluj, więc nie)
+//                    nie ma apki (iPhone nie daje pewnego sygnału braku apki, więc nie)
 //   QualifiedListen  30 s w aplikacji (Spotify liczy stream od 30 s). Większość nie wraca na
 //                    stronę, więc liczy licznik od otwarcia apki: Android zwykle wysyła po 30 s
 //                    w tle, iPhone usypia stronę i wysyła przy powrocie (bez powrotu przepada).
 const QUALIFIED_LISTEN_SECONDS = 30;
+const FREEZE_GAP_MS = 4000;                 // przerwa w liczniku = strona zamrożona w tle
+const FREEZE_WATCH_MS = 10 * 60 * 1000;     // jak długo po kliknięciu pilnujemy powrotu
 function sendMetaAppEvent(name, params) {
   const evId = name.toLowerCase() + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
   const data = Object.assign({ link_id: LINK_ID, owner: OWNER_ID }, params || {});
@@ -155,7 +157,8 @@ function trackAppOpen(mobileUrl) {
   const stat = window.mmStat;
   const inApp = (typeof detectInAppBrowser === 'function') ? detectInAppBrowser() : null;
   const started = Date.now();
-  const windowMs = inApp ? 30000 : 6000;
+  // iPhone i Instagram pokazują okienko "Otworzyć w Spotify?", więc czekamy dłużej na decyzję
+  const windowMs = (inApp || /iPhone|iPad|iPod/i.test(navigator.userAgent)) ? 30000 : 6000;
   let decided = null, hiddenAt = 0, navigated = false, returned = false;
   let listenSent = false, listenTimer = null;
   function sendListen(secs) {
@@ -165,7 +168,7 @@ function trackAppOpen(mobileUrl) {
   }
 
   function decide(kind, extra) {
-    if (decided) return false;
+    if (decided && !(kind === 'open' && decided === 'unknown')) return false;
     decided = kind;
     stat('app_' + kind, extra || null, true);
     if (kind === 'open') {
@@ -199,11 +202,37 @@ function trackAppOpen(mobileUrl) {
   });
 
   setTimeout(function() {                     // pomoc dla tych, którym nic się nie otworzyło
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) return;   // iPhone ma okienko wyboru
     if (!decided && document.visibilityState === 'visible') showOpenInBrowser(mobileUrl, decide);
   }, 3000);
   setTimeout(function() {
     if (!decided && document.visibilityState === 'visible') decide('unknown');
   }, windowMs);
+  window.mmAppDecide = decide;
+
+  // iPhone w Instagramie nie zgłasza zejścia w tło, ale po kilku sekundach w tle zamraża stronę.
+  // Licznik co 1 s: przerwa dłuższa niż FREEZE_GAP_MS = ktoś był poza stroną (w Spotify),
+  // a długość przerwy to przybliżony czas w Spotify (bez kilku sekund przed zamrożeniem).
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    let lastTick = Date.now();
+    const freezeWatch = setInterval(function() {
+      const now = Date.now();
+      const gap = now - lastTick;
+      lastTick = now;
+      if (gap <= FREEZE_GAP_MS || returned) return;
+      clearInterval(freezeWatch);
+      window.mmAppSeen = true;                // bez okienka wyboru, był w Spotify
+      const secs = Math.round(gap / 1000);
+      decide('open');
+      returned = true;
+      clearTimeout(listenTimer);
+      stat('app_return', { seconds: secs }, true);
+      if (secs >= QUALIFIED_LISTEN_SECONDS) sendListen(secs);
+      const choice = document.getElementById('appChoice');
+      if (choice) choice.remove();
+    }, 1000);
+    setTimeout(function() { clearInterval(freezeWatch); }, FREEZE_WATCH_MS);
+  }
 }
 
 function showOpenInBrowser(mobileUrl, decide) {
@@ -215,8 +244,36 @@ function showOpenInBrowser(mobileUrl, decide) {
   a.className = 'open-in-browser';
   a.href = mobileUrl;
   a.textContent = 'Spotify not opening? Open it in your browser';
-  a.addEventListener('click', function() { decide('none'); });
+  a.addEventListener('click', function() { if (decide) decide('none'); });
   btn.insertAdjacentElement('afterend', a);
+}
+
+// iPhone: wybór po IOS_CHOICE_DELAY_MS (2 s), gdy nic nie wskazuje, że Spotify się otworzył.
+// U kogoś, kto jest już w Spotify, okienko pojawia się w tle, a po powrocie licznik
+// zamrożenia (trackAppOpen) od razu je usuwa.
+const IOS_CHOICE_DELAY_MS = 2000;
+function showAppChoice(appUrl, browserUrl) {
+  if (document.getElementById('appChoice')) return;
+  const btn = document.getElementById('spotifyBtn');
+  if (!btn) return;
+  const box = document.createElement('div');
+  box.id = 'appChoice';
+  box.className = 'app-choice';
+  const p = document.createElement('p');
+  p.textContent = 'Spotify not opening?';
+  const openApp = document.createElement('a');
+  openApp.className = 'app-choice-btn app-choice-primary';
+  openApp.href = appUrl;
+  openApp.textContent = 'Open in Spotify app';
+  const openWeb = document.createElement('a');
+  openWeb.className = 'app-choice-btn';
+  openWeb.href = browserUrl;
+  openWeb.textContent = 'Open in browser';
+  openWeb.addEventListener('click', function() {
+    if (typeof window.mmAppDecide === 'function') window.mmAppDecide('none');
+  });
+  box.append(p, openApp, openWeb);
+  btn.insertAdjacentElement('afterend', box);
 }
 
 function handleLinkClick(e) {
@@ -263,11 +320,15 @@ function handleLinkClick(e) {
     }
     // Sam link https zostawał w przeglądarce (szczególnie w przeglądarce Instagrama), więc
     // aplikację otwieramy wprost: Android przez intent:// (z powrotem do https, gdy brak apki),
-    // iPhone przez spotify:track:ID, a https po 2 s, jeśli strona dalej jest na wierzchu.
+    // iPhone przez spotify:track:ID, bez automatycznego przejścia do przeglądarki (2026-10-27:
+    // przeglądarka Instagrama na iPhonie nie zgłasza zejścia strony w tło, więc dawne przejście
+    // po 2 s włączało się w tle u ludzi, którzy już byli w Spotify). Po 3 s link
+    // Po 2 s bez śladu apki okienko z dwoma przyciskami: apka jeszcze raz albo przeglądarka.
     const mu = new URL(mobileUrl);
     const parts = mu.pathname.split('/').filter(Boolean);           // ['track', 'ID']
     const ctx = mu.searchParams.get('context');                      // tylko z RELEASE_LINK_MOBILE
     trackAppOpen(mobileUrl);
+    deferEmailPopupAfterAppClick();
     if (/android/i.test(navigator.userAgent)) {
       // ten sam link https, ale wymuszony w pakiecie Spotify; bez aplikacji przeglądarka sama
       // przechodzi na browser_fallback_url (przeładowanie strony, rozpoznawane po pagehide)
@@ -275,16 +336,44 @@ function handleLinkClick(e) {
         '#Intent;scheme=https;package=com.spotify.music;S.browser_fallback_url=' +
         encodeURIComponent(mobileUrl) + ';end';
     } else {
-      window.location.href = 'spotify:' + parts.join(':') + (ctx ? '?context=' + encodeURIComponent(ctx) : '');
+      const appUrl = 'spotify:' + parts.join(':') + (ctx ? '?context=' + encodeURIComponent(ctx) : '');
+      const clickAt = Date.now();
+      let leftPage = false;                    // apka otwarta choć na chwilę = bez okienka wyboru
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) leftPage = true;
+      });
       setTimeout(function() {
-        if (!document.hidden) window.location.href = mobileUrl;
-      }, 2000);
+        // licznik spóźniony = strona była zamrożona, czyli ktoś był w Spotify
+        const frozen = Date.now() - clickAt > IOS_CHOICE_DELAY_MS + FREEZE_GAP_MS;
+        if (!leftPage && !frozen && !window.mmAppSeen && !document.hidden) showAppChoice(appUrl, mobileUrl);
+      }, IOS_CHOICE_DELAY_MS);
+      window.location.href = appUrl;
+
     }
   } else {
     window.open(url, '_blank', 'noopener');
     clearTimeout(emailPopupTimer);
     setTimeout(showEmailPopup, 350);
   }
+}
+
+// Popup z mailem po kliknięciu na telefonie: nie w trakcie otwierania apki (zasłaniał przycisk
+// i link do przeglądarki), tylko po powrocie ze Spotify albo 20 s po kliknięciu, jeśli nikt
+// nie wyszedł ze strony.
+const POPUP_AFTER_APP_CLICK_MS = 20000;
+let mmAppClicked = false;
+function deferEmailPopupAfterAppClick() {
+  if (mmAppClicked) return;
+  mmAppClicked = true;
+  clearTimeout(emailPopupTimer);
+  let wasHidden = false;
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) { wasHidden = true; return; }
+    if (wasHidden) setTimeout(showEmailPopup, 600);   // wrócił ze Spotify
+  });
+  setTimeout(function() {
+    if (!wasHidden && !document.hidden) showEmailPopup();
+  }, POPUP_AFTER_APP_CLICK_MS);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -484,7 +573,7 @@ window.addEventListener('load', function() {
   var pvEventId = window.__mm_pv_id || ('pv_fallback_' + Date.now());
   sendCAPI('PageView', pvEventId, { link_id: LINK_ID, owner: OWNER_ID });
 
-  if (localStorage.getItem('mm_popup_subscribed')) return;
+  if (localStorage.getItem('mm_popup_subscribed') || mmAppClicked) return;
   emailPopupTimer = setTimeout(showEmailPopup, 10000);
 });
 

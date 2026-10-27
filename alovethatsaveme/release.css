@@ -518,3 +518,31 @@ body.has-custom-cursor * {
   text-underline-offset: 3px;
 }
 .open-in-browser:hover { color: var(--text); }
+
+/* iPhone: wybór po 2 s, gdy Spotify się nie otworzył */
+.app-choice {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+.app-choice p {
+  font-size: 0.85rem;
+  color: var(--gray);
+}
+.app-choice-btn {
+  display: block;
+  padding: 13px 20px;
+  border: 1px solid rgba(184,180,220, 0.35);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.app-choice-primary {
+  background: #1db954;
+  border-color: #1db954;
+  color: #000;
+}

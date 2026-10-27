@@ -242,7 +242,10 @@ function renderAppPanel(sessions) {
     const op = mob.filter((s) => s.os === key && s.app === 'open').length;
     return all ? `${osLabel(key)}: ${op} of ${all} opened the app (${pct(op, all)})` : '';
   };
-  document.getElementById('appByOs').textContent = [osSplit('android'), osSplit('ios')].filter(Boolean).join(' · ');
+  // Przeglądarka Instagrama na iPhonie nie zgłasza stronie przejścia do Spotify, więc iPhone
+  // wychodzi zaniżony (otwarcie apki widać tylko w Safari).
+  const iosNote = osSplit('ios') ? ' · iPhone in Instagram is detected when the page pauses in the background, so it can be slightly low' : '';
+  document.getElementById('appByOs').textContent = [osSplit('android'), osSplit('ios')].filter(Boolean).join(' · ') + iosNote;
 
   const ret30 = open.filter((s) => s.ret !== null && s.ret >= 30).length;
   const retShort = open.filter((s) => s.ret !== null && s.ret < 30).length;
