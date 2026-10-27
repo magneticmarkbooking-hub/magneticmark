@@ -85,9 +85,9 @@ function buildSessions(events) {
     const id = ev.session_id || ('ev_' + ev.id);
     const s = map[id] || (map[id] = {
       id, view: false, click: false, app: null, ret: null, leave: null,
-      device: ev.device_type, os: ev.os, inApp: ev.in_app_browser, country: ev.country, adset: ev.utm_content
+      device: ev.device_type, os: ev.os, inApp: ev.in_app_browser, country: ev.country, adset: adsetKey(ev)
     });
-    if (!s.adset && ev.utm_content) s.adset = ev.utm_content;
+    if (!s.adset) s.adset = adsetKey(ev);
     if (!s.country && ev.country) s.country = ev.country;
     if (!s.os && ev.os) s.os = ev.os;
     switch (ev.event_type) {
@@ -271,10 +271,22 @@ function renderLeavePanel(sessions) {
   document.getElementById('bounceRate').textContent = pct(left.length, seen.length);
 }
 
-function adsetLabel(name) {
-  if (!name) return '(no UTM)';
-  const m = /-\s*(\d{1,3})\s*$/.exec(name);   // "A Love That Save Me - 07" -> "#07"
-  return m ? '#' + m[1].padStart(2, '0') : name;
+// Źródło wejścia: ID ad setu z reklamy Meta (utm_term, a gdy go brak, ID reklamy z
+// utm_content), inaczej zwykły utm_content, np. "link_in_bio". Nazwy w adsets.js.
+const ADSETS = (typeof ADSET_NAMES !== 'undefined') ? ADSET_NAMES : {};
+const ADS = (typeof AD_TO_ADSET !== 'undefined') ? AD_TO_ADSET : {};
+
+function adsetKey(ev) {
+  if (ev.utm_term && ADSETS[ev.utm_term]) return ev.utm_term;
+  if (ev.utm_content && ADS[ev.utm_content]) return ADS[ev.utm_content];
+  return ev.utm_content || ev.utm_term || null;
+}
+
+function adsetLabel(key) {
+  if (!key) return 'No source (direct)';
+  if (ADSETS[key]) return ADSETS[key];
+  if (/^\d{8,}$/.test(key)) return 'Other ad (' + key + ')';
+  return key.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
 }
 
 function renderAdsetTable(sessions) {
@@ -292,7 +304,7 @@ function renderAdsetTable(sessions) {
   });
   const rows = Object.values(groups).sort((a, b) => b.listens - a.listens || b.clicks - a.clicks);
   if (!rows.length || (rows.length === 1 && !rows[0].name)) {
-    el.innerHTML = '<p class="empty-state">No ad set data yet (needs UTM parameters in the ads)</p>';
+    el.innerHTML = '<p class="empty-state">No ad data yet</p>';
     return;
   }
   el.innerHTML = `<table class="adset-table"><thead><tr>
