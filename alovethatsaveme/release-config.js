@@ -21,6 +21,10 @@ const RELEASE = {
   // Link docelowy przycisku — wczytywany z LINK_DO_WKLEJENIA.js
   linkUrl: (typeof RELEASE_LINK !== 'undefined') ? RELEASE_LINK : "PLACEHOLDER_WKLEJ_TUTAJ_LINK_SPOTIFY",
 
+  // Link na telefon (opcjonalny), np. utwór w kontekście playlisty. Bez niego telefon dostaje
+  // sam utwór, bo Spotify na telefonie ignoruje utwór przy kontekście artysty.
+  mobileLinkUrl: (typeof RELEASE_LINK_MOBILE !== 'undefined' && RELEASE_LINK_MOBILE) ? RELEASE_LINK_MOBILE : null,
+
   // Nazwa platformy docelowej
   platform: "spotify",
 

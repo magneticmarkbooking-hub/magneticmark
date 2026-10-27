@@ -125,6 +125,68 @@ function sendCAPI(eventName, eventId, extra) {
 }
 // ===== END CAPI =====
 
+// ===== Pomiar: czy otworzyła się aplikacja Spotify (tylko statystyki, Meta bez zmian) =====
+// app_open: strona schowała się w tło bez przeładowania (aplikacja na wierzchu)
+// app_none: przejście na wersję w przeglądarce (Android: browser_fallback_url, iPhone: https
+//           po 2 s w handleLinkClick) albo link "Open in browser"
+// app_unknown: w przeglądarce Instagrama/Facebooka nic się nie stało przez 30 s
+//           (okienko "Otworzyć w Spotify?" i Anuluj)
+// Pomiar tylko obserwuje: otwieranie aplikacji i powrót do przeglądarki działają bez niego.
+// app_return: powrót z aplikacji, seconds = czas w Spotify (odtworzenie liczy się od 30 s)
+let mmAppTracking = false;
+function trackAppOpen(mobileUrl) {
+  if (mmAppTracking || typeof window.mmStat !== 'function') return;
+  mmAppTracking = true;
+  const stat = window.mmStat;
+  const inApp = (typeof detectInAppBrowser === 'function') ? detectInAppBrowser() : null;
+  const started = Date.now();
+  const windowMs = inApp ? 30000 : 6000;
+  let decided = null, hiddenAt = 0, navigated = false, returned = false;
+
+  function decide(kind, extra) {
+    if (decided) return false;
+    decided = kind;
+    stat('app_' + kind, extra || null, true);
+    return true;
+  }
+  window.addEventListener('pagehide', function() {
+    navigated = true;
+    if (!decided) decide('none');             // Android bez apki: przeładowanie na https
+  });
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') {
+      if (decided || Date.now() - started > windowMs) return;
+      hiddenAt = Date.now();
+      setTimeout(function() {                 // pagehide w tym czasie = przeładowanie, nie apka
+        if (!navigated) decide('open');
+      }, 400);
+    } else if (decided === 'open' && !returned) {
+      returned = true;
+      stat('app_return', { seconds: Math.round((Date.now() - hiddenAt) / 1000) }, true);
+    }
+  });
+
+  setTimeout(function() {                     // pomoc dla tych, którym nic się nie otworzyło
+    if (!decided && document.visibilityState === 'visible') showOpenInBrowser(mobileUrl, decide);
+  }, 3000);
+  setTimeout(function() {
+    if (!decided && document.visibilityState === 'visible') decide('unknown');
+  }, windowMs);
+}
+
+function showOpenInBrowser(mobileUrl, decide) {
+  if (document.getElementById('openInBrowser')) return;
+  const btn = document.getElementById('spotifyBtn');
+  if (!btn) return;
+  const a = document.createElement('a');
+  a.id = 'openInBrowser';
+  a.className = 'open-in-browser';
+  a.href = mobileUrl;
+  a.textContent = 'Spotify not opening? Open it in your browser';
+  a.addEventListener('click', function() { decide('none'); });
+  btn.insertAdjacentElement('afterend', a);
+}
+
 function handleLinkClick(e) {
   e.preventDefault();
   const el = e.currentTarget;
@@ -173,8 +235,10 @@ function handleLinkClick(e) {
     const mu = new URL(mobileUrl);
     const parts = mu.pathname.split('/').filter(Boolean);           // ['track', 'ID']
     const ctx = mu.searchParams.get('context');                      // tylko z RELEASE_LINK_MOBILE
+    trackAppOpen(mobileUrl);
     if (/android/i.test(navigator.userAgent)) {
-      // ten sam link https, ale wymuszony w pakiecie Spotify
+      // ten sam link https, ale wymuszony w pakiecie Spotify; bez aplikacji przeglądarka sama
+      // przechodzi na browser_fallback_url (przeładowanie strony, rozpoznawane po pagehide)
       window.location.href = 'intent://' + mobileUrl.replace(/^https:\/\//, '') +
         '#Intent;scheme=https;package=com.spotify.music;S.browser_fallback_url=' +
         encodeURIComponent(mobileUrl) + ';end';

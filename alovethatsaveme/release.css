@@ -506,3 +506,15 @@ body.has-custom-cursor * {
 @media (max-width: 480px) {
   .email-popup-inner { padding: 48px 22px 32px; }
 }
+
+/* link awaryjny pod przyciskiem, gdy Spotify się nie otworzy */
+.open-in-browser {
+  display: block;
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--gray);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.open-in-browser:hover { color: var(--text); }

@@ -42,12 +42,34 @@
       <span class="stat-label">Top country</span>
       <span class="stat-value" id="topCountry">—</span>
     </div>
+    <div class="stat-card">
+      <span class="stat-label">Spotify app opened</span>
+      <span class="stat-value" id="appOpenRate">—</span>
+      <span class="stat-hint">of phone clicks</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Listened 30 s+</span>
+      <span class="stat-value" id="listenRate">—</span>
+      <span class="stat-hint">of phone clicks, estimate</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Left without click</span>
+      <span class="stat-value" id="bounceRate">—</span>
+      <span class="stat-hint">of views</span>
+    </div>
   </section>
 
   <section class="stats-panels">
     <div class="panel">
       <h2 class="panel-title">Countries</h2>
       <div class="bar-list" id="countryList">
+        <p class="empty-state">No data yet</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Devices (Android, iPhone, PC, Mac)</h2>
+      <div class="bar-list" id="deviceList">
         <p class="empty-state">No data yet</p>
       </div>
     </div>
@@ -60,8 +82,31 @@
     </div>
 
     <div class="panel">
-      <h2 class="panel-title">Device</h2>
-      <div class="bar-list" id="deviceList">
+      <h2 class="panel-title">Exits without click</h2>
+      <div class="bar-list" id="leaveList">
+        <p class="empty-state">No data yet</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">After click on phone</h2>
+      <div class="bar-list" id="appList">
+        <p class="empty-state">No data yet</p>
+      </div>
+      <p class="panel-foot" id="appByOs"></p>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">In Spotify (app opened)</h2>
+      <div class="bar-list" id="listenList">
+        <p class="empty-state">No data yet</p>
+      </div>
+      <p class="panel-foot">Spotify counts a stream after 30 s. Time is measured until the person comes back to this page.</p>
+    </div>
+
+    <div class="panel panel-wide">
+      <h2 class="panel-title">Ad sets</h2>
+      <div class="table-scroll" id="adsetTable">
         <p class="empty-state">No data yet</p>
       </div>
     </div>
@@ -72,6 +117,7 @@
         <div class="daily-legend">
           <span class="legend-item"><span class="legend-dot legend-dot-views"></span>Views</span>
           <span class="legend-item"><span class="legend-dot legend-dot-clicks"></span>Clicks</span>
+          <span class="legend-item"><span class="legend-dot legend-dot-opens"></span>App opens</span>
         </div>
       </div>
       <div class="daily-chart" id="dailyChart">
