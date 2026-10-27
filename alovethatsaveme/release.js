@@ -110,6 +110,7 @@ function sendCAPI(eventName, eventId, extra) {
   try {
     fetch(CAPI_ENDPOINT, {
       method: 'POST',
+      keepalive: true,   // zdarzenia apki wychodzą, gdy strona schodzi w tło
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(Object.assign({
         event_name:       eventName,
@@ -132,6 +133,20 @@ function sendCAPI(eventName, eventId, extra) {
 // app_unknown: w przeglądarce Instagrama/Facebooka nic się nie stało przez 30 s
 //           (okienko "Otworzyć w Spotify?" i Anuluj)
 // Pomiar tylko obserwuje: otwieranie aplikacji i powrót do przeglądarki działają bez niego.
+// Do Meta (pixel + CAPI, do grup odbiorców i optymalizacji) idą tylko pewne przypadki:
+//   SpotifyAppOpen   aplikacja się otworzyła
+//   NoSpotifyApp     tylko Android: telefon sam przeszedł na wersję w przeglądarce, czyli
+//                    nie ma apki (na iPhonie przejście po 2 s bywa też po Anuluj, więc nie)
+//   QualifiedListen  30 s w aplikacji (Spotify liczy stream od 30 s). Większość nie wraca na
+//                    stronę, więc liczy licznik od otwarcia apki: Android zwykle wysyła po 30 s
+//                    w tle, iPhone usypia stronę i wysyła przy powrocie (bez powrotu przepada).
+const QUALIFIED_LISTEN_SECONDS = 30;
+function sendMetaAppEvent(name, params) {
+  const evId = name.toLowerCase() + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  const data = Object.assign({ link_id: LINK_ID, owner: OWNER_ID }, params || {});
+  if (typeof fbq !== 'undefined') fbq('trackCustom', name, data, { eventID: evId });
+  sendCAPI(name, evId, data);
+}
 // app_return: powrót z aplikacji, seconds = czas w Spotify (odtworzenie liczy się od 30 s)
 let mmAppTracking = false;
 function trackAppOpen(mobileUrl) {
@@ -142,16 +157,30 @@ function trackAppOpen(mobileUrl) {
   const started = Date.now();
   const windowMs = inApp ? 30000 : 6000;
   let decided = null, hiddenAt = 0, navigated = false, returned = false;
+  let listenSent = false, listenTimer = null;
+  function sendListen(secs) {
+    if (listenSent) return;
+    listenSent = true;
+    sendMetaAppEvent('QualifiedListen', { seconds: secs });
+  }
 
   function decide(kind, extra) {
     if (decided) return false;
     decided = kind;
     stat('app_' + kind, extra || null, true);
+    if (kind === 'open') {
+      sendMetaAppEvent('SpotifyAppOpen');
+      listenTimer = setTimeout(function() {    // dalej w Spotify po 30 s
+        if (document.visibilityState === 'hidden') sendListen(QUALIFIED_LISTEN_SECONDS);
+      }, Math.max(0, QUALIFIED_LISTEN_SECONDS * 1000 - (Date.now() - hiddenAt)));
+    }
     return true;
   }
   window.addEventListener('pagehide', function() {
     navigated = true;
-    if (!decided) decide('none');             // Android bez apki: przeładowanie na https
+    if (decided) return;
+    decide('none');                           // Android bez apki: przeładowanie na https
+    if (/android/i.test(navigator.userAgent)) sendMetaAppEvent('NoSpotifyApp');
   });
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'hidden') {
@@ -162,7 +191,10 @@ function trackAppOpen(mobileUrl) {
       }, 400);
     } else if (decided === 'open' && !returned) {
       returned = true;
-      stat('app_return', { seconds: Math.round((Date.now() - hiddenAt) / 1000) }, true);
+      const secs = Math.round((Date.now() - hiddenAt) / 1000);
+      stat('app_return', { seconds: secs }, true);
+      clearTimeout(listenTimer);
+      if (secs >= QUALIFIED_LISTEN_SECONDS) sendListen(secs);
     }
   });
 
