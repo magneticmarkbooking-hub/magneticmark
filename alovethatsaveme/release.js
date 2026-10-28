@@ -140,13 +140,15 @@ function sendCAPI(eventName, eventId, extra) {
 //   QualifiedListen  30 s w aplikacji (Spotify liczy stream od 30 s). Większość nie wraca na
 //                    stronę, więc liczy licznik od otwarcia apki: Android zwykle wysyła po 30 s
 //                    w tle, iPhone usypia stronę i wysyła przy powrocie (bez powrotu przepada).
+//                    Ten sam sygnał z tła zapisujemy u nas jako app_listen (seconds 30).
 const QUALIFIED_LISTEN_SECONDS = 30;
 const FREEZE_GAP_MS = 4000;                 // przerwa w liczniku = strona zamrożona w tle
 const RAF_STALL_MS = 1500;                  // tyle bez rysowania = strona w tle
 const NAVIGATION_GRACE_MS = 500;            // przeładowanie w tym czasie = brak apki
 const VISIBILITY_CONFIRM_MS = 2000;         // krócej w tle = mignięcie okienka, nie apka
 const NO_APP_WINDOW_MS = 5000;              // przeładowanie później = zamknięcie, nie brak apki
-const FREEZE_WATCH_MS = 10 * 60 * 1000;     // jak długo po kliknięciu pilnujemy powrotu
+const FREEZE_WATCH_MS = 10 * 60 * 1000;     // bez wyjścia do apki w tym czasie przestajemy pilnować;
+                                            // po wyjściu pilnujemy powrotu bez limitu (wraca nawet po dobie)
 function sendMetaAppEvent(name, params) {
   const evId = name.toLowerCase() + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
   const data = Object.assign({ link_id: LINK_ID, owner: OWNER_ID }, params || {});
@@ -165,10 +167,13 @@ function trackAppOpen(mobileUrl) {
   const windowMs = (inApp || /iPhone|iPad|iPod/i.test(navigator.userAgent)) ? 30000 : 6000;
   let decided = null, hiddenAt = 0, navigated = false, returned = false;
   let listenSent = false, listenTimer = null;
-  function sendListen(secs) {
+  // signal: sygnał z tła (strona żyje 30 s po wyjściu, bez powrotu), zapisywany jako app_listen;
+  // przy powrocie po 30 s+ wystarcza app_return z czasem
+  function sendListen(secs, signal) {
     if (listenSent) return;
     listenSent = true;
     sendMetaAppEvent('QualifiedListen', { seconds: secs });
+    if (signal) stat('app_listen', { seconds: secs, detail: signal }, true);
   }
 
   function decide(kind, extra) {
@@ -178,7 +183,7 @@ function trackAppOpen(mobileUrl) {
     if (kind === 'open') {
       sendMetaAppEvent('SpotifyAppOpen');
       listenTimer = setTimeout(function() {    // dalej w Spotify po 30 s
-        if (document.visibilityState === 'hidden') sendListen(QUALIFIED_LISTEN_SECONDS);
+        if (document.visibilityState === 'hidden') sendListen(QUALIFIED_LISTEN_SECONDS, 'timer');
       }, Math.max(0, QUALIFIED_LISTEN_SECONDS * 1000 - (Date.now() - hiddenAt)));
     }
     return true;
@@ -266,7 +271,7 @@ function trackAppOpen(mobileUrl) {
       // jeszcze w Spotify, a kod działa: 30 s mija bez powrotu
       if (now - lastFrame > RAF_STALL_MS && tickGap <= FREEZE_GAP_MS) {
         if (decided === 'open' && now - awayAt >= QUALIFIED_LISTEN_SECONDS * 1000) {
-          sendListen(QUALIFIED_LISTEN_SECONDS);
+          sendListen(QUALIFIED_LISTEN_SECONDS, 'watch');
         }
         return;
       }
@@ -282,7 +287,7 @@ function trackAppOpen(mobileUrl) {
       const choice = document.getElementById('appChoice');
       if (choice) choice.remove();
     }, 500);
-    setTimeout(stop, FREEZE_WATCH_MS);
+    setTimeout(function() { if (!awayAt) stop(); }, FREEZE_WATCH_MS);
   }
 }
 

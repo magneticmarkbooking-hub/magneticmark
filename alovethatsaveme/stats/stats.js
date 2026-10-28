@@ -3,7 +3,7 @@
    ===========================================================
    Pobiera z Supabase wszystkie zdarzenia wydania (RELEASE_SLUG z index.html),
    agreguje je i rysuje karty, listy i wykres liniowy dzienny.
-   Zdarzenia: view, click, leave, app_open, app_none, app_unknown, app_return
+   Zdarzenia: view, click, leave, app_open, app_none, app_unknown, app_return, app_listen
    (opis w ../tracking.js).
    =========================================================== */
 
@@ -95,6 +95,7 @@ function buildSessions(events) {
       case 'click': s.click = true; break;
       case 'leave': s.leave = ev.seconds; break;
       case 'app_return': s.ret = ev.seconds; break;
+      case 'app_listen': s.bg30 = true; break;
       case 'app_open': s.app = 'open'; if (!s.openDay) s.openDay = (ev.created_at || '').slice(0, 10); break;
       case 'app_none': if (s.app !== 'open') s.app = 'none'; break;
       case 'app_unknown': if (!s.app) s.app = 'unknown'; break;
@@ -266,9 +267,12 @@ function renderAppPanel(sessions) {
   const ret30 = open.filter((s) => s.ret !== null && s.ret >= 30).length;
   const retShort = open.filter((s) => s.ret !== null && s.ret < 30).length;
   const noRet = open.length - ret30 - retShort;
+  // Brak powrotu też liczymy jako odsłuch; app_listen mówi tylko, że strona żyła 30 s po wyjściu
+  const noRetBg = open.filter((s) => s.ret === null && s.bg30).length;
   renderBarList('listenList', [
     { label: 'Back after 30 s+', count: ret30 },
-    { label: 'Still in Spotify', count: noRet },
+    { label: 'No return, 30 s+ signal from background', count: noRetBg },
+    { label: 'No return', count: noRet - noRetBg },
     { label: 'Back before 30 s', count: retShort }
   ].filter((i) => i.count > 0), open.length);
 
