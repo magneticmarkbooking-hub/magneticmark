@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Test iPhone</title>
+<!-- Strona testowa (2026-10-28): który sposób otwiera apkę Spotify z przeglądarki Instagrama
+     na iPhonie bez strony błędu. Nie jest podlinkowana, do usunięcia po teście. -->
+<style>
+  :root { --bg: #0a1550; --text: #f2f0ff; --muted: #b8b4dc; --btn: #1db954; }
+  body { margin: 0; padding: 20px 16px 40px; background: var(--bg); color: var(--text);
+         font-family: -apple-system, system-ui, sans-serif; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  p { color: var(--muted); font-size: 14px; line-height: 1.4; margin: 0 0 18px; }
+  a, button { display: block; width: 100%; box-sizing: border-box; margin: 0 0 12px;
+              padding: 15px 14px; border: 0; border-radius: 12px; background: var(--btn);
+              color: #000; font-size: 16px; font-weight: 700; text-align: left;
+              text-decoration: none; font-family: inherit; }
+  small { display: block; font-weight: 400; font-size: 12px; margin-top: 3px; }
+</style>
+</head>
+<body>
+<h1>Test: open Spotify from Instagram</h1>
+<p>Tap one, note what happens (app opens, dialog, error page, Spotify web page), come back, tap the next.</p>
+
+<button id="t1" type="button">1. Script jump (current site)<small>location.href = spotify:track:ID</small></button>
+<a id="t2" href="spotify:track:4pP3D8jIVGJHv19SBEHr4Y">2. Link spotify:track<small>a href spotify:track:ID</small></a>
+<a id="t3" href="spotify:track:4pP3D8jIVGJHv19SBEHr4Y" target="_blank">3. Link spotify:track, new window<small>a href spotify:track:ID target _blank</small></a>
+<a id="t4" href="spotify://track/4pP3D8jIVGJHv19SBEHr4Y">4. Link spotify://track<small>a href spotify://track/ID</small></a>
+<a id="t5" href="https://open.spotify.com/track/4pP3D8jIVGJHv19SBEHr4Y">5. Link open.spotify.com<small>a href https</small></a>
+<a id="t6" href="https://open.spotify.com/track/4pP3D8jIVGJHv19SBEHr4Y" target="_blank">6. Link open.spotify.com, new window<small>a href https target _blank</small></a>
+
+<script>
+document.getElementById('t1').addEventListener('click', function() {
+  window.location.href = 'spotify:track:4pP3D8jIVGJHv19SBEHr4Y';
+});
+</script>
+</body>
+</html>
