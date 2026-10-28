@@ -178,6 +178,32 @@ function queueQualifiedListen() {
     }).catch(function() {});
   } catch (e) {}
 }
+// Zaległy powrót: gdy telefon zamknie stronę w tle (brak pamięci, wyłączony Instagram), po
+// ponownym otwarciu strona ładuje się od nowa. Wyjście do apki zapamiętujemy więc w localStorage,
+// a nowa strona wysyła app_return dla starej sesji z czasem od wyjścia (detail reload_<sygnał>).
+const PENDING_RETURN_KEY = 'mm_pending_return';
+const PENDING_RETURN_MAX_AGE_MS = 7 * 24 * 3600 * 1000;
+function rememberAway(at, signal) {
+  try {
+    localStorage.setItem(PENDING_RETURN_KEY, JSON.stringify({ session: getSessionId(), at: at, signal: signal }));
+  } catch (e) {}
+}
+function forgetAway() {
+  try { localStorage.removeItem(PENDING_RETURN_KEY); } catch (e) {}
+}
+function sendPendingReturn() {
+  let pending = null;
+  try { pending = JSON.parse(localStorage.getItem(PENDING_RETURN_KEY)); } catch (e) {}
+  forgetAway();
+  if (!pending || !pending.session || !pending.at || typeof window.mmStat !== 'function') return;
+  const age = Date.now() - pending.at;
+  if (age < 0 || age > PENDING_RETURN_MAX_AGE_MS) return;
+  window.mmStat('app_return', {
+    seconds: Math.round(age / 1000),
+    detail: 'reload_' + (pending.signal || 'unknown'),
+    session_id: pending.session
+  });
+}
 // app_return: powrót z aplikacji, seconds = czas w Spotify (odtworzenie liczy się od 30 s)
 let mmAppTracking = false;
 function trackAppOpen(mobileUrl) {
@@ -236,7 +262,7 @@ function trackAppOpen(mobileUrl) {
       // Apka = strona dalej w tle po VISIBILITY_CONFIRM_MS i bez przeładowania.
       setTimeout(function() {
         if (!navigated && hiddenAt === thisHide && document.visibilityState === 'hidden') {
-          decide('open', { detail: 'visibility' });
+          if (decide('open', { detail: 'visibility' })) rememberAway(thisHide, 'visibility');
         }
       }, VISIBILITY_CONFIRM_MS);
     } else if (hiddenAt && Date.now() - hiddenAt < VISIBILITY_CONFIRM_MS) {
@@ -245,6 +271,7 @@ function trackAppOpen(mobileUrl) {
       returned = true;
       const secs = Math.round((Date.now() - hiddenAt) / 1000);
       stat('app_return', { seconds: secs, detail: 'visibility' }, true);
+      forgetAway();
       clearTimeout(listenTimer);
       if (secs >= QUALIFIED_LISTEN_SECONDS) sendListen(secs);
     }
@@ -283,7 +310,7 @@ function trackAppOpen(mobileUrl) {
       setTimeout(function() {
         if (navigated) return;                 // przeładowanie do przeglądarki, nie apka
         window.mmAppSeen = true;               // bez okienka wyboru, jest w Spotify
-        decide('open', { detail: signal });
+        if (decide('open', { detail: signal })) rememberAway(at, signal);
       }, NAVIGATION_GRACE_MS);
     };
     const watch = setInterval(function() {
@@ -311,6 +338,7 @@ function trackAppOpen(mobileUrl) {
       const secs = Math.round((now - awayAt) / 1000);
       clearTimeout(listenTimer);
       stat('app_return', { seconds: secs, detail: awaySignal }, true);
+      forgetAway();
       if (secs >= QUALIFIED_LISTEN_SECONDS) sendListen(secs);
       const choice = document.getElementById('appChoice');
       if (choice) choice.remove();
@@ -454,6 +482,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const btn = document.getElementById('spotifyBtn');
   if (isPhone() && isIOS()) btn.href = getMobileUrl(buildForwardedUrl(RELEASE.linkUrl));
   btn.addEventListener('click', handleLinkClick);
+  sendPendingReturn();
 });
 
 // ===== PŁYWAJĄCE KULE ŚWIATŁA W TLE =====
