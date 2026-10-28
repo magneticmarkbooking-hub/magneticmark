@@ -144,6 +144,8 @@ const QUALIFIED_LISTEN_SECONDS = 30;
 const FREEZE_GAP_MS = 4000;                 // przerwa w liczniku = strona zamrożona w tle
 const RAF_STALL_MS = 1500;                  // tyle bez rysowania = strona w tle
 const NAVIGATION_GRACE_MS = 500;            // przeładowanie w tym czasie = brak apki
+const VISIBILITY_CONFIRM_MS = 2000;         // krócej w tle = mignięcie okienka, nie apka
+const NO_APP_WINDOW_MS = 5000;              // przeładowanie później = zamknięcie, nie brak apki
 const FREEZE_WATCH_MS = 10 * 60 * 1000;     // jak długo po kliknięciu pilnujemy powrotu
 function sendMetaAppEvent(name, params) {
   const evId = name.toLowerCase() + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
@@ -184,16 +186,28 @@ function trackAppOpen(mobileUrl) {
   window.addEventListener('pagehide', function() {
     navigated = true;
     if (decided) return;
-    decide('none');                           // Android bez apki: przeładowanie na https
+    // Android bez apki przeładowuje stronę od razu; późniejsze wyjście (zamknięcie przeglądarki
+    // Instagrama) nic nie mówi o apce, więc nie jest brakiem apki.
+    if (Date.now() - started > NO_APP_WINDOW_MS) return;
+    // Android bez apki: przeładowanie na https; iPhone: link przeszedł na stronę Spotify
+    // (brak apki albo Instagram nie oddał linku apce), bez NoSpotifyApp
+    decide('none', isIOS() ? { detail: 'ios_web' } : null);
     if (/android/i.test(navigator.userAgent)) sendMetaAppEvent('NoSpotifyApp');
   });
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'hidden') {
       if (decided || Date.now() - started > windowMs) return;
-      hiddenAt = Date.now();
-      setTimeout(function() {                 // pagehide w tym czasie = przeładowanie, nie apka
-        if (!navigated) decide('open', { detail: 'visibility' });
-      }, 400);
+      const thisHide = Date.now();
+      hiddenAt = thisHide;
+      // Krótkie mignięcie (iPhone: okienko Instagrama "Otworzyć w Spotify?") to nie apka.
+      // Apka = strona dalej w tle po VISIBILITY_CONFIRM_MS i bez przeładowania.
+      setTimeout(function() {
+        if (!navigated && hiddenAt === thisHide && document.visibilityState === 'hidden') {
+          decide('open', { detail: 'visibility' });
+        }
+      }, VISIBILITY_CONFIRM_MS);
+    } else if (hiddenAt && Date.now() - hiddenAt < VISIBILITY_CONFIRM_MS) {
+      hiddenAt = 0;                           // mignięcie: dalej czekamy na prawdziwe wyjście
     } else if (decided === 'open' && !returned && hiddenAt) {
       returned = true;
       const secs = Math.round((Date.now() - hiddenAt) / 1000);
@@ -287,7 +301,7 @@ function showOpenInBrowser(mobileUrl, decide) {
 
 // iPhone: wybór po IOS_CHOICE_DELAY_MS (2 s), gdy nic nie wskazuje, że Spotify się otworzył.
 // U kogoś, kto jest już w Spotify, okienko pojawia się w tle, a po powrocie licznik
-// zamrożenia (trackAppOpen) od razu je usuwa.
+// zamrożenia (trackAppOpen) od razu je usuwa. Na razie nieużywane (patrz handleLinkClick).
 const IOS_CHOICE_DELAY_MS = 2000;
 function showAppChoice(appUrl, browserUrl) {
   if (document.getElementById('appChoice')) return;
@@ -313,8 +327,30 @@ function showAppChoice(appUrl, browserUrl) {
   btn.insertAdjacentElement('afterend', box);
 }
 
+// Telefon (2026-10-26): aplikacja Spotify na telefonie ignoruje utwór, gdy link ma kontekst
+// artysty (?context=spotify:artist:...), i gra pierwszy utwór z profilu. Na PC działa.
+// Dlatego na telefonie: link z LINK_DO_WKLEJENIA.js (RELEASE_LINK_MOBILE, np. utwór
+// w kontekście playlisty), a bez niego sam utwór bez parametru context.
+function getMobileUrl(url) {
+  if (RELEASE.mobileLinkUrl) return buildForwardedUrl(RELEASE.mobileLinkUrl);
+  const u = new URL(url);
+  u.searchParams.delete('context');
+  return u.toString();
+}
+
+function isPhone() {
+  return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+}
+
+function isIOS() {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 function handleLinkClick(e) {
-  e.preventDefault();
+  // iPhone: przycisk jest zwykłym linkiem do open.spotify.com (ustawiony w DOMContentLoaded)
+  // i przeglądarka sama za nim idzie; reszta telefonów i PC sterowana skryptem.
+  const iosLink = isPhone() && isIOS();
+  if (!iosLink) e.preventDefault();
   const el = e.currentTarget;
   const url = buildForwardedUrl(el.dataset.link);
 
@@ -340,30 +376,8 @@ function handleLinkClick(e) {
   sendCAPI('ViewContent', eventId, { link_id: LINK_ID, owner: OWNER_ID });
 
   // Mobile → otwórz aplikację Spotify; desktop → nowa karta + popup
-  const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-
-  if (isMobile) {
-    // Telefon (2026-10-26): aplikacja Spotify na telefonie ignoruje utwór, gdy link ma kontekst
-    // artysty (?context=spotify:artist:...), i gra pierwszy utwór z profilu. Na PC działa.
-    // Dlatego na telefonie: link z LINK_DO_WKLEJENIA.js (RELEASE_LINK_MOBILE, np. utwór
-    // w kontekście playlisty), a bez niego sam utwór bez parametru context.
-    let mobileUrl;
-    if (RELEASE.mobileLinkUrl) {
-      mobileUrl = buildForwardedUrl(RELEASE.mobileLinkUrl);
-    } else {
-      const u = new URL(url);
-      u.searchParams.delete('context');
-      mobileUrl = u.toString();
-    }
-    // Sam link https zostawał w przeglądarce (szczególnie w przeglądarce Instagrama), więc
-    // aplikację otwieramy wprost: Android przez intent:// (z powrotem do https, gdy brak apki),
-    // iPhone przez spotify:track:ID, bez automatycznego przejścia do przeglądarki (2026-10-27:
-    // przeglądarka Instagrama na iPhonie nie zgłasza zejścia strony w tło, więc dawne przejście
-    // po 2 s włączało się w tle u ludzi, którzy już byli w Spotify). Po 3 s link
-    // Po 2 s bez śladu apki okienko z dwoma przyciskami: apka jeszcze raz albo przeglądarka.
-    const mu = new URL(mobileUrl);
-    const parts = mu.pathname.split('/').filter(Boolean);           // ['track', 'ID']
-    const ctx = mu.searchParams.get('context');                      // tylko z RELEASE_LINK_MOBILE
+  if (isPhone()) {
+    const mobileUrl = getMobileUrl(url);
     trackAppOpen(mobileUrl);
     deferEmailPopupAfterAppClick();
     if (/android/i.test(navigator.userAgent)) {
@@ -372,21 +386,11 @@ function handleLinkClick(e) {
       window.location.href = 'intent://' + mobileUrl.replace(/^https:\/\//, '') +
         '#Intent;scheme=https;package=com.spotify.music;S.browser_fallback_url=' +
         encodeURIComponent(mobileUrl) + ';end';
-    } else {
-      const appUrl = 'spotify:' + parts.join(':') + (ctx ? '?context=' + encodeURIComponent(ctx) : '');
-      const clickAt = Date.now();
-      let leftPage = false;                    // apka otwarta choć na chwilę = bez okienka wyboru
-      document.addEventListener('visibilitychange', function() {
-        if (document.hidden) leftPage = true;
-      });
-      setTimeout(function() {
-        // licznik spóźniony = strona była zamrożona, czyli ktoś był w Spotify
-        const frozen = Date.now() - clickAt > IOS_CHOICE_DELAY_MS + FREEZE_GAP_MS;
-        if (!leftPage && !frozen && !window.mmAppSeen && !document.hidden) showAppChoice(appUrl, mobileUrl);
-      }, IOS_CHOICE_DELAY_MS);
-      window.location.href = appUrl;
-
     }
+    // iPhone: nic więcej. Test Marka w przeglądarce Instagrama (2026-10-28): adres spotify:track:
+    // ze skryptu i z linku daje stronę błędu, spotify:// otwiera apkę z okienkiem zgody, a zwykły
+    // link do open.spotify.com otwiera apkę, a bez apki pokazuje stronę Spotify. Dlatego przycisk
+    // na iPhonie to prawdziwy link do open.spotify.com, bez przejść ze skryptu.
   } else {
     window.open(url, '_blank', 'noopener');
     clearTimeout(emailPopupTimer);
@@ -414,7 +418,9 @@ function deferEmailPopupAfterAppClick() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('spotifyBtn').addEventListener('click', handleLinkClick);
+  const btn = document.getElementById('spotifyBtn');
+  if (isPhone() && isIOS()) btn.href = getMobileUrl(buildForwardedUrl(RELEASE.linkUrl));
+  btn.addEventListener('click', handleLinkClick);
 });
 
 // ===== PŁYWAJĄCE KULE ŚWIATŁA W TLE =====
