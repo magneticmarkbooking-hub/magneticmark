@@ -220,7 +220,8 @@ function trackAppOpen(mobileUrl) {
   // signal: sygnał z tła (strona żyje 30 s po wyjściu, bez powrotu), zapisywany jako app_listen;
   // przy powrocie po 30 s+ wystarcza app_return z czasem
   function sendListen(secs, signal) {
-    if (listenSent) return;
+    // sygnał z tła po powrocie na stronę (ktoś wyszedł drugi raz) to już nie ten odsłuch
+    if (listenSent || (signal && returned)) return;
     listenSent = true;
     // tylko pixel; CAPI wysyła serwer z tym samym event_id (qualified-listen)
     if (typeof fbq !== 'undefined') {
