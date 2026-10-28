@@ -95,7 +95,7 @@ function buildSessions(events) {
       case 'click': s.click = true; break;
       case 'leave': s.leave = ev.seconds; break;
       case 'app_return': s.ret = ev.seconds; break;
-      case 'app_open': s.app = 'open'; break;
+      case 'app_open': s.app = 'open'; if (!s.openDay) s.openDay = (ev.created_at || '').slice(0, 10); break;
       case 'app_none': if (s.app !== 'open') s.app = 'none'; break;
       case 'app_unknown': if (!s.app) s.app = 'unknown'; break;
     }
@@ -112,7 +112,8 @@ let dailyEventsCache = [];
 const SERIES = [
   { key: 'views', label: 'Views', color: 'var(--accent)' },
   { key: 'clicks', label: 'Clicks', color: 'var(--gold)' },
-  { key: 'opens', label: 'App opens', color: '#00e5a0' }
+  { key: 'opens', label: 'App opens', color: '#00e5a0' },
+  { key: 'listens', label: 'Listens 30 s+', color: '#ff7ae0' }
 ];
 
 function buildDailyMap(events) {
@@ -121,14 +122,19 @@ function buildDailyMap(events) {
   for (let i = 0; i < DAILY_RANGE_DAYS; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    map[d.toISOString().slice(0, 10)] = { views: 0, clicks: 0, opens: 0 };
+    map[d.toISOString().slice(0, 10)] = { views: 0, clicks: 0, opens: 0, listens: 0 };
   }
   events.forEach((ev) => {
     const day = (ev.created_at || '').slice(0, 10);
     if (!map[day]) return;
     if (ev.event_type === 'view') map[day].views++;
     else if (ev.event_type === 'click') map[day].clicks++;
-    else if (ev.event_type === 'app_open') map[day].opens++;
+  });
+  // otwarcie apki i odsłuch liczone raz na sesję, w dniu otwarcia (jak w tabeli ad setów)
+  buildSessions(events).forEach((s) => {
+    if (s.app !== 'open' || !s.openDay || !map[s.openDay]) return;
+    map[s.openDay].opens++;
+    if (s.ret === null || s.ret >= 30) map[s.openDay].listens++;
   });
   return map;
 }
@@ -149,7 +155,7 @@ function renderDailyChart() {
   const days = allDays.slice(Math.max(0, endIndex - DAILY_WINDOW_SIZE), endIndex);
 
   const W = 700, H = 200, PL = 34, PR = 10, PT = 12, PB = 26;
-  const max = Math.max(1, ...days.map((d) => Math.max(map[d].views, map[d].clicks, map[d].opens)));
+  const max = Math.max(1, ...days.map((d) => Math.max(map[d].views, map[d].clicks, map[d].opens, map[d].listens)));
   const x = (i) => PL + (days.length === 1 ? 0 : i * (W - PL - PR) / (days.length - 1));
   const y = (v) => PT + (H - PT - PB) * (1 - v / max);
   const ticks = [0, Math.round(max / 2), max];
@@ -175,7 +181,8 @@ function renderDailyChart() {
   days.forEach((d, i) => {
     const half = days.length > 1 ? (W - PL - PR) / (days.length - 1) / 2 : 20;
     svg += `<rect class="lc-hit" x="${x(i) - half}" y="0" width="${half * 2}" height="${H}" ` +
-           `data-day="${d.slice(5).replace('-', '/')}" data-views="${map[d].views}" data-clicks="${map[d].clicks}" data-opens="${map[d].opens}"/>`;
+           `data-day="${d.slice(5).replace('-', '/')}" data-views="${map[d].views}" data-clicks="${map[d].clicks}" ` +
+           `data-opens="${map[d].opens}" data-listens="${map[d].listens}"/>`;
   });
   svg += '</svg>';
   container.innerHTML = svg;
@@ -203,22 +210,31 @@ function attachDailyTooltips(container) {
     tip.className = 'daily-tooltip';
     document.body.appendChild(tip);
   }
-  function show(el) {
-    const { day, views, clicks, opens } = el.dataset;
-    tip.innerHTML = `<strong>${day}</strong><br>Views: ${views} · Clicks: ${clicks} · App opens: ${opens}`;
-    const r = el.getBoundingClientRect();
+  // Podpowiedź ma position: fixed, więc liczymy w układzie ekranu (bez window.scrollY),
+  // przy kursorze albo palcu; gdy brak miejsca nad nim, pod spodem.
+  function show(el, x, y) {
+    const { day, views, clicks, opens, listens } = el.dataset;
+    tip.innerHTML = `<strong>${day}</strong><br>Listens 30 s+: <b>${listens}</b><br>` +
+      `App opens: ${opens}<br>Clicks: ${clicks}<br>Views: ${views}`;
     tip.style.display = 'block';
     const tr = tip.getBoundingClientRect();
-    let left = r.left + r.width / 2 - tr.width / 2;
-    left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
+    const r = el.getBoundingClientRect();
+    const px = x !== undefined ? x : r.left + r.width / 2;
+    const py = y !== undefined ? y : r.top + r.height / 2;
+    const left = Math.max(8, Math.min(px - tr.width / 2, window.innerWidth - tr.width - 8));
+    const top = py - tr.height - 14 >= 8 ? py - tr.height - 14 : py + 18;
     tip.style.left = left + 'px';
-    tip.style.top = Math.max(8, r.top + window.scrollY - tr.height + 10) + 'px';
+    tip.style.top = top + 'px';
   }
   function hide() { tip.style.display = 'none'; }
   container.querySelectorAll('.lc-hit').forEach((el) => {
-    el.addEventListener('mouseenter', () => show(el));
+    el.addEventListener('mousemove', (e) => show(el, e.clientX, e.clientY));
     el.addEventListener('mouseleave', hide);
-    el.addEventListener('touchstart', (e) => { e.stopPropagation(); show(el); }, { passive: true });
+    el.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      const t = e.touches[0];
+      show(el, t.clientX, t.clientY);
+    }, { passive: true });
   });
   document.addEventListener('touchstart', (e) => { if (!container.contains(e.target)) hide(); }, { passive: true });
 }
@@ -257,7 +273,8 @@ function renderAppPanel(sessions) {
   ].filter((i) => i.count > 0), open.length);
 
   document.getElementById('appOpenRate').textContent = pct(open.length, mob.length);
-  document.getElementById('listenRate').textContent = pct(ret30 + noRet, mob.length);
+  document.getElementById('listenRate').textContent = ret30 + noRet;
+  document.getElementById('listenHint').textContent = pct(ret30 + noRet, mob.length) + ' of phone clicks';
 }
 
 function renderLeavePanel(sessions) {
@@ -292,6 +309,8 @@ function adsetLabel(key) {
   return key.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
 }
 
+const MIN_CLICKS_FOR_RATE = 10;             // mniej kliknięć = odsetek jeszcze niewiarygodny
+
 function renderAdsetTable(sessions) {
   const el = document.getElementById('adsetTable');
   const groups = {};
@@ -305,17 +324,20 @@ function renderAdsetTable(sessions) {
     if (s.app === 'open') { g.opens++; if (s.ret === null || s.ret >= 30) g.listens++; }
     if (s.view && !s.click && s.leave !== null && s.leave < 3) g.quick++;
   });
-  const rows = Object.values(groups).sort((a, b) => b.listens - a.listens || b.clicks - a.clicks);
+  // Najważniejszy jest odsłuch 30 s+: najpierw liczba odsłuchów, potem odsetek na kliknięcie
+  const rate = (g) => (g.clicks ? g.listens / g.clicks : 0);
+  const rows = Object.values(groups).sort((a, b) => b.listens - a.listens || rate(b) - rate(a) || b.clicks - a.clicks);
   if (!rows.length || (rows.length === 1 && !rows[0].name)) {
     el.innerHTML = '<p class="empty-state">No ad data yet</p>';
     return;
   }
   el.innerHTML = `<table class="adset-table"><thead><tr>
-      <th>Ad set</th><th>Views</th><th>Clicks</th><th>CTR</th><th>App opens</th><th>Listens 30 s+</th><th>Quick exits</th>
+      <th>Ad set</th><th class="col-key">Listens 30 s+</th><th>Listen rate</th><th>Clicks</th><th>App opens</th><th>Views</th><th>CTR</th><th>Quick exits</th>
     </tr></thead><tbody>` + rows.map((g) => `<tr>
-      <td title="${esc(g.name)}">${esc(adsetLabel(g.name))}</td><td>${g.views}</td><td>${g.clicks}</td>
-      <td>${pct(g.clicks, g.views)}</td><td>${g.opens} <small>${pct(g.opens, g.mob)}</small></td>
-      <td>${g.listens}</td><td>${g.quick} <small>${pct(g.quick, g.views)}</small></td></tr>`).join('') +
+      <td title="${esc(g.name)}">${esc(adsetLabel(g.name))}</td><td class="col-key">${g.listens}</td>
+      <td>${pct(g.listens, g.clicks)}${g.clicks < MIN_CLICKS_FOR_RATE ? ' <small>few clicks</small>' : ''}</td>
+      <td>${g.clicks}</td><td>${g.opens} <small>${pct(g.opens, g.mob)}</small></td>
+      <td>${g.views}</td><td>${pct(g.clicks, g.views)}</td><td>${g.quick} <small>${pct(g.quick, g.views)}</small></td></tr>`).join('') +
     '</tbody></table>';
 }
 

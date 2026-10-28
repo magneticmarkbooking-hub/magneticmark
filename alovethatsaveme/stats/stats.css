@@ -288,6 +288,9 @@ body {
 .legend-dot-opens {
   background: #00e5a0;
 }
+.legend-dot-listens {
+  background: #ff7ae0;
+}
 
 .daily-chart {
   min-height: 120px;
@@ -398,6 +401,9 @@ body {
 .daily-tooltip strong {
   color: var(--gold);
 }
+.daily-tooltip b {
+  color: #ff7ae0;
+}
 
 .empty-state {
   color: var(--gray);
@@ -430,4 +436,11 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* najważniejsza kolumna tabeli ad setów: odsłuchy 30 s+ */
+.adset-table .col-key {
+  color: var(--gold);
+  font-weight: 800;
+  font-size: 0.95rem;
 }
