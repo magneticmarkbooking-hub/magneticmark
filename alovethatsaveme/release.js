@@ -137,11 +137,14 @@ function sendCAPI(eventName, eventId, extra) {
 //   SpotifyAppOpen   aplikacja się otworzyła
 //   NoSpotifyApp     tylko Android: telefon sam przeszedł na wersję w przeglądarce, czyli
 //                    nie ma apki (iPhone nie daje pewnego sygnału braku apki, więc nie)
-//   QualifiedListen  30 s w aplikacji (Spotify liczy stream od 30 s). Większość nie wraca na
-//                    stronę, więc liczy licznik od otwarcia apki: Android zwykle wysyła po 30 s
-//                    w tle, iPhone usypia stronę i wysyła przy powrocie (bez powrotu przepada).
-//                    Ten sam sygnał z tła zapisujemy u nas jako app_listen (seconds 30).
+//   QualifiedListen  odsłuch 30 s+, liczony jak w panelu statystyk: apka otwarta i brak powrotu
+//                    albo powrót po 30 s+. Wysyła serwer (funkcja qualified-listen): przy kliknięciu
+//                    strona zgłasza sesję, a serwer po 3 min sprawdza app_open i szybki powrót i wysyła
+//                    do Meta przez CAPI. Działa też na iPhonie, który usypia stronę w tle.
+//                    Pixel na stronie wysyła ten sam event_id, gdy sam zobaczy 30 s (Meta liczy raz).
+//                    Sygnał 30 s z tła zapisujemy u nas jako app_listen (seconds 30).
 const QUALIFIED_LISTEN_SECONDS = 30;
+const LISTEN_QUEUE_ENDPOINT = 'https://igtyglcyithqpvgimgif.supabase.co/functions/v1/qualified-listen';
 const FREEZE_GAP_MS = 4000;                 // przerwa w liczniku = strona zamrożona w tle
 const RAF_STALL_MS = 1500;                  // tyle bez rysowania = strona w tle
 const NAVIGATION_GRACE_MS = 500;            // przeładowanie w tym czasie = brak apki
@@ -155,11 +158,32 @@ function sendMetaAppEvent(name, params) {
   if (typeof fbq !== 'undefined') fbq('trackCustom', name, data, { eventID: evId });
   sendCAPI(name, evId, data);
 }
+// Zgłoszenie kliknięcia (telefon) do kolejki QualifiedListen na serwerze (dane do dopasowania w Meta).
+function queueQualifiedListen() {
+  try {
+    fetch(LISTEN_QUEUE_ENDPOINT, {
+      method: 'POST',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'enqueue',
+        session_id: getSessionId(),
+        release_slug: typeof RELEASE_SLUG === 'undefined' ? '' : RELEASE_SLUG,
+        event_source_url: window.location.href,
+        fbp: getFbp(),
+        fbc: getFbc(),
+        external_id: getAnonId(),
+        pixel_ids: CAPI_PIXEL_IDS
+      })
+    }).catch(function() {});
+  } catch (e) {}
+}
 // app_return: powrót z aplikacji, seconds = czas w Spotify (odtworzenie liczy się od 30 s)
 let mmAppTracking = false;
 function trackAppOpen(mobileUrl) {
   if (mmAppTracking || typeof window.mmStat !== 'function') return;
   mmAppTracking = true;
+  queueQualifiedListen();   // przy kliknięciu, póki strona na pewno działa (iPhone zaraz ją uśpi)
   const stat = window.mmStat;
   const inApp = (typeof detectInAppBrowser === 'function') ? detectInAppBrowser() : null;
   const started = Date.now();
@@ -172,7 +196,11 @@ function trackAppOpen(mobileUrl) {
   function sendListen(secs, signal) {
     if (listenSent) return;
     listenSent = true;
-    sendMetaAppEvent('QualifiedListen', { seconds: secs });
+    // tylko pixel; CAPI wysyła serwer z tym samym event_id (qualified-listen)
+    if (typeof fbq !== 'undefined') {
+      fbq('trackCustom', 'QualifiedListen', { link_id: LINK_ID, owner: OWNER_ID, seconds: secs },
+        { eventID: 'qualifiedlisten_' + getSessionId() });
+    }
     if (signal) stat('app_listen', { seconds: secs, detail: signal }, true);
   }
 
