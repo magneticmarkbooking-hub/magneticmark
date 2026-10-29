@@ -112,6 +112,7 @@ function statsReady() {
 // schodzi w tło albo się zamyka (inaczej telefon uśpi stronę przed wysłaniem).
 async function sendStatEvent(eventType, extra, now) {
   if (!statsReady()) return;
+  if (window.mmConsent && !window.mmConsent.perf) return;   // rezygnacja ze statystyk (consent.js)
   const country = now ? knownCountry() : await detectCountry();
   const payload = buildStatPayload(eventType, extra, country);
   try {

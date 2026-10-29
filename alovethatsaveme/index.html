@@ -27,9 +27,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="release.css">
 
+<!-- Cookies: wybór użytkownika (opt-out) — MUSI być przed anon ID i Pixelem -->
+<script src="consent.js"></script>
+
 <!-- Anon ID init — MUSI być przed fbq('init') -->
 <script>
 (function() {
+  if (window.mmConsent && !window.mmConsent.ads) return;   // rezygnacja z reklamowych cookies
   var KEY = 'mm_uid';
   var m = document.cookie.match(new RegExp('(?:^|; )' + KEY + '=([^;]*)'));
   var id;
@@ -45,8 +49,9 @@
 })();
 </script>
 
-<!-- Meta Pixel -->
+<!-- Meta Pixel (tylko bez rezygnacji z reklamowych cookies, consent.js) -->
 <script>
+if (!window.mmConsent || window.mmConsent.ads) {
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -58,6 +63,7 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 fbq('init', '27127010080316320', { external_id: window.__mm_anon_id || '' });
 fbq('init', '8169582049794791',  { external_id: window.__mm_anon_id || '' });
 fbq('track', 'PageView', { link_id: 3507500, owner: 69827222 }, { eventID: window.__mm_pv_id });
+}
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=27127010080316320&ev=PageView&noscript=1"

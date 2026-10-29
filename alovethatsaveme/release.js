@@ -106,7 +106,13 @@ function getAnonId() {
 }
 // ===== END PERSISTENT ANON ID =====
 
+// Rezygnacja z reklamowych cookies (consent.js): nic nie idzie do Meta.
+function adsAllowed() {
+  return !window.mmConsent || window.mmConsent.ads;
+}
+
 function sendCAPI(eventName, eventId, extra) {
+  if (!adsAllowed()) return;
   try {
     fetch(CAPI_ENDPOINT, {
       method: 'POST',
@@ -160,6 +166,7 @@ function sendMetaAppEvent(name, params) {
 }
 // Zgłoszenie kliknięcia (telefon) do kolejki QualifiedListen na serwerze (dane do dopasowania w Meta).
 function queueQualifiedListen() {
+  if (!adsAllowed()) return;
   try {
     fetch(LISTEN_QUEUE_ENDPOINT, {
       method: 'POST',
