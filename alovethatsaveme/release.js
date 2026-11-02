@@ -245,7 +245,8 @@ function trackAppOpen(mobileUrl) {
     if (kind === 'open') {
       sendMetaAppEvent('SpotifyAppOpen');
       listenTimer = setTimeout(function() {    // dalej w Spotify po 30 s
-        if (document.visibilityState === 'hidden') sendListen(QUALIFIED_LISTEN_SECONDS, 'timer');
+        if (hiddenAt && document.visibilityState === 'hidden' &&
+            Date.now() - hiddenAt >= QUALIFIED_LISTEN_SECONDS * 1000) sendListen(QUALIFIED_LISTEN_SECONDS, 'timer');
       }, Math.max(0, QUALIFIED_LISTEN_SECONDS * 1000 - (Date.now() - hiddenAt)));
     }
     return true;
@@ -333,7 +334,12 @@ function trackAppOpen(mobileUrl) {
       if (navigated) { stop(); return; }
       // jeszcze w Spotify, a kod działa: 30 s mija bez powrotu
       if (now - lastFrame > RAF_STALL_MS && tickGap <= FREEZE_GAP_MS) {
-        if (decided === 'open' && now - awayAt >= QUALIFIED_LISTEN_SECONDS * 1000) {
+        // Gdy przegladarka zglasza tlo (Android, Safari), liczymy od zejscia w tlo: okienko Instagrama
+        // "Przejdz do Spotify" tez zatrzymuje rysowanie, a jego czas nie jest sluchaniem (2026-11-02:
+        // pixel wyslal QualifiedListen przy powrocie po 11 s). Bez sygnalu tla (iPhone) od ostatniej klatki.
+        const listenFrom = hiddenAt || awayAt;
+        const stillAway = hiddenAt ? document.visibilityState === 'hidden' : true;
+        if (decided === 'open' && stillAway && now - listenFrom >= QUALIFIED_LISTEN_SECONDS * 1000) {
           sendListen(QUALIFIED_LISTEN_SECONDS, 'watch');
         }
         return;
