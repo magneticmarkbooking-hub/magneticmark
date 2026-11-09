@@ -1,5 +1,13 @@
 [
   {
+    "title": "Share Your Happiness",
+    "slug": "shareyourhappiness",
+    "cover": "../shareyourhappiness/cover.jpg",
+    "date": "2026-11",
+    "release_date": "2026-11-30",
+    "platform": "Spotify"
+  },
+  {
     "title": "A Love That Save Me",
     "slug": "alovethatsaveme",
     "cover": "../alovethatsaveme/cover.jpg",

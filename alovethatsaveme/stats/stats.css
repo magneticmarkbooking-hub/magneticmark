@@ -444,3 +444,8 @@ body {
   font-weight: 800;
   font-size: 0.95rem;
 }
+
+/* Panel ad setów z celem QualifiedListen (2026-11-09) */
+.panel[hidden] { display: none; }
+.panel-ql { border-color: var(--accent); }
+.adset-table tr.row-benchmark td { color: var(--muted, rgba(255,255,255,0.6)); font-style: italic; border-top: 1px dashed rgba(255,255,255,0.2); }

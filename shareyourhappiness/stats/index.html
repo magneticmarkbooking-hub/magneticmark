@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stats: Share Your Happiness | MagneticMark</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="stats.css">
+</head>
+<body>
+
+<div class="ambient-glow"></div>
+
+<main class="stats-wrap">
+
+  <header class="stats-header">
+    <div class="stats-header-top">
+      <span class="stats-eyebrow">RELEASE STATS</span>
+      <span class="stats-updated" id="lastUpdated">—</span>
+    </div>
+    <h1 class="stats-title" id="releaseTitle">Share Your Happiness</h1>
+    <p class="stats-sub">MagneticMark</p>
+  </header>
+
+  <section class="stats-grid" id="summaryGrid">
+    <div class="stat-card">
+      <span class="stat-label">Views</span>
+      <span class="stat-value" id="totalViews">—</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Clicks</span>
+      <span class="stat-value" id="totalClicks">—</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">CTR</span>
+      <span class="stat-value" id="ctrValue">—</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Top country</span>
+      <span class="stat-value" id="topCountry">—</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Spotify app opened</span>
+      <span class="stat-value" id="appOpenRate">—</span>
+      <span class="stat-hint">of phone clicks</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Listens 30 s+</span>
+      <span class="stat-value" id="listenRate">—</span>
+      <span class="stat-hint" id="listenHint">of phone clicks</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Left without click</span>
+      <span class="stat-value" id="bounceRate">—</span>
+      <span class="stat-hint">of views</span>
+    </div>
+  </section>
+
+  <section class="stats-panels">
+    <div class="panel">
+      <h2 class="panel-title">Countries</h2>
+      <div class="bar-list" id="countryList">
+        <p class="empty-state">No data yet</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Devices (Android, iPhone, PC, Mac)</h2>
+      <div class="bar-list" id="deviceList">
+        <p class="empty-state">No data yet</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Platform</h2>
+      <div class="bar-list" id="platformList">
+        <p class="empty-state">No data yet</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">Exits without click</h2>
+      <div class="bar-list" id="leaveList">
+        <p class="empty-state">No data yet</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">After click on phone</h2>
+      <div class="bar-list" id="appList">
+        <p class="empty-state">No data yet</p>
+      </div>
+      <p class="panel-foot" id="appByOs"></p>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel-title">In Spotify (app opened)</h2>
+      <div class="bar-list" id="listenList">
+        <p class="empty-state">No data yet</p>
+      </div>
+      <p class="panel-foot">Spotify counts a stream after 30 s. Time is measured until the person comes back to this page.</p>
+    </div>
+
+    <div class="panel panel-wide panel-ql" id="qlPanel" hidden>
+      <h2 class="panel-title">QualifiedListen ad sets</h2>
+      <div class="table-scroll" id="qlTable">
+        <p class="empty-state">No data yet</p>
+      </div>
+      <p class="panel-foot">Ad sets optimized for the QualifiedListen event (30 s+ in Spotify). The last row sums the other ad sets of this campaign for comparison.</p>
+    </div>
+
+    <div class="panel panel-wide">
+      <h2 class="panel-title">Ad sets and sources</h2>
+      <div class="table-scroll" id="adsetTable">
+        <p class="empty-state">No data yet</p>
+      </div>
+    </div>
+
+    <div class="panel panel-wide">
+      <div class="panel-header-row">
+        <h2 class="panel-title">Daily activity</h2>
+        <div class="daily-legend">
+          <span class="legend-item"><span class="legend-dot legend-dot-views"></span>Views</span>
+          <span class="legend-item"><span class="legend-dot legend-dot-clicks"></span>Clicks</span>
+          <span class="legend-item"><span class="legend-dot legend-dot-opens"></span>App opens</span>
+          <span class="legend-item"><span class="legend-dot legend-dot-listens"></span>Listens 30 s+</span>
+        </div>
+      </div>
+      <div class="daily-chart" id="dailyChart">
+        <p class="empty-state">No data yet</p>
+      </div>
+      <div class="daily-nav">
+        <button class="daily-nav-btn" id="dailyPrevBtn" aria-label="Earlier period">‹ Earlier</button>
+        <span class="daily-range-label" id="dailyRangeLabel"></span>
+        <button class="daily-nav-btn" id="dailyNextBtn" aria-label="Later period">Later ›</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="stats-note" id="statsNote"></p>
+
+</main>
+
+<script src="../SUPABASE_DANE.js"></script>
+<script>const RELEASE_SLUG = "shareyourhappiness";</script>
+<script src="adsets.js"></script>
+<script src="stats.js"></script>
+</body>
+</html>

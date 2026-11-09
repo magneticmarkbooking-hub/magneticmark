@@ -299,6 +299,14 @@ function renderLeavePanel(sessions) {
 // utm_content), inaczej zwykły utm_content, np. "link_in_bio". Nazwy w adsets.js.
 const ADSETS = (typeof ADSET_NAMES !== 'undefined') ? ADSET_NAMES : {};
 const ADS = (typeof AD_TO_ADSET !== 'undefined') ? AD_TO_ADSET : {};
+// Cel optymalizacji ad setu z Meta (gen_adsets.py), np. "QualifiedListen". Starsze strony go nie mają.
+const GOALS = (typeof ADSET_GOALS !== 'undefined') ? ADSET_GOALS : {};
+const QL_GOAL = 'QualifiedListen';
+const BENCHMARK_KEY = '__other__';
+
+function isQlAdset(key) {
+  return GOALS[key] === QL_GOAL;
+}
 
 function adsetKey(ev) {
   if (ev.utm_term && ADSETS[ev.utm_term]) return ev.utm_term;
@@ -308,6 +316,7 @@ function adsetKey(ev) {
 
 function adsetLabel(key) {
   if (!key) return 'No source (direct)';
+  if (key === BENCHMARK_KEY) return 'Other ad sets of this campaign (benchmark)';
   if (ADSETS[key]) return ADSETS[key];
   if (/^\d{8,}$/.test(key)) return 'Other ad (' + key + ')';
   return key.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
@@ -315,8 +324,11 @@ function adsetLabel(key) {
 
 const MIN_CLICKS_FOR_RATE = 10;             // mniej kliknięć = odsetek jeszcze niewiarygodny
 
-function renderAdsetTable(sessions) {
-  const el = document.getElementById('adsetTable');
+const COUNT_FIELDS = ['views', 'clicks', 'mob', 'opens', 'listens', 'quick'];
+
+// Grupy sesji per źródło; odsłuch 30 s+ liczony jak QualifiedListen na serwerze
+// (apka otwarta i brak powrotu albo powrót po 30 s+).
+function groupAdsets(sessions) {
   const groups = {};
   sessions.forEach((s) => {
     if (!s.view && !s.click) return;
@@ -330,19 +342,51 @@ function renderAdsetTable(sessions) {
   });
   // Najważniejszy jest odsłuch 30 s+: najpierw liczba odsłuchów, potem odsetek na kliknięcie
   const rate = (g) => (g.clicks ? g.listens / g.clicks : 0);
-  const rows = Object.values(groups).sort((a, b) => b.listens - a.listens || rate(b) - rate(a) || b.clicks - a.clicks);
-  if (!rows.length || (rows.length === 1 && !rows[0].name)) {
-    el.innerHTML = '<p class="empty-state">No ad data yet</p>';
-    return;
-  }
-  el.innerHTML = `<table class="adset-table"><thead><tr>
-      <th>Ad set</th><th class="col-key">Listens 30 s+</th><th>Listen rate</th><th>Clicks</th><th>App opens</th><th>Views</th><th>CTR</th><th>Quick exits</th>
-    </tr></thead><tbody>` + rows.map((g) => `<tr>
+  return Object.values(groups).sort((a, b) => b.listens - a.listens || rate(b) - rate(a) || b.clicks - a.clicks);
+}
+
+function adsetTableHtml(rows, listensLabel) {
+  return `<table class="adset-table"><thead><tr>
+      <th>Ad set</th><th class="col-key">${listensLabel || 'Listens 30 s+'}</th><th>Listen rate</th><th>Clicks</th><th>App opens</th><th>Views</th><th>CTR</th><th>Quick exits</th>
+    </tr></thead><tbody>` + rows.map((g) => `<tr${g.name === BENCHMARK_KEY ? ' class="row-benchmark"' : ''}>
       <td title="${esc(g.name)}">${esc(adsetLabel(g.name))}</td><td class="col-key">${g.listens}</td>
       <td>${pct(g.listens, g.clicks)}${g.clicks < MIN_CLICKS_FOR_RATE ? ' <small>few clicks</small>' : ''}</td>
       <td>${g.clicks}</td><td>${g.opens} <small>${pct(g.opens, g.mob)}</small></td>
       <td>${g.views}</td><td>${pct(g.clicks, g.views)}</td><td>${g.quick} <small>${pct(g.quick, g.views)}</small></td></tr>`).join('') +
     '</tbody></table>';
+}
+
+// Ad sety z celem QualifiedListen mają osobny panel, więc tu ich nie ma.
+function renderAdsetTable(sessions) {
+  const el = document.getElementById('adsetTable');
+  const rows = groupAdsets(sessions).filter((g) => !isQlAdset(g.name));
+  if (!rows.length || (rows.length === 1 && !rows[0].name)) {
+    el.innerHTML = '<p class="empty-state">No ad data yet</p>';
+    return;
+  }
+  el.innerHTML = adsetTableHtml(rows);
+}
+
+// Panel ad setów optymalizowanych pod QualifiedListen, z wierszem porównawczym:
+// suma pozostałych ad setów tej kampanii (znanych z adsets.js).
+function renderQlPanel(sessions) {
+  const panel = document.getElementById('qlPanel');
+  const el = document.getElementById('qlTable');
+  if (!panel || !el) return;
+  const all = groupAdsets(sessions);
+  const qlRows = all.filter((g) => isQlAdset(g.name));
+  if (!qlRows.length) {
+    panel.hidden = !Object.values(GOALS).includes(QL_GOAL);
+    el.innerHTML = '<p class="empty-state">No clicks from QualifiedListen ad sets yet</p>';
+    return;
+  }
+  panel.hidden = false;
+  const bench = { name: BENCHMARK_KEY };
+  COUNT_FIELDS.forEach((f) => { bench[f] = 0; });
+  all.filter((g) => !isQlAdset(g.name) && ADSETS[g.name])
+    .forEach((g) => COUNT_FIELDS.forEach((f) => { bench[f] += g[f]; }));
+  const rows = bench.clicks > 0 ? qlRows.concat([bench]) : qlRows;
+  el.innerHTML = adsetTableHtml(rows, 'QualifiedListen');
 }
 
 // Supabase/PostgREST zwraca maksymalnie 1000 wierszy na zapytanie, więc stronami.
@@ -400,6 +444,7 @@ async function loadStats() {
   renderAppPanel(sessions);
   renderLeavePanel(sessions);
   renderAdsetTable(sessions);
+  renderQlPanel(sessions);
 
   dailyEventsCache = events;
   dailyWindowOffset = 0;
