@@ -94,6 +94,35 @@ function getFbc() {
   return '';
 }
 
+// ===== TIKTOK (2026-11-15) =====
+// Pixel ładuje index.html (DBT0V53C77U1OIGLBRNG). Zdarzenia z tym samym event_id co w Meta,
+// QualifiedListen jako standardowe Subscribe (tak jest nazwane w pixelu), żeby dało się pod nie optymalizować.
+// ttclid z linku reklamy zapamiętany na całą wizytę: serwer (qualified-listen) dopasowuje nim odsłuch.
+function getTtclid() {
+  const fromUrl = new URLSearchParams(window.location.search).get('ttclid');
+  try {
+    if (fromUrl) sessionStorage.setItem('mm_ttclid', fromUrl);
+    return fromUrl || sessionStorage.getItem('mm_ttclid') || '';
+  } catch (e) {
+    return fromUrl || '';
+  }
+}
+getTtclid();   // od razu przy wejściu, zanim link zniknie z adresu
+
+function getTtp() {
+  const m = document.cookie.match(/(?:^|; )_ttp=([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
+function tiktokTrack(name, props, eventId) {
+  if (!adsAllowed() || typeof ttq === 'undefined') return;
+  try {
+    ttq.track(name, Object.assign({ content_id: typeof RELEASE_SLUG === 'undefined' ? '' : RELEASE_SLUG }, props || {}),
+      eventId ? { event_id: eventId } : undefined);
+  } catch (e) {}
+}
+// ===== END TIKTOK =====
+
 // ===== PERSISTENT ANON ID =====
 function getAnonId() {
   if (window.__mm_anon_id) return window.__mm_anon_id;
@@ -164,6 +193,7 @@ function sendMetaAppEvent(name, params) {
   const data = Object.assign({ link_id: LINK_ID, owner: OWNER_ID }, params || {});
   if (typeof fbq !== 'undefined') fbq('trackCustom', name, data, { eventID: evId });
   sendCAPI(name, evId, data);
+  tiktokTrack(name, null, evId);   // SpotifyAppOpen / NoSpotifyApp jako własne zdarzenia TikToka
 }
 // Zgłoszenie kliknięcia (telefon) do kolejki QualifiedListen na serwerze (dane do dopasowania w Meta).
 function queueQualifiedListen() {
@@ -181,7 +211,9 @@ function queueQualifiedListen() {
         fbp: getFbp(),
         fbc: getFbc(),
         external_id: getAnonId(),
-        pixel_ids: CAPI_PIXEL_IDS
+        pixel_ids: CAPI_PIXEL_IDS,
+        ttclid: getTtclid(),
+        ttp: getTtp()
       })
     }).catch(function() {});
   } catch (e) {}
@@ -236,6 +268,8 @@ function trackAppOpen(mobileUrl) {
       fbq('trackCustom', 'QualifiedListen', { link_id: LINK_ID, owner: OWNER_ID, seconds: secs },
         { eventID: 'qualifiedlisten_' + getSessionId() });
     }
+    tiktokTrack('Subscribe', { content_type: 'product', description: 'QualifiedListen 30 s+' },
+      'qualifiedlisten_' + getSessionId());
     if (signal) stat('app_listen', { seconds: secs, detail: signal }, true);
   }
 
@@ -450,6 +484,8 @@ function handleLinkClick(e) {
 
   // CAPI — ten sam eventId, oba Pixele
   sendCAPI('ViewContent', eventId, { link_id: LINK_ID, owner: OWNER_ID });
+  // TikTok: ten sam eventId, cel optymalizacji grup reklam (ON_WEB_DETAIL)
+  tiktokTrack('ViewContent', { content_type: 'product', content_name: RELEASE.platform || 'spotify' }, eventId);
 
   // Mobile → otwórz aplikację Spotify; desktop → nowa karta + popup
   if (isPhone()) {

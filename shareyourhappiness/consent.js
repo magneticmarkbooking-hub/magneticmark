@@ -3,7 +3,8 @@
    Ładowany w <head> PRZED anon ID i Meta Pixelem, bo one sprawdzają window.mmConsent.
    Domyślnie wszystko włączone. Wybór zapisany w localStorage (mm_consent):
      perf  statystyki strony (Supabase release_events, panel /stats/)
-     ads   Meta Pixel, Conversions API, kolejka QualifiedListen, cookie mm_uid
+     ads   Meta Pixel, Conversions API, TikTok Pixel i Events API (od 2026-11-15),
+           kolejka QualifiedListen, cookie mm_uid
    Napis siedzi w dolnym paddingu karty pod "All rights reserved", panel jest nakładką,
    więc wysokość strony się nie zmienia. Teksty po angielsku (strona wydania).
    =========================================================== */
@@ -28,7 +29,9 @@
     if (consent.ads && !ads) {
       // od razu: pixel milknie, identyfikatory reklamowe znikają z przeglądarki
       if (typeof fbq !== 'undefined') fbq('consent', 'revoke');
-      ['_fbp', '_fbc', 'mm_uid'].forEach(expireCookie);
+      if (typeof ttq !== 'undefined' && ttq.disableCookie) ttq.disableCookie();
+      ['_fbp', '_fbc', 'mm_uid', '_ttp'].forEach(expireCookie);
+      try { sessionStorage.removeItem('mm_ttclid'); } catch (e) {}
     }
     consent.perf = perf;
     consent.ads = ads;
@@ -60,11 +63,12 @@
           'Statistics of how this page is used: views, clicks and whether the Spotify app opened. ' +
           'No name or email, only a random session ID.') +
         choiceRow('ads', 'Advertising',
-          'Meta Pixel and Meta Conversions API measure the results of our ads on Facebook and Instagram. ' +
-          'Meta may set cookies containing user identifiers. ' +
-          '<a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener">Meta Privacy Policy</a>') +
+          'Meta Pixel, Meta Conversions API, TikTok Pixel and TikTok Events API measure the results of our ads ' +
+          'on Facebook, Instagram and TikTok. Meta and TikTok may set cookies containing user identifiers. ' +
+          '<a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener">Meta Privacy Policy</a>, ' +
+          '<a href="https://www.tiktok.com/legal/page/eea/privacy-policy/en" target="_blank" rel="noopener">TikTok Privacy Policy</a>') +
         '<p class="mmc-text">Data controller: <b>MagneticMark</b>. ' +
-          'Processors: Meta Platforms Ireland Ltd. (advertising), Supabase Inc. (statistics).</p>' +
+          'Processors: Meta Platforms Ireland Ltd. and TikTok Technology Limited (advertising), Supabase Inc. (statistics).</p>' +
         '<button type="button" class="mmc-save">Save privacy permissions</button>' +
       '</div>';
     document.body.appendChild(panel);
