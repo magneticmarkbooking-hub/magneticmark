@@ -114,11 +114,19 @@ function getTtp() {
   return m ? decodeURIComponent(m[1]) : '';
 }
 
+// content_id i tablica contents w każdym zdarzeniu: bez nich diagnostyka pixela zgłasza
+// „Content ID is missing in your events” (2026-11-15).
 function tiktokTrack(name, props, eventId) {
   if (!adsAllowed() || typeof ttq === 'undefined') return;
+  const slug = typeof RELEASE_SLUG === 'undefined' ? '' : RELEASE_SLUG;
+  const title = (typeof RELEASE !== 'undefined' && RELEASE.title) || slug;
   try {
-    ttq.track(name, Object.assign({ content_id: typeof RELEASE_SLUG === 'undefined' ? '' : RELEASE_SLUG }, props || {}),
-      eventId ? { event_id: eventId } : undefined);
+    ttq.track(name, Object.assign({
+      content_id: slug,
+      content_type: 'product',
+      content_name: title,
+      contents: [{ content_id: slug, content_type: 'product', content_name: title }]
+    }, props || {}), eventId ? { event_id: eventId } : undefined);
   } catch (e) {}
 }
 // ===== END TIKTOK =====
@@ -268,8 +276,7 @@ function trackAppOpen(mobileUrl) {
       fbq('trackCustom', 'QualifiedListen', { link_id: LINK_ID, owner: OWNER_ID, seconds: secs },
         { eventID: 'qualifiedlisten_' + getSessionId() });
     }
-    tiktokTrack('Subscribe', { content_type: 'product', description: 'QualifiedListen 30 s+' },
-      'qualifiedlisten_' + getSessionId());
+    tiktokTrack('Subscribe', { description: 'QualifiedListen 30 s+' }, 'qualifiedlisten_' + getSessionId());
     if (signal) stat('app_listen', { seconds: secs, detail: signal }, true);
   }
 
@@ -485,7 +492,7 @@ function handleLinkClick(e) {
   // CAPI — ten sam eventId, oba Pixele
   sendCAPI('ViewContent', eventId, { link_id: LINK_ID, owner: OWNER_ID });
   // TikTok: ten sam eventId, cel optymalizacji grup reklam (ON_WEB_DETAIL)
-  tiktokTrack('ViewContent', { content_type: 'product', content_name: RELEASE.platform || 'spotify' }, eventId);
+  tiktokTrack('ViewContent', null, eventId);
 
   // Mobile → otwórz aplikację Spotify; desktop → nowa karta + popup
   if (isPhone()) {
