@@ -201,7 +201,9 @@ function sendMetaAppEvent(name, params) {
   const data = Object.assign({ link_id: LINK_ID, owner: OWNER_ID }, params || {});
   if (typeof fbq !== 'undefined') fbq('trackCustom', name, data, { eventID: evId });
   sendCAPI(name, evId, data);
-  tiktokTrack(name, null, evId);   // SpotifyAppOpen / NoSpotifyApp jako własne zdarzenia TikToka
+  // SpotifyAppOpen / NoSpotifyApp jako własne zdarzenia TikToka. SpotifyAppOpen wysyła też serwer
+  // (qualified-listen) z event_id spotifyappopen_<sesja>, ten sam ID tutaj, TikTok liczy raz.
+  tiktokTrack(name, null, name === 'SpotifyAppOpen' ? 'spotifyappopen_' + getSessionId() : evId);
 }
 // Zgłoszenie kliknięcia (telefon) do kolejki QualifiedListen na serwerze (dane do dopasowania w Meta).
 function queueQualifiedListen() {
